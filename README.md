@@ -1,13 +1,88 @@
-# React + Vite
+# 🌙 dreamWeaver
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**dreamWeaver** is a mindful, minimalist sleep-tracking app designed to help users better understand their rest patterns and sleep environments. With features for bedtime notes, morning reflection, and customizable sleep settings, it focuses on intention—not just data.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+- **Frontend**: React (Progressive Web App — installable on mobile & desktop)
+- **Backend**: Node.js with Express routing
+- **Database**: MongoDB (via Mongoose ODM)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# dream-weaver
+---
+
+## ✨ Key Features
+
+- ⏰ **Sleep Timer** — tap *Go to Bed* and *Wake Up* to track your rest
+- 🛏️ **Multiple Bedrooms** — create custom settings like lighting, sound, and location
+- 📝 **Night Notes** — journal sleepy thoughts or dream intentions
+- ☀️ **Morning Reflection** — rate how well-rested you feel
+- 📱 **Installable Web App** — works offline when bookmarked or added to home screen
+
+---
+
+## 🧬 Data Model (ERD)
+
+![dreamWeaver ERD](./dreamWeaver-ERD.jpg)
+
+### 🔑 Entity Overview
+
+#### `User`
+- Auth via username & password
+- References to their `bedRoom` setups and `nightCap` sessions
+
+#### `bedRoom`
+- `_id`: Mongo-generated  
+- `name`: e.g. “My Room”, “Tent”, “Hotel”  
+- `lighting`: brightness level  
+- `audio`: ambient sounds like music, TV, white noise
+
+#### `nightCap`
+- Timestamped start to each sleep session  
+- Linked to a `bedRoom`  
+- Contains user notes  
+- Ends with a linked `wakeUp` object
+
+#### `wakeUp`
+- Time a user wakes up  
+- Used to calculate session duration  
+- Optionally includes a restfulness score (planned feature)
+
+---
+
+## 🧪 Sample API Endpoints
+
+| Method | Endpoint         | Description                     |
+|--------|------------------|---------------------------------|
+| POST   | `/sleep/start`   | Begin a new sleep session       |
+| POST   | `/sleep/end`     | End the session, store duration |
+| GET    | `/bedrooms`      | List saved bedroom profiles     |
+| POST   | `/bedrooms`      | Add a new bedroom               |
+| POST   | `/notes`         | Save a bedtime note             |
+| POST   | `/rating`        | Save morning restfulness score  |
+
+---
+
+## 👤 Creator
+
+**Macfarley**  
+Founder of [Extra G Data Solutions](https://www.linkedin.com/in/travis-mccoy-630775b9/)
+
+---
+
+## 🚧 Coming Soon
+
+- 🧭 Timeline view of sleep history  
+- 📈 Insights on conditions vs. restfulness  
+- 💤 Dream journal export  
+- 🔔 Optional bedtime reminders
+
+---
+
+## 📄 License
+
+MIT License — fork it, build it, and drift into better sleep.
+
+---
+
