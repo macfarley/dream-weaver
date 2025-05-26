@@ -24,7 +24,7 @@
 
 ## 🧬 Data Model (ERD)
 
-![dreamWeaver ERD](./dreamWeaver-ERD.jpg)
+![dreamWeaver ERD](/public/dreamWeaver-ERD.png)
 
 ### 🔑 Entity Overview
 
