@@ -1,88 +1,64 @@
 # 🌙 dreamWeaver
 
-**dreamWeaver** is a mindful, minimalist sleep-tracking app designed to help users better understand their rest patterns and sleep environments. With features for bedtime notes, morning reflection, and customizable sleep settings, it focuses on intention—not just data.
+**dreamWeaver** is a minimalist sleep-tracking web app that helps users monitor their sleep quality, log pre- and post-sleep notes, and customize their sleep environments through configurable "bedrooms."
+
+Users can access it via the web or save it to their mobile home screen like an app.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Features
 
-- **Frontend**: React (Progressive Web App — installable on mobile & desktop)
-- **Backend**: Node.js with Express routing
-- **Database**: MongoDB (via Mongoose ODM)
-
----
-
-## ✨ Key Features
-
-- ⏰ **Sleep Timer** — tap *Go to Bed* and *Wake Up* to track your rest
-- 🛏️ **Multiple Bedrooms** — create custom settings like lighting, sound, and location
-- 📝 **Night Notes** — journal sleepy thoughts or dream intentions
-- ☀️ **Morning Reflection** — rate how well-rested you feel
-- 📱 **Installable Web App** — works offline when bookmarked or added to home screen
+- Start and stop sleep sessions with a simple "Go to Bed" / "Wake Up" workflow
+- Create and manage multiple "bedrooms" to track sleeping conditions (temperature, noise, light, etc.)
+- Record sleepy thoughts and morning reflections with each session
+- Rate how well-rested you feel upon waking
+- View sleep graphs and dream journal history in a user-friendly dashboard
 
 ---
 
-## 🧬 Data Model (ERD)
+## 🛠 Tech Stack
 
-![dreamWeaver ERD](/public/dreamWeaver-ERD.png)
-
-### 🔑 Entity Overview
-
-#### `User`
-- Auth via username & password
-- References to their `bedRoom` setups and `nightCap` sessions
-
-#### `bedRoom`
-- `_id`: Mongo-generated  
-- `name`: e.g. “My Room”, “Tent”, “Hotel”  
-- `lighting`: brightness level  
-- `audio`: ambient sounds like music, TV, white noise
-
-#### `nightCap`
-- Timestamped start to each sleep session  
-- Linked to a `bedRoom`  
-- Contains user notes  
-- Ends with a linked `wakeUp` object
-
-#### `wakeUp`
-- Time a user wakes up  
-- Used to calculate session duration  
-- Optionally includes a restfulness score (planned feature)
+- **Frontend:** React (PWA-style for mobile install)
+- **Backend:** Node.js + Express
+- **Database:** MongoDB (Mongoose)
+- **Authentication:** JWT-based session management
 
 ---
 
-## 🧪 Sample API Endpoints
+## 🌐 API Endpoints
 
-| Method | Endpoint         | Description                     |
-|--------|------------------|---------------------------------|
-| POST   | `/sleep/start`   | Begin a new sleep session       |
-| POST   | `/sleep/end`     | End the session, store duration |
-| GET    | `/bedrooms`      | List saved bedroom profiles     |
-| POST   | `/bedrooms`      | Add a new bedroom               |
-| POST   | `/notes`         | Save a bedtime note             |
-| POST   | `/rating`        | Save morning restfulness score  |
-
+### 🔐 Authentication
+| Method | Endpoint       | Description           |
+|--------|----------------|-----------------------|
+| POST   | `/auth/signup` | Register a new user   |
+| POST   | `/auth/login`  | Log in an existing user |
+| GET    | `/auth/me`     | Return current user info (dashboard) |
 ---
 
-## 👤 Creator
+### 🛏️ Bedroom Management
+| Method | Endpoint             | Description                         |
+|--------|----------------------|-------------------------------------|
+| GET    | `/bedrooms`          | Retrieve all bedrooms for user      |
+| POST   | `/bedrooms`          | Create a new bedroom                |
+| GET    | `/bedrooms/:id`      | View details of a single bedroom    |
+| PUT    | `/bedrooms/:id`      | Update a bedroom                    |
+| DELETE | `/bedrooms/:id`      | Delete a bedroom                    |
 
-**Macfarley**  
-Founder of [Extra G Data Solutions](https://www.linkedin.com/in/travis-mccoy-630775b9/)
-
----
-
-## 🚧 Coming Soon
-
-- 🧭 Timeline view of sleep history  
-- 📈 Insights on conditions vs. restfulness  
-- 💤 Dream journal export  
-- 🔔 Optional bedtime reminders
-
----
-
-## 📄 License
-
-MIT License — fork it, build it, and drift into better sleep.
-
----
-
+### 😴 Sleep Session Management
+| Method | Endpoint             | Description                                 |
+|--------|----------------------|---------------------------------------------|
+| GET    | `/sleepdata`         | Retrieve all sleep sessions for user        |
+| GET    | `/sleepdata/:date`   | Retrieve sleep session for a specific date  |
+| PUT    | `/sleepdata/:date`   | Edit sleep session for a specific date      |
+| DELETE | `/sleepdata/:date`   | Delete sleep session for a specific date    |
+| POST   | `/gotobed`           | Start a new sleep session                   |
+| PUT    | `/gotobed/wakeup`    | End the current sleep session (wake up)     |
+**Bedroom Example Payload:**
+```json
+{
+  "name": "Cool & Dark",
+  "temperature": "68F",
+  "lightLevel": "Dark",
+  "noiseLevel": "Quiet",
+  "notes": "Blackout curtains and white noise machine"
+}
