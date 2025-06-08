@@ -32,7 +32,7 @@ Users can access it via the web or save it to their mobile home screen like an a
 |--------|----------------|-----------------------|
 | POST   | `/auth/signup` | Register a new user   |
 | POST   | `/auth/login`  | Log in an existing user |
-| GET    | `/auth/me`     | Return current user info (dashboard) |
+| GET    | `/auth/dashboard`     | Return current user info (dashboard) |
 ---
 
 ### 🛏️ Bedroom Management

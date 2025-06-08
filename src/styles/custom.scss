@@ -1,0 +1,47 @@
+/* 1. Import Aclonica font */
+@import url("https://fonts.googleapis.com/css2?family=Aclonica&display=swap");
+
+/* 2. Bootstrap variable overrides */
+$primary: #3A0CA3;
+$secondary: #9D4EDD;
+$dark: #1A1A2E;
+$light: #EDEDED;
+$body-bg: $dark;
+$body-color: $light;
+
+/* 3. Load Bootstrap (must come after overrides) */
+@import "bootstrap/scss/bootstrap";
+
+/* 4. Custom dreamWeaver styles */
+body {
+  font-family: 'Aclonica', sans-serif;
+  background-color: $body-bg;
+  color: $body-color;
+}
+
+.navbar {
+  background-color: $dark;
+}
+
+.navbar-brand,
+.nav-link {
+  font-family: 'Aclonica', sans-serif;
+  color: $light !important;
+}
+
+.btn-primary {
+  background-color: $primary;
+  border-color: $primary;
+  font-family: 'Aclonica', sans-serif;
+}
+
+.btn-primary:hover {
+  background-color: $secondary;
+  border-color: $secondary;
+}
+
+.card {
+  background-color: lighten($dark, 5%);
+  color: $light;
+  border: none;
+}

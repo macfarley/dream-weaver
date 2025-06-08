@@ -1,25 +1,23 @@
-import { useState } from 'react'
-import AppNavbar from './components/navbar'
-import 'bootstrap/dist/css/bootstrap.min.css'
-import './App.css'
-import { Routes, Route } from 'react-router-dom'
 
+import { BrowserRouter as Routes, Route } from 'react-router-dom';
+import LandingPage from './components/landing.jsx';
+import SignUp from './components/signup.jsx'; // import signup component
+import Navbar from './components/navbar.jsx';// import navbar component
+import About from './components/about.jsx';// import about component
+import Footer from './components/footer.jsx'; // import footer component
 
 function App() {
-
   return (
-    <>
-      <AppNavbar />
+      <main>
+      <Navbar />
       <Routes>
-        <Route path="/" element={
-          <div className="container mt-4">
-            <h1>Welcome to Dream Weaver</h1>
-            <p>Your mindfulness and sleep improvement app.</p>
-          </div>
-        } />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/auth/signup" element={<SignUp />} />
+        <Route path="/about" element={<About />} />
       </Routes>
-    </>
-  )
+      <Footer />
+      </main>
+  );
 }
 
-export default App
+export default App;
