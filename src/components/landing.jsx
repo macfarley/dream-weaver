@@ -10,7 +10,7 @@ function LandingPage() {
             <h1 className="display-4 fw-bold">Welcome to dreamWeaver</h1>
             <p className="lead mb-4">Track your sleep. Record your dreams. Design your nights.</p>
 
-            <Link to="/signup" className="btn btn-primary btn-lg mb-5">Start Tracking Your Sleep</Link>
+            <Link to="/auth/signup" className="btn btn-primary btn-lg mb-5">Start Tracking Your Sleep</Link>
 
             <div className="row w-100 justify-content-center g-3">
                 <div className="col-10 col-md-3">

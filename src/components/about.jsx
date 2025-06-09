@@ -16,6 +16,9 @@ function About() {
             <p>
                 Start your journey to better sleep with DreamWeaver, your companion for peaceful nights and clearer mornings.
             </p>
+            <p>
+                Pro tip: Add DreamWeaver to your phone’s home screen for quick access. Open your browser’s menu and tap ‘Add to Home Screen.’
+            </p>
         </>
     );
 }
