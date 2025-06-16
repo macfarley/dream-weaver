@@ -1,47 +1,33 @@
-/* 1. Import Aclonica font */
-@import url("https://fonts.googleapis.com/css2?family=Aclonica&display=swap");
+/* custom.scss */
+/* Master SCSS entry — just imports, no variables, no overrides */
 
-/* 2. Bootstrap variable overrides */
-$primary: #3A0CA3;
-$secondary: #9D4EDD;
-$dark: #1A1A2E;
-$light: #EDEDED;
-$body-bg: $dark;
-$body-color: $light;
+@use './_variables'; // Only contains theme variables (no :root again)
+@use './componentStyles/landing';
+@use './componentStyles/navbar';
+@use './componentStyles/dashboard';
+@use './componentStyles/signupform';
+@use './componentStyles/themeToggle';
 
-/* 3. Load Bootstrap (must come after overrides) */
-@import "bootstrap/scss/bootstrap";
+// =============================
+// PAGE LAYOUT - Ensure footer sticks below main content
+// =============================
 
-/* 4. Custom dreamWeaver styles */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  font-family: 'Aclonica', sans-serif;
-  background-color: $body-bg;
-  color: $body-color;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-.navbar {
-  background-color: $dark;
+main {
+  flex: 1 0 auto; // Grow to fill available space
 }
 
-.navbar-brand,
-.nav-link {
-  font-family: 'Aclonica', sans-serif;
-  color: $light !important;
-}
-
-.btn-primary {
-  background-color: $primary;
-  border-color: $primary;
-  font-family: 'Aclonica', sans-serif;
-}
-
-.btn-primary:hover {
-  background-color: $secondary;
-  border-color: $secondary;
-}
-
-.card {
-  background-color: lighten($dark, 5%);
-  color: $light;
-  border: none;
+footer {
+  flex-shrink: 0; // Prevent footer from shrinking
 }

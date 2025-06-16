@@ -1,0 +1,39 @@
+/* =============================
+   THEME VARIABLES - DreamWeaver
+   ============================= */
+
+/* LIGHT MODE COLORS */
+:root {
+  --color-bg: #f6f3f9;              /* soft lavender-tinted background */
+  --color-surface: #e4ddef;         /* cards, panels, navbar, etc. */
+  --color-text: #2c1a3d;            /* rich deep purple-gray for good readability */
+  --color-primary: #665773;         /* muted indigo */
+  --color-secondary: #a678d6;       /* soft orchid accent */
+  --color-accent-light: #dcd0f8; /* or whatever lighter tone */
+  --color-accent: #b399d4;          /* light orchid/lavender accent */
+  --color-accent-hover: #d1b3f0;    /* lighter orchid for hover states */
+  
+  /* New light mode colors */
+  --color-bg-nav-footer: #d8c7e6;  /* slightly darker for navbar/footer */
+  --color-bg-main: #e1d7f1;        /* a shade darker for main section */
+  --color-border: #a186b9;         /* lighter purple border */
+
+  /* Logo and other sizes */
+  --logo-max-height: 150px;
+  --logo-max-width: 80%;
+  --logo-max-height-mobile: 100px;
+}
+
+/* DARK MODE COLORS */
+[data-theme="dark"] {
+  --color-bg: #190b28;              /* deep plum background */
+  --color-text: #eeddfe;            /* pale lavender-pink text */
+  --color-surface: #2d1e3c;         /* card/panel surface */
+  --color-secondary: #665773;       /* mid-tone purples */
+  --color-accent: #d8b4f8;          /* orchid/lavender accent */
+  
+  /* New dark mode colors */
+  --color-bg-nav-footer: #3a2350;  /* two shades lighter than background for navbar/footer */
+  --color-bg-main: #120820;        /* darker shade for main section */
+  --color-border: #665773;         /* lighter orchid border */
+}

@@ -1,0 +1,85 @@
+/* src/styles/componentStyles/_footer.scss */
+
+/* =============================
+   FOOTER STYLES — DreamWeaver
+   Uses CSS vars for theming
+   ============================= */
+
+footer {
+  max-height: 15vh;
+  background-color: var(--color-bg-nav-footer); /* #d8c7e6 light, #190b28 dark */
+  color: var(--color-text);
+  padding: 1rem 1.5rem;
+  text-align: center;
+  overflow-y: auto;
+
+  /* Primary action button */
+  .btn {
+    width: 100%;
+    max-width: 300px;
+    margin: 0.5rem auto;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+
+    &.btn-info {
+      background-color: var(--color-accent);
+      color: var(--color-bg-nav-footer);
+
+      &:hover,
+      &:focus {
+        background-color: var(--color-accent);
+      }
+    }
+
+    &.btn-success {
+      background-color: var(--color-secondary);
+      color: var(--color-bg-nav-footer);
+
+      &:hover,
+      &:focus {
+        background-color: var(--color-secondary);
+      }
+    }
+  }
+
+  /* Info links */
+  a {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover,
+    &:focus {
+      color: var(--color-accent);
+      text-decoration: underline;
+    }
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+
+    .breadcrumb-item {
+      color: var(--color-text);
+
+      &.active {
+        font-weight: 600;
+        color: var(--color-accent);
+      }
+
+      a {
+        color: var(--color-accent);
+
+        &:hover,
+        &:focus {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

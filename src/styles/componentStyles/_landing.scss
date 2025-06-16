@@ -1,0 +1,169 @@
+// =============================
+// LANDING PAGE STYLES
+// =============================
+
+.landing-page {
+  // Layout and Base Styles
+  min-height: 100vh;
+  padding-top: 10vh; // Leave room for fixed navbar
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  text-align: center;
+
+  // =============================
+  // LOGO
+  // =============================
+  .landing-logo {
+    max-height: var(--logo-max-height);
+    max-width: var(--logo-max-width);
+    margin-bottom: 2rem;
+  }
+
+  // =============================
+  // HEADINGS AND TEXT
+  // =============================
+  h1.display-4 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--color-accent);
+  }
+
+  .lead {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    color: var(--color-text);
+  }
+
+  // =============================
+  // PRIMARY BUTTON
+  // =============================
+  .btn-primary {
+    font-size: 1.25rem;
+    padding: 0.75rem 2rem;
+    margin-bottom: 3rem;
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+    border: none;
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1);
+    }
+  }
+
+  // =============================
+  // FEATURE CARD ROW
+  // =============================
+  .row {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 4rem;  // adds space below the feature cards
+
+  }
+
+  .card {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    text-align: center;
+
+    h5.card-title {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-accent);
+    }
+
+    .card-text {
+      font-size: 1rem;
+      color: var(--color-text);
+    }
+  }
+
+  // =============================
+  // SIGNUP/LOGIN FORM CONTAINER (Desktop)
+  // =============================
+  .content-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.5rem;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+
+      .row {
+        flex: 3;
+      }
+
+      .signup-panel {
+        flex: 2;
+        max-width: 400px;
+        background-color: var(--color-surface);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+        color: var(--color-text);
+      }
+    }
+
+    @media (max-width: 767.98px) {
+      flex-direction: column;
+
+      .row {
+        margin-bottom: 1.5rem;
+      }
+
+      .signup-panel {
+        display: none;
+      }
+    }
+  }
+
+  // =============================
+  // SIGNUP/LOGIN PANEL (Mobile only)
+  // =============================
+  .signup-mobile {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 0 1rem;
+
+    @media (min-width: 768px) {
+      display: none;
+    }
+
+    .signup-panel {
+      background-color: var(--color-surface);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+      color: var(--color-text);
+    }
+  }
+}
+
+// =============================
+// MOBILE-SPECIFIC OVERRIDES
+// =============================
+@media (max-width: 767.98px) {
+  .landing-page {
+    .landing-logo {
+      max-height: var(--logo-max-height-mobile);
+    }
+
+    .row {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn-primary {
+      width: 100%;
+    }
+  }
+}

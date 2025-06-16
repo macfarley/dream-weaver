@@ -1,0 +1,88 @@
+/* src/styles/componentStyles/_navbar.scss */
+
+/* =============================
+   NAVBAR STYLES — DreamWeaver
+   Uses CSS vars for theming
+   ============================= */
+
+.navbar {
+  max-height: 15vh;
+  background-color: var(--color-bg-nav-footer); /* #d8c7e6 light, #190b28 dark */
+  color: var(--color-text);
+
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+
+  /* Brand (logo) */
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    color: var(--color-text);
+
+    img {
+      max-height: var(--logo-max-height-mobile);
+      max-width: var(--logo-max-width);
+      object-fit: contain;
+    }
+  }
+
+  /* Increase logo size on larger screens */
+  @media (min-width: 768px) {
+    .navbar-brand img {
+      max-height: var(--logo-max-height);
+    }
+  }
+
+  /* Nav links */
+  .navbar-nav {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-link {
+    color: var(--color-text);
+    margin-left: 1rem;
+    transition: color 0.2s ease;
+
+    &:hover,
+    &:focus {
+      color: var(--color-accent);
+      text-decoration: none;
+    }
+  }
+
+  /* Back button (if used) */
+  .btn-outline-light {
+    color: var(--color-text);
+    border-color: var(--color-text);
+
+    &:hover,
+    &:focus {
+      background-color: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-bg-nav-footer);
+    }
+  }
+
+  /* Mobile toggler */
+  .navbar-toggler {
+    border-color: var(--color-text);
+
+    .navbar-toggler-icon {
+      filter: invert(1);
+    }
+
+    &:hover,
+    &:focus {
+      background-color: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+  }
+}
+/* Force welcome text to use theme text color */
+.custom-navbar-welcome,
+.navbar-text.custom-navbar-welcome {
+  color: var(--color-text) !important;
+}

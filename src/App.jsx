@@ -1,42 +1,35 @@
-import { useState } from 'react';
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import LandingPage from './components/landing.jsx';
-import SignUp from './components/signup.jsx'; // import signup component
-import Navbar from './components/navbar.jsx';// import navbar component
-import About from './components/about.jsx';// import about component
-import Footer from './components/footer.jsx'; // import footer component
+import { ThemeProvider } from './contexts/ThemeContext';
+import { UserProvider } from './contexts/UserContext';
+import { DashboardProvider } from './contexts/DashboardContext';
+
+import NavBar from './components/layout/NavBar';
+import Footer from './components/layout/Footer';
+import LandingPage from './components/LandingPage';
+import Dashboard from './components/dashboard/Dashboard';
+import JoinUs from './components/JoinUs';
+import About from './components/About';
 
 function App() {
-  const [formData, setFormData] = useState(defaultFormData);
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission logic here
-    console.log('Form submitted:', formData);
-  };
-
   return (
-      <main>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/auth/signup" 
-          element={<SignUp
-            formData={formData}
-            onFormChange={handleFormChange}
-            onFormSubmit={handleFormSubmit}
-          />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
-      <Footer />
-      </main>
+    <ThemeProvider>
+      <UserProvider>
+        <DashboardProvider>
+          <NavBar /> {/* Navigation bar stays outside Routes */}
+          <main>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/join" element={<JoinUs />} />
+              <Route path="/about" element={<About />} />
+              {/* Add other routes here */}
+            </Routes>
+          </main>
+          <Footer /> {/* Footer stays outside Routes */}
+        </DashboardProvider>
+      </UserProvider>
+    </ThemeProvider>
   );
 }
 

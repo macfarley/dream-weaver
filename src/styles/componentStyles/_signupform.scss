@@ -1,0 +1,175 @@
+/* src/styles/componentStyles/_signupform.scss */
+
+/* ==========================================
+   SIGNUP FORM STYLES
+   Hooks into classes from SignupForm.jsx
+   ========================================== */
+
+.signup-form {
+  /* Form container basics */
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+
+  /* =====================
+     Title
+     ===================== */
+  &-title {
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  /* =====================
+     Submission Error Alert
+     ===================== */
+  &-error {
+    margin-bottom: 1rem;
+    color: var(--color-danger, #dc3545); /* fallback if not defined */
+    background-color: rgba(220, 53, 69, 0.1);
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+  }
+
+  /* =====================
+     Field Wrapper
+     ===================== */
+  &-field {
+    margin-bottom: 1rem;
+  }
+
+  /* Label */
+  &-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  /* Input styles */
+  &-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25); /* primary color alpha */
+      border-color: var(--color-primary);
+    }
+  }
+
+  /* Inline field error message */
+  &-error-msg {
+    margin-top: 0.25rem;
+    color: var(--color-accent);
+    font-size: 0.875rem;
+  }
+
+  /* =====================
+     Divider
+     ===================== */
+  &-divider {
+    margin: 1.5rem 0;
+    border: 0;
+    height: 1px;
+    background-color: var(--color-primary);
+    opacity: 0.3;
+  }
+
+  /* =====================
+     Checkbox Field
+     ===================== */
+  &-checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &-checkbox {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-primary);
+  }
+
+  &-checkbox-label {
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  /* =====================
+     Select Dropdowns
+     ===================== */
+  &-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+      border-color: var(--color-primary);
+    }
+  }
+
+  /* =====================
+     Submit Button
+     ===================== */
+  &-submit {
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    border: none;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover:not(:disabled),
+    &:focus:not(:disabled) {
+      background-color: var(--color-accent);
+    }
+
+    &:disabled {
+      background-color: var(--color-secondary);
+      cursor: not-allowed;
+    }
+  }
+
+  /* =====================
+     Switch to Login Link
+     ===================== */
+  &-switch {
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  &-switch-btn {
+    color: var(--color-primary);
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+      text-decoration: underline;
+      color: var(--color-accent);
+    }
+  }
+}
+
+/* Responsive adjustments can be added here if needed, but original responsive behavior is preserved */

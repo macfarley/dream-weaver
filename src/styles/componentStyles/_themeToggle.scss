@@ -1,0 +1,89 @@
+/* src/styles/componentStyles/_themeToggle.scss */
+
+/* =====================================
+   THEME TOGGLE SWITCH
+   Hooks into ThemeToggle.jsx classes
+   ===================================== */
+
+/* Container: label wrapping the toggle */
+.theme-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+  cursor: pointer;
+}
+
+/* Hidden checkbox input */
+.theme-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider track and knob container */
+.theme-toggle-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-secondary);
+  border-radius: 30px;
+  transition: background-color 0.3s ease;
+}
+
+/* Knob */
+.theme-toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 3px;
+  top: 3px;
+  background-color: var(--color-bg);
+  border-radius: 5px; /* square-ish knob */
+  transition: transform 0.3s ease;
+}
+
+/* Checked state: track color */
+.theme-toggle-input:checked + .theme-toggle-slider {
+  background-color: var(--color-primary);
+}
+
+/* Checked state: move knob */
+.theme-toggle-input:checked + .theme-toggle-slider::before {
+  transform: translateX(30px);
+}
+
+/* Icon base styling */
+.theme-toggle-icon {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  font-size: 16px;
+  color: var(--color-text);
+  transition: color 0.3s ease;
+}
+
+/* Sun icon on left */
+.theme-toggle-icon.sun {
+  left: 6px;
+  top: 7px;
+}
+
+/* Moon icon on right */
+.theme-toggle-icon.moon {
+  right: 6px;
+  top: 7px;
+}
+
+/* Active icon color */
+.theme-toggle-icon.active.sun {
+  color: var(--color-accent);
+}
+
+.theme-toggle-icon.active.moon {
+  color: var(--color-accent);
+}
