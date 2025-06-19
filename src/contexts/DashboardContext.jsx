@@ -36,24 +36,61 @@ const DashboardProvider = ({ children }) => {
 
             // Fetch data in parallel (using user data from context for profile)
             const [bedrooms, sleepEntries] = await Promise.allSettled([
-                bedroomService.getBedrooms(token).catch((err) => {
-                    console.warn('Failed to load bedrooms:', err.message);
-                    return [];
-                }),
-                // Note: Backend doesn't have /sleepdata endpoint yet, so this will fail
-                // We'll handle it gracefully for now
-                sleepDataService.getSleepDataByUser(token).catch(() => []),
+                bedroomService.getBedrooms(token),
+                sleepDataService.getSleepDataByUser(token),
             ]);
 
             // Handle bedrooms result
-            const bedroomsData = bedrooms.status === 'fulfilled' ? bedrooms.value : [];
+            let bedroomsData = [];
+            if (bedrooms.status === 'fulfilled') {
+                bedroomsData = bedrooms.value || [];
+            } else {
+                console.warn('Failed to load bedrooms:', bedrooms.reason?.message);
+            }
 
-            // Handle sleep data result (may not be implemented yet)
-            const sleepEntriesData = sleepEntries.status === 'fulfilled' ? sleepEntries.value : [];
+            // Handle sleep data result
+            let sleepEntriesResult = [];
+            if (sleepEntries.status === 'fulfilled') {
+                sleepEntriesResult = sleepEntries.value || [];
+            } else {
+                console.warn('Failed to load sleep data:', sleepEntries.reason?.message);
+            }
+            
+            // Log the actual sleep data response for debugging
+            console.log('Sleep data response:', sleepEntriesResult);
+            console.log('Type of sleep data response:', typeof sleepEntriesResult);
+            console.log('Is Array:', Array.isArray(sleepEntriesResult));
 
-            const sortedSleep = sleepEntriesData?.sort(
+            // Ensure we have an array for sorting (handle different response formats)
+            let sleepArray = [];
+            
+            if (Array.isArray(sleepEntriesResult)) {
+                // Direct array response
+                sleepArray = sleepEntriesResult;
+            } else if (sleepEntriesResult && typeof sleepEntriesResult === 'object') {
+                // Object response - check for different properties
+                if (Array.isArray(sleepEntriesResult.data)) {
+                    sleepArray = sleepEntriesResult.data;
+                } else if (Array.isArray(sleepEntriesResult.sleepSessions)) {
+                    sleepArray = sleepEntriesResult.sleepSessions;
+                } else {
+                    console.warn('Expected array in response data property, got:', sleepEntriesResult);
+                    sleepArray = [];
+                }
+            } else {
+                console.warn('Expected array or object with array property, got:', typeof sleepEntriesResult, sleepEntriesResult);
+                sleepArray = [];
+            }
+
+            // Safety check before sorting
+            if (!Array.isArray(sleepArray)) {
+                console.error('sleepArray is not an array after processing:', sleepArray);
+                sleepArray = [];
+            }
+
+            const sortedSleep = sleepArray.sort(
                 (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-            ) || [];
+            );
 
             const latestSleepData = sortedSleep[0] || null;
 

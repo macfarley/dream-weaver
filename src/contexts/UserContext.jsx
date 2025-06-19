@@ -55,6 +55,7 @@ function UserProvider({ children }) {
       if (!token) {
         console.info('No authentication token found - user not logged in');
         setUser(null);
+        setLoading(false); // Set loading to false when no token
         return;
       }
 
@@ -67,6 +68,7 @@ function UserProvider({ children }) {
         logOut(); // Remove invalid token from localStorage
         setUser(null);
         setError('Your session has expired. Please log in again.');
+        setLoading(false); // Set loading to false on invalid token
         return;
       }
 
@@ -76,6 +78,7 @@ function UserProvider({ children }) {
         logOut();
         setUser(null);
         setError('Invalid user session. Please log in again.');
+        setLoading(false); // Set loading to false on invalid user data
         return;
       }
 
@@ -98,10 +101,14 @@ function UserProvider({ children }) {
         }
       }
       
+      // Set loading to false after successful user load
+      setLoading(false);
+      
     } catch (error) {
       console.error('Error loading user profile:', error);
       setError('Failed to load user session. Please try logging in again.');
       setUser(null);
+      setLoading(false); // Set loading to false even on error
       
       // If there's a critical error, clear potentially corrupted token
       if (error.name === 'SyntaxError') {
