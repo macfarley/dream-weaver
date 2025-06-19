@@ -67,7 +67,7 @@ function Footer() {
       <div className="container">
         {/* Primary action button - only shown to authenticated users */}
         {user && (
-          <div className="my-3 text-center">
+          <div className="my-2 text-center"> {/* Reduced margin */}
             <Link
               to={primaryAction.to}
               className={`btn ${primaryAction.style} btn-lg w-100`}
@@ -86,10 +86,7 @@ function Footer() {
               About / Help
             </Link>
           </p>
-          <p className="mb-1 small">
-            Not medical advice. For sleep disorders, consult a healthcare professional.
-          </p>
-          <p className="mb-0 small">
+          <p className="mb-2 small"> {/* Increased bottom margin for spacing */}
             © {new Date().getFullYear()} DreamWeaver. Built by{' '}
             <a
               href="https://www.linkedin.com/in/travis-mccoy-630775b9/"
@@ -101,8 +98,11 @@ function Footer() {
             </a>
           </p>
         </div>
-        {/* Breadcrumb navigation */}
-        <Breadcrumb className="mb-2">
+
+        {/* Breadcrumb navigation with label */}
+        <div className="breadcrumb-container">
+          <div className="breadcrumb-label">Where you are:</div>
+          <Breadcrumb className="mb-0"> {/* Remove bottom margin */}
           {/* Always show Home link */}
           <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
             Home
@@ -129,6 +129,7 @@ function Footer() {
             );
           })}
         </Breadcrumb>
+        </div> {/* Close breadcrumb-container */}
       </div>
     </div>
   );

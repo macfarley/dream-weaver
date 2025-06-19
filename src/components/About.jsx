@@ -65,6 +65,15 @@ function About() {
                 </li>
             </ul>
 
+            {/* Important Disclaimer */}
+            <div className="alert alert-info mt-4" role="alert">
+                <h5 className="alert-heading">⚠️ Important Medical Disclaimer</h5>
+                <p className="mb-0">
+                    <strong>This app is not medical advice.</strong> DreamWeaver is designed for personal tracking and mindfulness purposes only. 
+                    If you have sleep disorders, chronic insomnia, or other sleep-related health concerns, please consult with a qualified healthcare professional.
+                </p>
+            </div>
+
             {/* Project Links */}
             <h3 className="mt-4">Project Info</h3>
             <p>
