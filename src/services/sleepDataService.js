@@ -1,112 +1,109 @@
-const API_BASE = import.meta.env.VITE_BACK_END_SERVER_URL;
+import api from './apiConfig.js';
 
 /**
  * Sleep Data Service
  * 
  * Handles all API calls related to sleep sessions and data.
- * Uses the correct backend endpoint: /sleep-data/
+ * Uses centralized axios instance with automatic authentication.
+ * Backend endpoint: /sleep-data/
  */
 
 // Get all sleep data for current user
-const getAll = async (token) => {
-  const res = await fetch(`${API_BASE}/sleep-data/`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
+const getAll = async () => {
+  try {
+    const response = await api.get('/sleep-data/');
+    
+    // Log the actual response for debugging
+    console.log('Sleep data API response:', response.data);
+    
+    // Handle different response formats (similar to bedroom service)
+    if (Array.isArray(response.data)) {
+      return response.data;
+    } else if (response.data && Array.isArray(response.data.data)) {
+      return response.data.data;
+    } else if (response.data && Array.isArray(response.data.sleepSessions)) {
+      return response.data.sleepSessions;
+    } else {
+      console.warn('Expected array of sleep data, got:', typeof response.data, response.data);
+      return [];
+    }
+  } catch (error) {
     // If endpoint doesn't exist (404), return empty array instead of throwing
-    if (res.status === 404) {
+    if (error.response?.status === 404) {
       console.warn('Sleep data endpoint not available yet');
       return [];
     }
-    throw new Error('Failed to fetch sleep data');
-  }
-  
-  const sleepData = await res.json();
-  
-  // Log the actual response for debugging
-  console.log('Sleep data API response:', sleepData);
-  
-  // Handle different response formats (similar to bedroom service)
-  if (Array.isArray(sleepData)) {
-    return sleepData;
-  } else if (sleepData && Array.isArray(sleepData.data)) {
-    return sleepData.data;
-  } else if (sleepData && Array.isArray(sleepData.sleepSessions)) {
-    return sleepData.sleepSessions;
-  } else {
-    console.warn('Expected array of sleep data, got:', typeof sleepData, sleepData);
-    return [];
+    
+    console.error('Error fetching sleep data:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch sleep data');
   }
 };
 
 // Get specific sleep session by ID
-const get = async (id, token) => {
-  const res = await fetch(`${API_BASE}/sleep-data/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error('Failed to fetch sleep session');
-  return await res.json();
+const get = async (id) => {
+  try {
+    const response = await api.get(`/sleep-data/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching sleep session:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch sleep session');
+  }
 };
 
 // Get sleep session by date (for pretty URL support)
-const getByDate = async (date, token) => {
-  const res = await fetch(`${API_BASE}/sleep-data/date/${date}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error('Failed to fetch sleep session');
-  return await res.json();
+const getByDate = async (date) => {
+  try {
+    const response = await api.get(`/sleep-data/date/${date}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching sleep session by date:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch sleep session');
+  }
 };
 
 // Create new sleep session
-const create = async (payload, token) => {
-  const res = await fetch(`${API_BASE}/sleep-data/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('Failed to create sleep session');
-  return await res.json();
+const create = async (payload) => {
+  try {
+    const response = await api.post('/sleep-data/', payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating sleep session:', error);
+    throw new Error(error.response?.data?.message || 'Failed to create sleep session');
+  }
 };
 
 // Update sleep session
-const update = async (id, payload, token) => {
-  const res = await fetch(`${API_BASE}/sleep-data/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('Failed to update sleep session');
-  return await res.json();
+const update = async (id, payload) => {
+  try {
+    const response = await api.put(`/sleep-data/${id}`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating sleep session:', error);
+    throw new Error(error.response?.data?.message || 'Failed to update sleep session');
+  }
 };
 
 // Delete sleep session (requires password confirmation)
-const remove = async (id, password, token) => {
-  const res = await fetch(`${API_BASE}/sleep-data/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ password }),
-  });
-  if (!res.ok) throw new Error('Failed to delete sleep session');
-  return await res.json();
+const remove = async (id, password) => {
+  try {
+    const response = await api.delete(`/sleep-data/${id}`, {
+      data: { password }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting sleep session:', error);
+    throw new Error(error.response?.data?.message || 'Failed to delete sleep session');
+  }
 };
 
 // Get sleep data by user ID (for dashboard context)
-const getSleepDataByUser = async (token) => {
-  return getAll(token); // Same as getAll since user is determined by token
+const getSleepDataByUser = async () => {
+  return getAll(); // Same as getAll since user is determined by token
 };
 
 // Alternative function name that matches some backend expectations
-const getSleepDataByDate = async (date, token) => {
-  return getByDate(date, token);
+const getSleepDataByDate = async (date) => {
+  return getByDate(date);
 };
 
 export default {

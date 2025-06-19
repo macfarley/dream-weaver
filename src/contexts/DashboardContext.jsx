@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { UserContext } from './UserContext';
-import { getToken } from '../services/authService';
 import * as userService from '../services/userService';
 import * as bedroomService from '../services/bedroomService';
 import sleepDataService from '../services/sleepDataService';
@@ -28,16 +27,10 @@ const DashboardProvider = ({ children }) => {
         setError(null);
 
         try {
-            // Get token for API calls
-            const token = getToken();
-            if (!token) {
-                throw new Error('No authentication token found');
-            }
-
             // Fetch data in parallel (using user data from context for profile)
             const [bedrooms, sleepEntries] = await Promise.allSettled([
                 bedroomService.getBedrooms(),
-                sleepDataService.getSleepDataByUser(token),
+                sleepDataService.getSleepDataByUser(),
             ]);
 
             // Handle bedrooms result
