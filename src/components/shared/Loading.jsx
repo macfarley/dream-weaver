@@ -2,42 +2,67 @@
 import React from "react";
 
 /**
- * Loading component displays a centered spinner with an optional message.
+ * Loading component displays a themed animated spinner with an optional message.
  * 
- * This component provides a consistent loading experience across the app
- * with Bootstrap styling and accessibility features.
+ * This component provides a beautiful, on-brand loading experience with
+ * custom animations, theme-aware styling, and accessibility features.
  * 
  * @param {Object} props - Component props
  * @param {string} [props.message="Loading..."] - Custom message to display below spinner
  * 
  * Features:
- * - Centers content both horizontally and vertically
- * - Uses Bootstrap spinner with primary color theme
- * - Includes proper ARIA labels for screen readers
+ * - Custom DreamWeaver-themed animations (floating moons and stars)
+ * - Theme-aware colors that adapt to light/dark mode
+ * - Multiple animation layers for visual interest
+ * - Proper ARIA labels for screen readers
  * - Responsive design that works on all screen sizes
- * - Customizable message text
+ * - Customizable message text with fade-in animation
  * 
  * Usage Examples:
  * - <Loading /> // Shows "Loading..."
- * - <Loading message="Signing you in..." />
- * - <Loading message="Saving your preferences..." />
+ * - <Loading message="Weaving your dreams..." />
+ * - <Loading message="Preparing your sleep sanctuary..." />
  */
 function Loading({ message = "Loading..." }) {
   return (
-    <div className="d-flex justify-content-center align-items-center min-vh-100">
-      <div className="text-center">
-        {/* Bootstrap spinner with accessibility support */}
-        <div 
-          className="spinner-border text-primary mb-3" 
-          role="status" 
-          aria-label="Loading spinner"
-        >
-          {/* Screen reader text - visually hidden but available to assistive technology */}
+    <div className="loading-container">
+      <div className="loading-content">
+        {/* Custom animated spinner with dream theme */}
+        <div className="dream-spinner" role="status" aria-label="Loading spinner">
+          {/* Central moon/sun that rotates */}
+          <div className="central-orb">
+            <div className="orb-glow"></div>
+            🌙
+          </div>
+          
+          {/* Orbiting stars */}
+          <div className="orbit orbit-1">
+            <div className="star">✨</div>
+          </div>
+          <div className="orbit orbit-2">
+            <div className="star">⭐</div>
+          </div>
+          <div className="orbit orbit-3">
+            <div className="star">💫</div>
+          </div>
+          
+          {/* Floating dream elements */}
+          <div className="floating-element cloud-1">☁️</div>
+          <div className="floating-element cloud-2">☁️</div>
+          
+          {/* Screen reader text */}
           <span className="visually-hidden">{message}</span>
         </div>
         
-        {/* Visible loading message */}
-        <div className="text-muted">{message}</div>
+        {/* Animated loading message */}
+        <div className="loading-message">{message}</div>
+        
+        {/* Subtle breathing animation dots */}
+        <div className="loading-dots">
+          <span className="dot"></span>
+          <span className="dot"></span>
+          <span className="dot"></span>
+        </div>
       </div>
     </div>
   );

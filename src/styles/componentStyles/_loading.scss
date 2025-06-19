@@ -1,0 +1,330 @@
+/* src/styles/componentStyles/_loading.scss */
+
+/* =============================
+   LOADING COMPONENT STYLES — DreamWeaver
+   Custom animations and theming for loading states
+   ============================= */
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    var(--color-bg) 0%,
+    var(--color-bg-secondary) 50%,
+    var(--color-bg) 100%
+  );
+  animation: backgroundShift 8s ease-in-out infinite;
+}
+
+.loading-content {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===================
+   DREAM SPINNER ANIMATIONS
+   =================== */
+
+.dream-spinner {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Central orb (moon/sun) */
+.central-orb {
+  position: relative;
+  font-size: 2.5rem;
+  animation: centralFloat 3s ease-in-out infinite;
+  z-index: 5;
+  filter: drop-shadow(0 0 20px var(--color-accent));
+}
+
+.orb-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(
+    circle,
+    var(--color-accent-light) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 2s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* Orbiting stars */
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  border: 1px solid var(--color-accent-light);
+  opacity: 0.3;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.orbit-1 {
+  width: 80px;
+  height: 80px;
+  margin: -40px 0 0 -40px;
+  animation: orbit 4s linear infinite;
+}
+
+.orbit-2 {
+  width: 100px;
+  height: 100px;
+  margin: -50px 0 0 -50px;
+  animation: orbit 6s linear infinite reverse;
+}
+
+.orbit-3 {
+  width: 120px;
+  height: 120px;
+  margin: -60px 0 0 -60px;
+  animation: orbit 8s linear infinite;
+}
+
+.star {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  animation: starTwinkle 2s ease-in-out infinite;
+}
+
+/* Floating cloud elements */
+.floating-element {
+  position: absolute;
+  font-size: 1.5rem;
+  opacity: 0.6;
+  animation: float 4s ease-in-out infinite;
+}
+
+.cloud-1 {
+  top: -20px;
+  left: -30px;
+  animation-delay: -1s;
+}
+
+.cloud-2 {
+  bottom: -20px;
+  right: -30px;
+  animation-delay: -3s;
+}
+
+/* ===================
+   LOADING MESSAGE & DOTS
+   =================== */
+
+.loading-message {
+  color: var(--color-text);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 500;
+  margin-bottom: 1rem;
+  animation: fadeInUp 1s ease-out;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-accent);
+  border-radius: 50%;
+  animation: breathe 1.5s ease-in-out infinite;
+}
+
+.dot:nth-child(1) { animation-delay: 0s; }
+.dot:nth-child(2) { animation-delay: 0.5s; }
+.dot:nth-child(3) { animation-delay: 1s; }
+
+/* ===================
+   KEYFRAME ANIMATIONS
+   =================== */
+
+@keyframes backgroundShift {
+  0%, 100% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+}
+
+@keyframes centralFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(180deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0.3;
+  }
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(-50%) scale(1.2);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-15px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+/* ===================
+   THEME-SPECIFIC ADJUSTMENTS
+   =================== */
+
+[data-theme="light"] .loading-container {
+  background: linear-gradient(
+    135deg,
+    var(--color-bg) 0%,
+    #f8f9fa 50%,
+    var(--color-bg) 100%
+  );
+}
+
+[data-theme="dark"] .loading-container {
+  background: linear-gradient(
+    135deg,
+    var(--color-bg) 0%,
+    #1a1a2e 50%,
+    var(--color-bg) 100%
+  );
+}
+
+[data-theme="dark"] .central-orb {
+  filter: drop-shadow(0 0 25px var(--color-accent));
+}
+
+/* ===================
+   RESPONSIVE DESIGN
+   =================== */
+
+@media (max-width: 768px) {
+  .dream-spinner {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .central-orb {
+    font-size: 2rem;
+  }
+  
+  .orbit-1 {
+    width: 70px;
+    height: 70px;
+    margin: -35px 0 0 -35px;
+  }
+  
+  .orbit-2 {
+    width: 85px;
+    height: 85px;
+    margin: -42.5px 0 0 -42.5px;
+  }
+  
+  .orbit-3 {
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+  }
+  
+  .floating-element {
+    font-size: 1.2rem;
+  }
+}
+
+/* ===================
+   ACCESSIBILITY
+   =================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .dream-spinner *,
+  .loading-message,
+  .dot,
+  .loading-container {
+    animation: none !important;
+  }
+  
+  .central-orb {
+    filter: none;
+  }
+  
+  .orb-glow {
+    display: none;
+  }
+}
