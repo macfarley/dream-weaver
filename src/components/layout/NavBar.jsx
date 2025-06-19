@@ -231,10 +231,11 @@ function Navbar() {
                 <li className="nav-item custom-nav-item">
                   <Link
                     className="nav-link text-warning"
-                    to="/admin"
+                    to="/admin/dashboard"
                     title="Admin dashboard"
                     aria-label="Admin dashboard - administrative functions"
                   >
+                    <i className="fas fa-cog me-1"></i>
                     Admin Dashboard
                   </Link>
                 </li>

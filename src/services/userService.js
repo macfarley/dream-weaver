@@ -181,15 +181,22 @@ function getAllUsers() {
  * Fetches a specific user by their ID (admin only).
  * 
  * @param {string} userId - The unique ID of the user to fetch
+ * @param {string} token - Authentication token
  * @returns {Promise<Object>} Promise that resolves to user data
  * @throws {Error} Throws error if user not found or insufficient privileges
  */
-function getUserById(userId) {
+function getUserById(userId, token) {
   if (!userId || typeof userId !== 'string') {
     throw new Error('User ID is required and must be a string.');
   }
 
-  return api.get(`/admin/users/${userId}`)
+  if (!token) {
+    throw new Error('Authentication token is required.');
+  }
+
+  return api.get(`/admin/users/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
     .then(response => response.data)
     .catch(error => {
       if (error.response?.status === 403) {
@@ -207,10 +214,11 @@ function getUserById(userId) {
  * 
  * @param {string} userId - The unique ID of the user to update
  * @param {Object} updateData - Object containing fields to update
+ * @param {string} token - Authentication token
  * @returns {Promise<Object>} Promise that resolves to updated user data
  * @throws {Error} Throws error if update fails or insufficient privileges
  */
-function updateUserById(userId, updateData) {
+function updateUserById(userId, updateData, token) {
   if (!userId || typeof userId !== 'string') {
     throw new Error('User ID is required and must be a string.');
   }
@@ -219,7 +227,13 @@ function updateUserById(userId, updateData) {
     throw new Error('Update data is required and must be an object.');
   }
 
-  return api.put(`/admin/users/${userId}`, updateData)
+  if (!token) {
+    throw new Error('Authentication token is required.');
+  }
+
+  return api.put(`/admin/users/${userId}`, updateData, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
     .then(response => response.data)
     .catch(error => {
       if (error.response?.status === 403) {
@@ -238,19 +252,36 @@ function updateUserById(userId, updateData) {
  * Deletes a user by their ID (admin only).
  * 
  * @param {string} userId - The unique ID of the user to delete
+ * @param {string} password - Admin password for confirmation
+ * @param {string} token - Authentication token
  * @returns {Promise<Object>} Promise that resolves to deletion confirmation
  * @throws {Error} Throws error if deletion fails or insufficient privileges
  */
-function deleteUserById(userId) {
+function deleteUserById(userId, password, token) {
   if (!userId || typeof userId !== 'string') {
     throw new Error('User ID is required and must be a string.');
   }
 
-  return api.delete(`/admin/users/${userId}`)
+  if (!password) {
+    throw new Error('Admin password confirmation is required.');
+  }
+
+  if (!token) {
+    throw new Error('Authentication token is required.');
+  }
+
+  return api.delete(`/admin/users/${userId}`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'x-admin-password': password // Send password in header as expected by backend
+    }
+  })
     .then(response => response.data)
     .catch(error => {
       if (error.response?.status === 403) {
         throw new Error('Access denied. Admin privileges required.');
+      } else if (error.response?.status === 401) {
+        throw new Error('Invalid password provided.');
       } else if (error.response?.status === 404) {
         throw new Error('User not found.');
       }

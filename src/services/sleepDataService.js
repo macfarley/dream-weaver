@@ -20,7 +20,23 @@ const getAll = async (token) => {
     }
     throw new Error('Failed to fetch sleep data');
   }
-  return await res.json();
+  
+  const sleepData = await res.json();
+  
+  // Log the actual response for debugging
+  console.log('Sleep data API response:', sleepData);
+  
+  // Handle different response formats (similar to bedroom service)
+  if (Array.isArray(sleepData)) {
+    return sleepData;
+  } else if (sleepData && Array.isArray(sleepData.data)) {
+    return sleepData.data;
+  } else if (sleepData && Array.isArray(sleepData.sleepSessions)) {
+    return sleepData.sleepSessions;
+  } else {
+    console.warn('Expected array of sleep data, got:', typeof sleepData, sleepData);
+    return [];
+  }
 };
 
 // Get specific sleep session by ID

@@ -20,6 +20,11 @@ import WakeUpForm from './components/forms/WakeUpForm';
 import JoinUs from './components/JoinUs';
 import About from './components/About';
 
+// Admin Components
+import AdminOnlyRoute from './components/admin/AdminOnlyRoute';
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminUserProfile from './components/admin/AdminUserProfile';
+
 function App() {
   return (
     <ThemeProvider>
@@ -48,6 +53,18 @@ function App() {
               {/* Sleep Session Routes */}
               <Route path="/gotobed" element={<GoToBedForm />} />
               <Route path="/gotobed/wakeup" element={<WakeUpForm />} />
+              
+              {/* Admin Routes - Protected by AdminOnlyRoute */}
+              <Route path="/admin/dashboard" element={
+                <AdminOnlyRoute>
+                  <AdminDashboard />
+                </AdminOnlyRoute>
+              } />
+              <Route path="/admin/userprofile/:userId" element={
+                <AdminOnlyRoute>
+                  <AdminUserProfile />
+                </AdminOnlyRoute>
+              } />
               
               {/* Legacy Routes for Compatibility */}
               <Route path="/dashboard" element={<Dashboard />} />
