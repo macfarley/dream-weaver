@@ -36,7 +36,7 @@ const DashboardProvider = ({ children }) => {
 
             // Fetch data in parallel (using user data from context for profile)
             const [bedrooms, sleepEntries] = await Promise.allSettled([
-                bedroomService.getBedrooms(token),
+                bedroomService.getBedrooms(),
                 sleepDataService.getSleepDataByUser(token),
             ]);
 

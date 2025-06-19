@@ -1,8 +1,10 @@
+import api from './apiConfig.js';
+
 /**
  * Bedroom Service
  * 
  * Handles all bedroom-related API calls to the backend.
- * All functions require authentication tokens and handle errors gracefully.
+ * Uses centralized axios instance with automatic authentication.
  * 
  * Backend endpoints:
  * - GET /bedrooms - Get all bedrooms for authenticated user
@@ -12,72 +14,44 @@
  * - DELETE /bedrooms/:id - Delete bedroom (requires password)
  */
 
-// Get the backend base URL from environment variables
-const API_BASE = import.meta.env.VITE_BACK_END_SERVER_URL;
-
 /**
  * Fetches all bedrooms for the authenticated user.
  * 
- * @param {string} token - JWT authentication token
  * @returns {Promise<Array>} Array of bedroom objects
  * @throws {Error} If request fails or user is not authenticated
  */
-async function getBedrooms(token) {
-  // Validate token parameter
-  if (!token || typeof token !== 'string') {
-    throw new Error('Authentication token is required');
-  }
-
+async function getBedrooms() {
   try {
-    const response = await fetch(`${API_BASE}/bedrooms`, {
-      method: 'GET',
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-    });
-    
-    // Backend returns 404 when user has no bedrooms - this is expected behavior
-    if (response.status === 404) {
-      console.info('User has no bedrooms yet');
-      return [];
-    }
-    
-    // Handle other error status codes
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to fetch bedrooms: ${response.status} - ${errorText}`);
-    }
-    
-    const bedroomsData = await response.json();
+    const response = await api.get('/bedrooms');
     
     // Log the actual response for debugging
-    console.log('Bedrooms API response:', bedroomsData);
+    console.log('Bedrooms API response:', response.data);
     
     // Check if response has a data property (common API pattern)
     let bedroomArray;
-    if (Array.isArray(bedroomsData)) {
-      bedroomArray = bedroomsData;
-    } else if (bedroomsData && Array.isArray(bedroomsData.data)) {
-      bedroomArray = bedroomsData.data;
-    } else if (bedroomsData && Array.isArray(bedroomsData.bedrooms)) {
-      bedroomArray = bedroomsData.bedrooms;
+    if (Array.isArray(response.data)) {
+      bedroomArray = response.data;
+    } else if (response.data && Array.isArray(response.data.data)) {
+      bedroomArray = response.data.data;
+    } else if (response.data && Array.isArray(response.data.bedrooms)) {
+      bedroomArray = response.data.bedrooms;
     } else {
-      console.warn('Expected array of bedrooms, got:', typeof bedroomsData, bedroomsData);
+      console.warn('Expected array of bedrooms, got:', typeof response.data, response.data);
       return [];
     }
     
     return bedroomArray;
     
   } catch (error) {
-    console.error('Error in getBedrooms:', error);
-    
-    // Re-throw with more context if it's a network error
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Network error: Unable to connect to server. Please check your connection.');
+    // Backend returns 404 when user has no bedrooms - this is expected behavior
+    if (error.response?.status === 404) {
+      console.info('User has no bedrooms yet');
+      return [];
     }
     
-    throw error;
+    // Handle other errors
+    console.error('Error fetching bedrooms:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch bedrooms');
   }
 }
 

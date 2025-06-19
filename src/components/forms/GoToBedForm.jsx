@@ -79,15 +79,8 @@ function GoToBed() {
      */
     const loadBedrooms = async () => {
         try {
-            // Get token for authentication
-            const token = getToken();
-            if (!token) {
-                console.error('No token available for loading bedrooms');
-                return;
-            }
-
-            // Fetch bedrooms using the bedroom service
-            const res = await bedroomService.getBedrooms(token);
+            // Fetch bedrooms using the bedroom service (token handled automatically)
+            const res = await bedroomService.getBedrooms();
             setBedrooms(res);
         } catch (err) {
             // Log error and optionally show a message
