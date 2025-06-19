@@ -1,8 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { UserContext } from './UserContext';
+import { getToken } from '../services/authService';
 import * as userService from '../services/userService';
 import * as bedroomService from '../services/bedroomService';
-import * as sleepDataService from '../services/sleepDataService';
+import sleepDataService from '../services/sleepDataService';
 
 // Create context
 const DashboardContext = createContext();
@@ -27,14 +28,30 @@ const DashboardProvider = ({ children }) => {
         setError(null);
 
         try {
-            // Fetch everything in parallel
-            const [profile, bedrooms, sleepEntries] = await Promise.all([
-                userService.getUserById(user._id),
-                bedroomService.getBedroomsByUser(user._id),
-                sleepDataService.getSleepDataByUser(user._id),
+            // Get token for API calls
+            const token = getToken();
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            // Fetch data in parallel (using user data from context for profile)
+            const [bedrooms, sleepEntries] = await Promise.allSettled([
+                bedroomService.getBedrooms(token).catch((err) => {
+                    console.warn('Failed to load bedrooms:', err.message);
+                    return [];
+                }),
+                // Note: Backend doesn't have /sleepdata endpoint yet, so this will fail
+                // We'll handle it gracefully for now
+                sleepDataService.getSleepDataByUser(token).catch(() => []),
             ]);
 
-            const sortedSleep = sleepEntries?.sort(
+            // Handle bedrooms result
+            const bedroomsData = bedrooms.status === 'fulfilled' ? bedrooms.value : [];
+
+            // Handle sleep data result (may not be implemented yet)
+            const sleepEntriesData = sleepEntries.status === 'fulfilled' ? sleepEntries.value : [];
+
+            const sortedSleep = sleepEntriesData?.sort(
                 (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
             ) || [];
 
@@ -49,8 +66,8 @@ const DashboardProvider = ({ children }) => {
             }
 
             setDashboardData({
-                profile,
-                bedrooms: bedrooms || [],
+                profile: user, // Use user data from context
+                bedrooms: bedroomsData || [],
                 latestSleepData,
                 latestDreamLog,
             });

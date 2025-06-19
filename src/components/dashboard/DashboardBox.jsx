@@ -1,62 +1,131 @@
 import React from 'react';
 
 /**
- * DashboardBox component displays a card with a title, content, and optional action buttons.
- *
- * Props:
- * - title: string - The title displayed at the top of the card.
- * - data: any - The data to be rendered in the content area.
- * - renderContent: function - Function to render the content based on the data.
- * - actions: array - Optional array of action objects for rendering buttons.
+ * DashboardBox component displays a reusable card with title, content, and optional action buttons.
+ * 
+ * This component provides a consistent layout for dashboard widgets and data displays.
+ * It handles various states including empty data and provides accessible button actions.
+ * 
+ * @param {Object} props - Component props
+ * @param {string} props.title - The title displayed at the top of the card
+ * @param {any} props.data - The data to be rendered in the content area (can be object, array, etc.)
+ * @param {function} props.renderContent - Function that receives data and returns JSX content
+ * @param {Array<Object>} [props.actions] - Optional array of action button configurations
+ * @param {string} props.actions[].label - Button text
+ * @param {function} props.actions[].onClick - Click handler function
+ * @param {string} [props.actions[].variant='primary'] - Bootstrap button variant (primary, secondary, success, etc.)
+ * 
+ * Features:
+ * - Responsive Bootstrap card layout
+ * - Graceful handling of empty/missing data
+ * - Flexible content rendering via render prop pattern
+ * - Action buttons with customizable styling
+ * - Accessibility support with proper tabIndex and ARIA labels
+ * 
+ * Usage Examples:
+ * <DashboardBox 
+ *   title="Sleep Sessions" 
+ *   data={sleepData} 
+ *   renderContent={(data) => <SleepList sessions={data} />}
+ *   actions={[
+ *     { label: "View All", onClick: handleViewAll },
+ *     { label: "Add New", onClick: handleAdd, variant: "success" }
+ *   ]}
+ * />
  */
 const DashboardBox = (props) => {
   const { title, data, renderContent, actions } = props;
 
-  // Render the main content area
+  /**
+   * Renders the main content area of the dashboard box.
+   * Uses the provided renderContent function if data exists, otherwise shows placeholder.
+   * 
+   * @returns {JSX.Element} The rendered content
+   */
   const renderMainContent = () => {
-    if (data) {
-      // If data is present, use the renderContent function to display it
+    // Check if data exists and is not empty
+    if (data !== null && data !== undefined) {
+      // Use the provided render function to display the data
       return renderContent(data);
     } else {
-      // If no data, show a placeholder message
-      return <p className="text-muted">No data available.</p>;
+      // Show user-friendly message when no data is available
+      return (
+        <p className="text-muted mb-0">
+          No data available.
+        </p>
+      );
     }
   };
 
-  // Render the action buttons if any actions are provided
+  /**
+   * Renders action buttons if any actions are provided.
+   * Each action becomes a clickable button with customizable styling.
+   * 
+   * @returns {JSX.Element|null} Action buttons container or null if no actions
+   */
   const renderActions = () => {
-    if (!actions || actions.length === 0) return null;
+    // Return null if no actions provided or actions array is empty
+    if (!actions || !Array.isArray(actions) || actions.length === 0) {
+      return null;
+    }
 
     return (
       <div className="mt-3 d-flex gap-2 flex-wrap justify-content-end">
-        {actions.map((action, idx) => (
-          <button
-            key={idx}
-            type="button"
-            className={`btn btn-${action.variant || 'primary'} btn-sm`}
-            onClick={action.onClick}
-            style={{ minWidth: '44px', minHeight: '44px' }}
-          >
-            {action.label}
-          </button>
-        ))}
+        {actions.map((action, index) => {
+          // Validate that each action has required properties
+          if (!action.label || typeof action.onClick !== 'function') {
+            console.warn(`DashboardBox: Invalid action at index ${index}`, action);
+            return null;
+          }
+
+          return (
+            <button
+              key={index}
+              type="button"
+              className={`btn btn-${action.variant || 'primary'} btn-sm`}
+              onClick={action.onClick}
+              style={{ 
+                minWidth: '44px', 
+                minHeight: '44px' // Ensure buttons meet accessibility touch target size
+              }}
+              aria-label={action.label}
+            >
+              {action.label}
+            </button>
+          );
+        })}
       </div>
     );
   };
 
   return (
-    <div className="card h-100 shadow-sm p-3 dashboard-box" tabIndex="0">
+    <div 
+      className="card h-100 shadow-sm p-3 dashboard-box" 
+      tabIndex="0"
+      role="region"
+      aria-labelledby={`dashboard-box-title-${title.replace(/\s+/g, '-').toLowerCase()}`}
+    >
       <div className="card-body d-flex flex-column justify-content-between">
-        <div>
-          {/* Card title */}
-          <h5 className="card-title">{title}</h5>
+        {/* Content section - takes up available space */}
+        <div className="flex-grow-1">
+          {/* Card title with semantic heading */}
+          <h5 
+            className="card-title mb-3" 
+            id={`dashboard-box-title-${title.replace(/\s+/g, '-').toLowerCase()}`}
+          >
+            {title}
+          </h5>
+          
           {/* Main content area */}
-          <div>
+          <div className="dashboard-box-content">
             {renderMainContent()}
           </div>
         </div>
-        {/* Optional actions section */}
-        {renderActions()}
+        
+        {/* Actions section - pinned to bottom */}
+        <div className="dashboard-box-actions">
+          {renderActions()}
+        </div>
       </div>
     </div>
   );

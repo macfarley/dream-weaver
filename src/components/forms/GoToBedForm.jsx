@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
 import BedroomForm from './BedroomForm';
-import { UserContext } from '../context/UserContext';
-import { DashboardContext } from '../context/DashboardContext';
-import * as bedroomService from '../services/bedroomService';
+import { UserContext } from '../../contexts/UserContext';
+import { DashboardContext } from '../../contexts/DashboardContext';
+import * as bedroomService from '../../services/bedroomService';
+import sleepSessionService from '../../services/sleepSessionService';
+import { getToken } from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
-
-// Get API base URL from environment variables
-const API_BASE = import.meta.env.VITE_BACK_END_SERVER_URL;
 
 /**
  * GoToBed component allows a user to start a new sleep session.
@@ -18,7 +16,7 @@ function GoToBed() {
     const { user } = useContext(UserContext);
 
     // Get dashboard refresh function from context (optional chaining in case context is not provided)
-    const { refreshDashboard } = useContext(DashboardContext) || {};
+    const { refreshDashboard, dashboardData } = useContext(DashboardContext) || {};
 
     // React Router navigation hook
     const navigate = useNavigate();
@@ -46,6 +44,7 @@ function GoToBed() {
 
     /**
      * Fetch user's bedrooms when the user is loaded or changes.
+     * Also check for active sleep sessions and redirect if needed.
      */
     useEffect(() => {
         if (user?._id) {
@@ -55,12 +54,41 @@ function GoToBed() {
     }, [user]);
 
     /**
+     * Check for active sleep sessions when dashboard data changes.
+     */
+    useEffect(() => {
+        if (dashboardData?.latestSleepData) {
+            checkForActiveSleepSession();
+        }
+    }, [dashboardData, navigate]);
+
+    /**
+     * Check if user has an active sleep session and redirect to wake up if so.
+     */
+    const checkForActiveSleepSession = () => {
+        // Check dashboard data for active sleep session (same logic as Footer)
+        const hasActiveSleep = dashboardData?.latestSleepData?.wakeUps?.length === 0;
+        
+        if (hasActiveSleep) {
+            // Redirect to wake up form if there's an active sleep session
+            navigate('/gotobed/wakeup');
+        }
+    };
+
+    /**
      * Loads bedrooms for the current user from the backend.
      */
     const loadBedrooms = async () => {
         try {
+            // Get token for authentication
+            const token = getToken();
+            if (!token) {
+                console.error('No token available for loading bedrooms');
+                return;
+            }
+
             // Fetch bedrooms using the bedroom service
-            const res = await bedroomService.getBedroomsByUser(user._id);
+            const res = await bedroomService.getBedrooms(token);
             setBedrooms(res);
         } catch (err) {
             // Log error and optionally show a message
@@ -89,7 +117,6 @@ function GoToBed() {
 
         // Prepare data to send to backend
         const sleepData = {
-            user: user._id,
             bedroom: selectedBedroomId,
             cuddleBuddy,
             sleepyThoughts,
@@ -99,25 +126,25 @@ function GoToBed() {
             setSubmitting(true); // Show loading spinner
             setError(''); // Clear previous errors
 
-            // Get JWT token from local storage for authentication
-            const token = localStorage.getItem('token');
+            // Get JWT token for authentication
+            const token = getToken();
+            if (!token) {
+                setError('Authentication required. Please log in.');
+                return;
+            }
 
-            // Send POST request to backend to start sleep session
-            await axios.post(`${API_BASE}/gotobed`, sleepData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            // Start sleep session using the service
+            const newSleepSession = await sleepSessionService.startSleepSession(sleepData, token);
 
             // Optionally refresh dashboard data
             refreshDashboard?.();
 
             // Navigate back to dashboard
-            navigate('/dashboard');
+            navigate('/users/dashboard');
         } catch (err) {
             // Log and show error
             console.error('Error starting sleep session:', err);
-            setError('Could not start sleep session.');
+            setError(err.message || 'Could not start sleep session.');
         } finally {
             setSubmitting(false); // Reset submitting state
         }
@@ -164,7 +191,6 @@ function GoToBed() {
                 {/* Embedded Bedroom Form (shown when toggled) */}
                 {showBedroomForm && (
                     <BedroomForm
-                        userId={user._id}
                         onSuccess={handleBedroomAdd}
                         onCancel={() => setShowBedroomForm(false)}
                     />

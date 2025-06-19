@@ -4,7 +4,6 @@ import React from 'react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { UserProvider } from './contexts/UserContext';
 
 import 'bootstrap/dist/css/bootstrap.min.css';             // Load Bootstrap CSS
 import './styles/custom.scss';                             // ✅ Load custom styles after Bootstrap
@@ -22,9 +21,7 @@ const root = createRoot(rootElement);
 root.render(
   <StrictMode>
     <BrowserRouter>
-      <UserProvider>
-        <App />
-      </UserProvider>
+      <App />
     </BrowserRouter>
   </StrictMode>
 );

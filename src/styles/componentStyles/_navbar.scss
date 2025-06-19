@@ -7,40 +7,14 @@
 
 .navbar {
   max-height: 15vh;
-  background-color: var(--color-bg-nav-footer); /* #d8c7e6 light, #190b28 dark */
+  background-color: var(--color-bg-nav-footer);
   color: var(--color-text);
 
   display: flex;
   align-items: center;
   padding: 0 1rem;
 
-  /* Brand (logo) */
-  .navbar-brand {
-    display: flex;
-    align-items: center;
-    color: var(--color-text);
-
-    img {
-      max-height: var(--logo-max-height-mobile);
-      max-width: var(--logo-max-width);
-      object-fit: contain;
-    }
-  }
-
-  /* Increase logo size on larger screens */
-  @media (min-width: 768px) {
-    .navbar-brand img {
-      max-height: var(--logo-max-height);
-    }
-  }
-
-  /* Nav links */
-  .navbar-nav {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-  }
-
+  /* Nav links - default styling */
   .nav-link {
     color: var(--color-text);
     margin-left: 1rem;
@@ -53,25 +27,12 @@
     }
   }
 
-  /* Back button (if used) */
-  .btn-outline-light {
-    color: var(--color-text);
-    border-color: var(--color-text);
-
-    &:hover,
-    &:focus {
-      background-color: var(--color-accent);
-      border-color: var(--color-accent);
-      color: var(--color-bg-nav-footer);
-    }
-  }
-
-  /* Mobile toggler */
+  /* Mobile toggler - theme-aware */
   .navbar-toggler {
     border-color: var(--color-text);
 
     .navbar-toggler-icon {
-      filter: invert(1);
+      filter: none;
     }
 
     &:hover,
@@ -81,8 +42,93 @@
     }
   }
 }
-/* Force welcome text to use theme text color */
-.custom-navbar-welcome,
-.navbar-text.custom-navbar-welcome {
+
+/* Light mode specific styling - darker links for better contrast */
+[data-theme="light"] .navbar {
+  .nav-link {
+    color: var(--color-primary) !important; /* Use the darker primary color */
+
+    &:hover,
+    &:focus {
+      color: var(--color-text) !important; /* Even darker on hover */
+    }
+  }
+
+  /* Make welcome text darker too */
+  .custom-navbar-welcome,
+  .navbar-text.custom-navbar-welcome {
+    color: var(--color-primary) !important;
+  }
+
+  /* Toggler icon for light mode */
+  .navbar-toggler .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%232c1a3d' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
+}
+
+/* Dark mode specific styling */
+[data-theme="dark"] .navbar {
+  .nav-link {
+    color: var(--color-text);
+
+    &:hover,
+    &:focus {
+      color: var(--color-accent);
+    }
+  }
+
+  /* Toggler icon for dark mode */
+  .navbar-toggler .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23eeddfe' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
+
+  /* Welcome text in dark mode */
+  .custom-navbar-welcome,
+  .navbar-text.custom-navbar-welcome {
+    color: var(--color-text) !important;
+  }
+}
+
+/* Custom back button styles */
+.custom-back-button {
+  background-color: transparent !important;
+  border: 2px solid var(--color-border) !important;
   color: var(--color-text) !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+
+  &:hover,
+  &:focus {
+    background-color: var(--color-accent-light) !important;
+    border-color: var(--color-accent) !important;
+    color: var(--color-accent) !important;
+    transform: translateX(-2px);
+  }
+}
+
+/* Theme-specific styling for back button */
+[data-theme="light"] .navbar .custom-back-button {
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--color-accent-light) !important;
+    border-color: var(--color-accent) !important;
+    color: var(--color-text) !important;
+  }
+}
+
+[data-theme="dark"] .navbar .custom-back-button {
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--color-accent-light) !important;
+    border-color: var(--color-accent) !important;
+    color: var(--color-accent) !important;
+  }
 }

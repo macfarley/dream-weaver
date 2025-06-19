@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { DashboardContext } from '../contexts/DashboardContext';
-import * as sleepDataService from '../services/sleepDataService';
+import { DashboardContext } from '../../contexts/DashboardContext';
+import sleepDataService from '../../services/sleepDataService';
 import { useNavigate } from 'react-router-dom';
 
 /**

@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-// Create the ThemeContext to hold theme state and toggler
+// Create the ThemeContext to hold theme state and functions
 const ThemeContext = createContext();
 
 /**
  * Retrieves the initial theme value.
  * - Checks localStorage for a saved theme.
- * - Defaults to 'light' if none is found or window is undefined.
+ * - Defaults to 'dark' if none is found or window is undefined.
  */
 function getInitialTheme() {
   if (typeof window !== 'undefined') {
@@ -15,7 +15,7 @@ function getInitialTheme() {
       return storedTheme;
     }
   }
-  return 'light';
+  return 'dark'; // Default to dark theme for DreamWeaver
 }
 
 /**
@@ -23,22 +23,43 @@ function getInitialTheme() {
  * - Manages theme state.
  * - Persists theme to localStorage.
  * - Updates document body attribute for CSS theming.
+ * - Syncs with user preferences when available.
  */
 function ThemeProvider({ children }) {
   // State to hold the current theme, initialized from localStorage or default
   const [theme, setTheme] = useState(getInitialTheme);
 
   /**
+   * Updates the theme and persists it to localStorage.
+   * This is used internally and by the sync functions.
+   */
+  const updateTheme = (newTheme) => {
+    if (newTheme === 'light' || newTheme === 'dark') {
+      setTheme(newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+  };
+
+  /**
    * Toggles between 'light' and 'dark' themes.
    * - Updates state.
    * - Persists new theme to localStorage.
+   * - Returns the new theme for potential backend sync.
    */
   function toggleTheme() {
-    setTheme(prevTheme => {
-      const nextTheme = prevTheme === 'light' ? 'dark' : 'light';
-      localStorage.setItem('theme', nextTheme);
-      return nextTheme;
-    });
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    updateTheme(nextTheme);
+    return nextTheme;
+  }
+
+  /**
+   * Sets theme from user preferences (e.g., when loading user profile).
+   * This allows external components to sync the theme without triggering toggle.
+   */
+  function setThemeFromPreferences(userTheme) {
+    if (userTheme && (userTheme === 'light' || userTheme === 'dark')) {
+      updateTheme(userTheme);
+    }
   }
 
   /**
@@ -49,9 +70,14 @@ function ThemeProvider({ children }) {
     document.body.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Provide the theme and toggle function to children
+  // Provide the theme and functions to children
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ 
+      theme, 
+      toggleTheme, 
+      setThemeFromPreferences,
+      updateTheme 
+    }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -1,6 +1,7 @@
-import React, { useContext } from 'react';
-import { DashboardContext } from '@contexts/DashboardContext';
-import DashboardBox from '@components/dashboard/DashboardBox';
+import React, { useContext, useEffect } from 'react';
+import { DashboardContext } from '../../contexts/DashboardContext';
+import { UserContext } from '../../contexts/UserContext';
+import DashboardBox from './DashboardBox';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -10,7 +11,25 @@ import { useNavigate } from 'react-router-dom';
 function Dashboard() {
   // Get dashboard data and status from context
   const { dashboardData, loading, error } = useContext(DashboardContext);
+  const { user, loading: userLoading } = useContext(UserContext);
   const navigate = useNavigate();
+
+  // Handle authentication redirect in useEffect
+  useEffect(() => {
+    if (!userLoading && !user) {
+      navigate('/auth/login');
+    }
+  }, [user, userLoading, navigate]);
+
+  // Show loading while user context is loading
+  if (userLoading) {
+    return <p>Loading...</p>;
+  }
+
+  // Show loading screen if redirecting
+  if (!user) {
+    return <p>Redirecting to login...</p>;
+  }
 
   // Show loading or error states
   if (loading) {
@@ -81,8 +100,8 @@ function Dashboard() {
           <DashboardBox
             title="Profile"
             data={profile}
-            onClick={() => navigate('/profile')}
             renderContent={renderProfile}
+            actions={[{ label: 'View Profile', onClick: () => navigate('/users/profile') }]}
           />
         </div>
 
@@ -91,8 +110,8 @@ function Dashboard() {
           <DashboardBox
             title="Bedroom"
             data={bedrooms && bedrooms[0]}
-            onClick={() => navigate('/bedrooms')}
             renderContent={renderBedroom}
+            actions={[{ label: 'View Bedrooms', onClick: () => navigate('/users/dashboard/bedrooms') }]}
           />
         </div>
 
@@ -101,8 +120,8 @@ function Dashboard() {
           <DashboardBox
             title="Latest Sleep Session"
             data={latestSleepData}
-            onClick={() => navigate('/sleep')}
             renderContent={renderSleepSession}
+            actions={[{ label: 'View Sleep Data', onClick: () => navigate('/users/dashboard/sleepdata') }]}
           />
         </div>
 
@@ -111,8 +130,8 @@ function Dashboard() {
           <DashboardBox
             title="Latest Dream Entry"
             data={latestDreamLog}
-            onClick={() => navigate('/dreams')}
             renderContent={renderDreamLog}
+            actions={[{ label: 'View Dreams', onClick: () => navigate('/users/dashboard/dreams') }]}
           />
         </div>
       </div>

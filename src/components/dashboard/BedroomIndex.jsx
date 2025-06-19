@@ -1,14 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { DashboardContext } from '../context/DashboardContext';
-import bedroomService from '../services/bedroomService';
+import { DashboardContext } from '../../contexts/DashboardContext';
+import * as bedroomService from '../../services/bedroomService';
+import { getToken } from '../../services/authService';
 import { Link, useNavigate } from 'react-router-dom';
+import BedroomForm from '../forms/BedroomForm';
 
 const BedroomIndex = () => {
-  const { dashboardData, loading, error } = useContext(DashboardContext);
+  const { dashboardData, loading, error, refreshDashboard } = useContext(DashboardContext);
   const [bedrooms, setBedrooms] = useState([]);
   const [expandedIds, setExpandedIds] = useState(new Set());
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState(null);
+  const [showBedroomForm, setShowBedroomForm] = useState(false);
   const navigate = useNavigate();
 
   // Helper: toggle usage history section
@@ -22,6 +25,18 @@ const BedroomIndex = () => {
       }
       return newSet;
     });
+  };
+
+  // Handle successful bedroom creation
+  const handleBedroomAdd = (newBedroom) => {
+    setShowBedroomForm(false); // Hide the form
+    // Refresh dashboard data to get updated bedroom list
+    if (refreshDashboard) {
+      refreshDashboard();
+    } else {
+      // Fallback: manually add to local state
+      setBedrooms((prev) => processBedrooms([...prev, newBedroom]));
+    }
   };
 
   // Calculate total nights and sort by favorite descending
@@ -66,9 +81,19 @@ const BedroomIndex = () => {
   useEffect(() => {
     if (!dashboardData?.bedrooms?.length) {
       setLocalLoading(true);
-      bedroomService.getBedroomsByUser()
+      const token = getToken();
+      if (!token) {
+        setLocalError('Authentication required');
+        setLocalLoading(false);
+        return;
+      }
+      
+      bedroomService.getBedrooms(token)
         .then((data) => setBedrooms(processBedrooms(data)))
-        .catch(() => setLocalError('Failed to load bedrooms'))
+        .catch((err) => {
+          console.error('Failed to load bedrooms:', err);
+          setLocalError('Failed to load bedrooms');
+        })
         .finally(() => setLocalLoading(false));
     } else {
       setBedrooms(processBedrooms(dashboardData.bedrooms));
@@ -79,12 +104,52 @@ const BedroomIndex = () => {
   if (error || localError) return <p>{error || localError}</p>;
 
   if (!bedrooms.length) {
-    return <p>No bedrooms found. Please add one.</p>;
+    return (
+      <div className="bedroom-index container mt-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h2>Your Bedrooms</h2>
+          <button
+            onClick={() => setShowBedroomForm(true)}
+            className="btn btn-primary"
+          >
+            Create Room
+          </button>
+        </div>
+        
+        {showBedroomForm ? (
+          <BedroomForm
+            onSuccess={handleBedroomAdd}
+            onCancel={() => setShowBedroomForm(false)}
+          />
+        ) : (
+          <p>No bedrooms found. Click "Create Room" to add your first bedroom.</p>
+        )}
+      </div>
+    );
   }
 
   return (
     <div className="bedroom-index container mt-4">
-      <h2>Your Bedrooms</h2>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Your Bedrooms</h2>
+        <button
+          onClick={() => setShowBedroomForm(!showBedroomForm)}
+          className="btn btn-primary"
+        >
+          {showBedroomForm ? 'Cancel' : 'Create Room'}
+        </button>
+      </div>
+
+      {/* Show bedroom form when toggled */}
+      {showBedroomForm && (
+        <div className="mb-4">
+          <BedroomForm
+            onSuccess={handleBedroomAdd}
+            onCancel={() => setShowBedroomForm(false)}
+          />
+        </div>
+      )}
+
       <div className="list-group">
         {bedrooms.map((bedroom) => (
           <div key={bedroom._id} className="list-group-item">
@@ -107,7 +172,7 @@ const BedroomIndex = () => {
                 {' '}
                 {/* Using bedroomName in URL - URL encode it to be safe */}
                 <Link
-                  to={`/bedrooms/${encodeURIComponent(bedroom.bedroomName)}`}
+                  to={`/users/dashboard/bedrooms/${encodeURIComponent(bedroom.bedroomName)}`}
                   className="btn btn-primary btn-sm"
                   aria-label={`View details for ${bedroom.bedroomName}`}
                 >

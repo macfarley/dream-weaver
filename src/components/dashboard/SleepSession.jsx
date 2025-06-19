@@ -1,13 +1,16 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import sleepDataService from '../services/sleepDataService';
-import { DashboardContext } from '../contexts/DashboardContext';
+import sleepDataService from '../../services/sleepDataService';
+import { DashboardContext } from '../../contexts/DashboardContext';
 
 function SleepSession() {
   // Get the date param from the URL
   const { date } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Check if this is being accessed via dreamjournal route
+  const isDreamJournalFocus = location.pathname.includes('/dreamjournal/');
 
   // Get dashboard data and refresh function from context
   const { dashboardData } = useContext(DashboardContext);

@@ -5,13 +5,19 @@
    Uses CSS vars for theming
    ============================= */
 
-footer {
-  max-height: 15vh;
-  background-color: var(--color-bg-nav-footer); /* #d8c7e6 light, #190b28 dark */
-  color: var(--color-text);
-  padding: 1rem 1.5rem;
+.custom-footer {
+  background-color: var(--color-bg-nav-footer) !important;
+  color: var(--color-text) !important;
+  padding: 1rem 1.5rem !important;
+  margin-top: auto !important;
   text-align: center;
-  overflow-y: auto;
+  min-height: auto;
+
+  /* Override Bootstrap's text-info class */
+  .text-info,
+  a.text-info {
+    color: var(--color-accent) !important;
+  }
 
   /* Primary action button */
   .btn {
@@ -23,35 +29,41 @@ footer {
     border: none;
 
     &.btn-info {
-      background-color: var(--color-accent);
-      color: var(--color-bg-nav-footer);
+      background-color: var(--color-accent) !important;
+      color: var(--color-bg) !important; /* Use background color for maximum contrast */
+      border-color: var(--color-accent) !important;
 
       &:hover,
       &:focus {
-        background-color: var(--color-accent);
+        background-color: var(--color-accent-hover) !important;
+        color: var(--color-bg) !important;
+        border-color: var(--color-accent-hover) !important;
       }
     }
 
     &.btn-success {
-      background-color: var(--color-secondary);
-      color: var(--color-bg-nav-footer);
+      background-color: var(--color-secondary) !important;
+      color: var(--color-bg) !important; /* Use background color for maximum contrast */
+      border-color: var(--color-secondary) !important;
 
       &:hover,
       &:focus {
-        background-color: var(--color-secondary);
+        background-color: var(--color-primary) !important;
+        color: var(--color-bg) !important;
+        border-color: var(--color-primary) !important;
       }
     }
   }
 
   /* Info links */
   a {
-    color: var(--color-accent);
+    color: var(--color-accent) !important;
     text-decoration: none;
     transition: color 0.2s ease;
 
     &:hover,
     &:focus {
-      color: var(--color-accent);
+      color: var(--color-accent-hover) !important;
       text-decoration: underline;
     }
   }
@@ -65,15 +77,15 @@ footer {
     justify-content: center;
 
     .breadcrumb-item {
-      color: var(--color-text);
+      color: var(--color-text) !important;
 
       &.active {
         font-weight: 600;
-        color: var(--color-accent);
+        color: var(--color-accent) !important;
       }
 
       a {
-        color: var(--color-accent);
+        color: var(--color-accent) !important;
 
         &:hover,
         &:focus {

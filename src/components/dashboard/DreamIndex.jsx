@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardContext } from '../contexts/DashboardContext';
-import sleepDataService from '../services/sleepDataService';
+import { DashboardContext } from '../../contexts/DashboardContext';
+import sleepDataService from '../../services/sleepDataService';
 
 /**
  * Helper to format ISO date string to a readable format.

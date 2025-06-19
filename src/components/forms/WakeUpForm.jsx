@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { UserContext } from '../context/UserContext';
-import { DashboardContext } from '../context/DashboardContext';
+import { UserContext } from '../../contexts/UserContext';
+import { DashboardContext } from '../../contexts/DashboardContext';
+import sleepSessionService from '../../services/sleepSessionService';
+import { getToken } from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
 
-// Get the API base URL from environment variables
-const API_BASE = import.meta.env.VITE_BACK_END_SERVER_URL;
-
-function WakeUp() {
+function WakeUpForm() {
     // Get the current user from context
     const { user } = useContext(UserContext);
 
@@ -70,33 +68,33 @@ function WakeUp() {
             setError(''); // Clear previous errors
 
             // Get the auth token
-            const token = localStorage.getItem('token');
+            const token = getToken();
+            if (!token) {
+                setError('Authentication required. Please log in.');
+                return;
+            }
 
-            // Send the wakeup data to the backend
-            await axios.post(
-                `${API_BASE}/gotobed/wakeup`,
-                {
-                    sleepDataId: sleepData._id, // ID of the sleep session
-                    dreamJournal,               // User's dream notes
-                    sleepQuality,               // User's sleep quality rating
-                    finalWakeUp,                // Whether the user is staying awake
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            // Prepare wakeup data according to backend expectations
+            const wakeupData = {
+                sleepQuality,
+                dreamJournal,
+                awakenAt: new Date(), // Current time
+                finishedSleeping: finalWakeUp, // Whether user is staying awake
+                backToBedAt: finalWakeUp ? null : new Date(), // If going back to bed, set time
+            };
+
+            // Send the wakeup data to the backend using the service
+            await sleepSessionService.addWakeupEvent(wakeupData, token);
 
             // Refresh the dashboard if possible
             if (refreshDashboard) refreshDashboard();
 
             // Navigate to the dashboard page
-            navigate('/dashboard');
+            navigate('/users/dashboard');
         } catch (err) {
             // Show an error if the request fails
             console.error('Failed to update sleep session:', err);
-            setError('Something went wrong while waking up.');
+            setError(err.message || 'Something went wrong while waking up.');
         } finally {
             setSubmitting(false); // Reset loading state
         }
@@ -169,4 +167,4 @@ function WakeUp() {
     );
 }
 
-export default WakeUp;
+export default WakeUpForm;

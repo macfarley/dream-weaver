@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import * as bedroomService from '../services/bedroomService';
+import { getToken } from '../../services/authService';
+import * as bedroomService from '../../services/bedroomService';
 
 /**
  * BedroomForm component allows users to add a new bedroom with various attributes.
- * @param {string} userId - The ID of the current user (owner).
  * @param {function} onSuccess - Callback when bedroom is successfully created.
  * @param {function} onCancel - Callback when the form is cancelled.
  */
-function BedroomForm({ userId, onSuccess, onCancel }) {
+function BedroomForm({ onSuccess, onCancel }) {
     // Initial form state
     const [formData, setFormData] = useState({
         bedroomName: '',
@@ -15,7 +15,7 @@ function BedroomForm({ userId, onSuccess, onCancel }) {
         mattressType: '',
         bedSize: '',
         temperature: 70,
-        lightLevel: 'moderate',
+        lightLevel: 'normal',
         noiseLevel: 'moderate',
         pillows: 'one',
     });
@@ -46,11 +46,13 @@ function BedroomForm({ userId, onSuccess, onCancel }) {
         setError(null);
 
         try {
-            // Create new bedroom with form data and ownerId
-            const newBedroom = await bedroomService.createBedroom({
-                ...formData,
-                ownerId: userId,
-            });
+            const token = getToken();
+            if (!token) {
+                throw new Error('Authentication required');
+            }
+
+            // Create new bedroom with form data (ownerId is set by backend from token)
+            const newBedroom = await bedroomService.createBedroom(formData, token);
             // Notify parent of success
             onSuccess(newBedroom);
         } catch (err) {
@@ -149,11 +151,12 @@ function BedroomForm({ userId, onSuccess, onCancel }) {
                     value={formData.lightLevel}
                     onChange={handleChange}
                 >
-                    <option value="very bright">Very Bright</option>
-                    <option value="bright">Bright</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="dim">Dim</option>
+                    <option value="pitch black">Pitch Black</option>
                     <option value="very dim">Very Dim</option>
+                    <option value="dim">Dim</option>
+                    <option value="normal">Normal</option>
+                    <option value="bright">Bright</option>
+                    <option value="daylight">Daylight</option>
                 </select>
             </div>
 
@@ -166,10 +169,12 @@ function BedroomForm({ userId, onSuccess, onCancel }) {
                     value={formData.noiseLevel}
                     onChange={handleChange}
                 >
-                    <option value="loud">Loud</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="quiet">Quiet</option>
+                    <option value="silent">Silent</option>
                     <option value="very quiet">Very Quiet</option>
+                    <option value="quiet">Quiet</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="loud">Loud</option>
+                    <option value="very loud">Very Loud</option>
                 </select>
             </div>
 

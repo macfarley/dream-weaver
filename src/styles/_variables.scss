@@ -1,22 +1,28 @@
 /* =============================
    THEME VARIABLES - DreamWeaver
+   WCAG AA Compliant Colors
    ============================= */
 
-/* LIGHT MODE COLORS */
+/* LIGHT MODE COLORS - WCAG AA Compliant */
 :root {
-  --color-bg: #f6f3f9;              /* soft lavender-tinted background */
-  --color-surface: #e4ddef;         /* cards, panels, navbar, etc. */
-  --color-text: #2c1a3d;            /* rich deep purple-gray for good readability */
-  --color-primary: #665773;         /* muted indigo */
-  --color-secondary: #a678d6;       /* soft orchid accent */
-  --color-accent-light: #dcd0f8; /* or whatever lighter tone */
-  --color-accent: #b399d4;          /* light orchid/lavender accent */
-  --color-accent-hover: #d1b3f0;    /* lighter orchid for hover states */
+  --color-bg: #f8f6fb;              /* Very light lavender background */
+  --color-surface: #ede7f3;         /* Cards, panels - slightly darker */
+  --color-text: #1a0d26;            /* Very dark purple - high contrast */
+  --color-primary: #4a3957;         /* Dark muted purple - WCAG compliant */
+  --color-secondary: #7d5a94;       /* Medium purple for accents */
+  --color-accent: #5e4471;          /* Dark enough for good contrast */
+  --color-accent-light: #c8b8d9;    /* Light accent for focus states */
+  --color-accent-hover: #3d2b47;    /* Even darker for hover states */
   
-  /* New light mode colors */
-  --color-bg-nav-footer: #d8c7e6;  /* slightly darker for navbar/footer */
-  --color-bg-main: #e1d7f1;        /* a shade darker for main section */
-  --color-border: #a186b9;         /* lighter purple border */
+  /* Navigation and footer */
+  --color-bg-nav-footer: #d4c4e0;   /* Darker lavender for nav/footer */
+  --color-bg-main: #f1ecf7;         /* Slightly tinted main background */
+  --color-border: #8f739f;          /* Medium purple border - visible */
+
+  /* Success/Error colors - WCAG compliant */
+  --color-success: #0d5016;         /* Dark green for light backgrounds */
+  --color-error: #a91e3a;           /* Dark red for light backgrounds */
+  --color-warning: #8a5c00;         /* Dark amber for light backgrounds */
 
   /* Logo and other sizes */
   --logo-max-height: 150px;
@@ -24,16 +30,24 @@
   --logo-max-height-mobile: 100px;
 }
 
-/* DARK MODE COLORS */
+/* DARK MODE COLORS - WCAG AA Compliant */
 [data-theme="dark"] {
-  --color-bg: #190b28;              /* deep plum background */
-  --color-text: #eeddfe;            /* pale lavender-pink text */
-  --color-surface: #2d1e3c;         /* card/panel surface */
-  --color-secondary: #665773;       /* mid-tone purples */
-  --color-accent: #d8b4f8;          /* orchid/lavender accent */
+  --color-bg: #0f0515;              /* Very dark plum background */
+  --color-surface: #1e1229;         /* Cards, panels - lighter than bg */
+  --color-text: #f0e6ff;            /* Very light lavender text */
+  --color-primary: #b8a3cc;         /* Light purple - good contrast on dark */
+  --color-secondary: #9b7db5;       /* Medium purple for accents */
+  --color-accent: #c8b5de;          /* Light enough for good contrast */
+  --color-accent-light: #4a3557;    /* Darker for focus states in dark mode */
+  --color-accent-hover: #e0d1f2;    /* Lighter for hover states */
   
-  /* New dark mode colors */
-  --color-bg-nav-footer: #3a2350;  /* two shades lighter than background for navbar/footer */
-  --color-bg-main: #120820;        /* darker shade for main section */
-  --color-border: #665773;         /* lighter orchid border */
+  /* Navigation and footer */
+  --color-bg-nav-footer: #241533;   /* Darker than surface but lighter than bg */
+  --color-bg-main: #130a1f;         /* Slightly different from main bg */
+  --color-border: #5a4066;          /* Visible border color */
+
+  /* Success/Error colors - WCAG compliant for dark backgrounds */
+  --color-success: #4ade80;         /* Bright green for dark backgrounds */
+  --color-error: #f87171;           /* Bright red for dark backgrounds */
+  --color-warning: #fbbf24;         /* Bright amber for dark backgrounds */
 }

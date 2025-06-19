@@ -5,47 +5,74 @@ import { UserContext } from '../../contexts/UserContext';
 import { DashboardContext } from '../../contexts/DashboardContext';
 
 /**
- * Footer component displays breadcrumbs, a main action button, and footer details.
+ * Footer component provides navigation aids and primary action buttons.
+ * 
+ * Features:
+ * - Dynamic breadcrumb navigation based on current route
+ * - Context-aware primary action button (Go To Bed / Wake Up)
+ * - Responsive layout with Bootstrap components
+ * - Shows different content for authenticated vs unauthenticated users
+ * 
+ * The footer adapts its content based on:
+ * - User authentication state
+ * - Current sleep session status  
+ * - Current page location for breadcrumbs
+ * 
+ * Primary Action Logic:
+ * - If user has active sleep session → "Wake Up" button
+ * - If user has no active sleep session → "Go To Bed" button
+ * - If user not logged in → No action button shown
+ * 
+ * Dependencies:
+ * - UserContext: For authentication state
+ * - DashboardContext: For sleep session status
+ * - React Router: For location and navigation
  */
 function Footer() {
-  // Get current route location
+  // Get current route location for breadcrumb generation
   const location = useLocation();
 
-  // Get user and dashboard data from contexts
+  // Get user authentication state and dashboard data from contexts
   const { user } = useContext(UserContext);
   const { dashboardData } = useContext(DashboardContext);
 
-  // Split the current path into segments for breadcrumbs
+  // Parse current URL path into segments for breadcrumb navigation
+  // Filter out empty strings from leading/trailing slashes
   const pathnames = location.pathname.split('/').filter(Boolean);
 
-  // Determine if the user has an active sleep session (no wakeUps means still sleeping)
+  // Determine if user has an active sleep session
+  // Active session = has sleep data but no wake-up events recorded yet
   const hasActiveSleep =
-    dashboardData?.latestSleepData?.wakeUps?.length === 0;
+    dashboardData?.latestSleepData && 
+    Array.isArray(dashboardData.latestSleepData.wakeUps) &&
+    dashboardData.latestSleepData.wakeUps.length === 0;
 
-  // Decide which primary action to show based on sleep state
+  // Configure primary action button based on current sleep state
   const primaryAction = hasActiveSleep
     ? {
         to: '/gotobed/wakeup',
-        label: 'Wake Up',
+        label: '⏰ Wake Up',
         style: 'btn-success',
+        ariaLabel: 'Wake up from current sleep session'
       }
     : {
         to: '/gotobed',
-        label: 'Go To Bed',
-        style: 'btn-info',
+        label: '🌙 Go To Bed',
+        style: 'btn-primary',
+        ariaLabel: 'Start a new sleep session'
       };
 
   return (
-    <footer className="    pt-3 px-3 mt-auto">
+    <div className="custom-footer">
       <div className="container">
-
-
-        {/* Main action button (only if user is logged in) */}
+        {/* Primary action button - only shown to authenticated users */}
         {user && (
           <div className="my-3 text-center">
             <Link
               to={primaryAction.to}
               className={`btn ${primaryAction.style} btn-lg w-100`}
+              aria-label={primaryAction.ariaLabel}
+              title={primaryAction.ariaLabel}
             >
               {primaryAction.label}
             </Link>
@@ -74,8 +101,8 @@ function Footer() {
             </a>
           </p>
         </div>
-                {/* Breadcrumb navigation */}
-        <Breadcrumb className="  mb-2">
+        {/* Breadcrumb navigation */}
+        <Breadcrumb className="mb-2">
           {/* Always show Home link */}
           <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
             Home
@@ -103,7 +130,7 @@ function Footer() {
           })}
         </Breadcrumb>
       </div>
-    </footer>
+    </div>
   );
 }
 

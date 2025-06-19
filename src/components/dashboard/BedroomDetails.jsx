@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { DashboardContext } from '../contexts/DashboardContext';
-import * as bedroomService from '../services/bedroomService';
-import * as sleepDataService from '../services/sleepDataService';
-import { format, parseISO } from 'date-fns';
-import './BedroomDetails.scss'; // optional, if custom styling
+import { DashboardContext } from '../../contexts/DashboardContext';
+import { getToken } from '../../services/authService';
+import * as bedroomService from '../../services/bedroomService';
+import sleepDataService from '../../services/sleepDataService';
+import { format } from 'date-fns';
 
 // Main BedroomDetails component
 function BedroomDetails() {
@@ -27,27 +27,34 @@ function BedroomDetails() {
     useEffect(() => {
         const loadData = async () => {
             try {
+                const token = getToken();
+                if (!token) {
+                    console.error('No authentication token found');
+                    navigate('/join');
+                    return;
+                }
+
                 // Try to find the bedroom in dashboard context first
                 let room = dashboardData?.bedrooms?.find(
-                    b => b.bedroomName.toLowerCase() === bedroomname.toLowerCase()
+                    b => b.bedroomName.toLowerCase() === decodeURIComponent(bedroomname).toLowerCase()
                 );
 
                 // If not found, fetch from API
                 if (!room) {
-                    room = await bedroomService.getBedroomByName(bedroomname);
+                    room = await bedroomService.getBedroomByName(decodeURIComponent(bedroomname), token);
                 }
 
                 setBedroom(room);
                 setFormData(room);
 
-                // Get all sleep data for the owner
+                // Get all sleep data for the current user (using token, not ownerId)
                 const allSleepData = dashboardData?.latestSleepData
-                    ? dashboardData.latestSleepData
-                    : await sleepDataService.getSleepDataByUser(room.ownerId);
+                    ? [dashboardData.latestSleepData] // Wrap in array if it's a single item
+                    : await sleepDataService.getSleepDataByUser(token);
 
                 // Filter sleep data for this bedroom and sort by date descending
-                const datesUsed = allSleepData
-                    .filter(entry => entry.bedroom && entry.bedroom === room._id)
+                const datesUsed = (Array.isArray(allSleepData) ? allSleepData : [allSleepData])
+                    .filter(entry => entry && entry.bedroom && entry.bedroom === room._id)
                     .map(entry => ({
                         id: entry._id,
                         date: entry.createdAt,
@@ -77,11 +84,18 @@ function BedroomDetails() {
     const handleSubmit = async e => {
         e.preventDefault();
         try {
-            await bedroomService.updateBedroom(bedroom._id, formData);
+            const token = getToken();
+            if (!token) {
+                alert('Authentication required. Please log in.');
+                return;
+            }
+            
+            await bedroomService.updateBedroom(bedroom._id, formData, token);
             setIsEditing(false);
             refreshDashboard?.();
         } catch (err) {
             console.error('Error updating bedroom:', err);
+            alert('Failed to update bedroom. Please try again.');
         }
     };
 
@@ -91,10 +105,24 @@ function BedroomDetails() {
             alert('Password required');
             return;
         }
+
+        // Check if this is the user's only bedroom
+        const bedroomCount = dashboardData?.bedrooms?.length || 0;
+        if (bedroomCount <= 1) {
+            alert('You cannot delete your only bedroom. Please create another bedroom first.');
+            return;
+        }
+
         try {
-            await bedroomService.deleteBedroom(bedroom._id, deletePassword);
+            const token = getToken();
+            if (!token) {
+                alert('Authentication required');
+                return;
+            }
+            
+            await bedroomService.deleteBedroom(bedroom._id, deletePassword, token);
             refreshDashboard?.();
-            navigate('/dashboard');
+            navigate('/users/dashboard');
         } catch (err) {
             console.error('Error deleting bedroom:', err);
             alert('Failed to delete bedroom.');

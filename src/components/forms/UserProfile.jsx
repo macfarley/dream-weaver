@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { UserContext } from '../../contexts/UserContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { updateProfile } from '../../services/userService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -7,10 +8,12 @@ import { toast } from 'react-toastify';
 /**
  * UserProfile component allows users to view and update their profile information.
  * It loads the current user data from context and updates it on submit.
+ * Also syncs theme changes with ThemeContext.
  */
 function UserProfile() {
   // Access user and setUser from context
   const { user, setUser } = useContext(UserContext);
+  const { setThemeFromPreferences } = useTheme();
   const navigate = useNavigate();
 
   // Local state for form data
@@ -58,12 +61,19 @@ function UserProfile() {
   /**
    * Handles form submission.
    * Calls updateProfile service and updates user context.
+   * Also syncs theme changes with ThemeContext.
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const updatedUser = await updateProfile(formData);
       setUser(updatedUser);
+      
+      // Sync theme change with ThemeContext if theme was updated
+      if (updatedUser.theme !== user?.theme) {
+        setThemeFromPreferences(updatedUser.theme);
+      }
+      
       toast.success('Profile updated successfully!');
       navigate('/users/dashboard');
     } catch (err) {

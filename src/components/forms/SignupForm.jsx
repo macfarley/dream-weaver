@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { UserContext } from "../../contexts/UserContext";
-import { signUp } from "../../services/authService";
+import { signUp, getToken } from "../../services/authService";
+import * as bedroomService from "../../services/bedroomService";
 
 // Define allowed options for preferences
 const dateFormats = ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'];
@@ -9,6 +10,7 @@ const themes = ['light', 'dark'];
 
 function SignupForm({ onSignUpSuccess, onShowLogin }) {
   const { setUser } = useContext(UserContext);
+  const formId = useRef(`signup-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`).current;
 
   const [formData, setFormData] = useState({
     username: "",
@@ -29,22 +31,122 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
   const [submitError, setSubmitError] = useState("");
 
   function validateField(name, value) {
-    // ...validation logic unchanged...
+    switch (name) {
+      case "username":
+        return value.length >= 3 ? null : "Username must be at least 3 characters";
+      case "firstName":
+        return value.trim().length >= 1 ? null : "First name is required";
+      case "lastName":
+        return value.trim().length >= 1 ? null : "Last name is required";
+      case "dateOfBirth":
+        if (!value) return "Date of birth is required";
+        const birthDate = new Date(value);
+        const today = new Date();
+        const age = today.getFullYear() - birthDate.getFullYear();
+        return age >= 13 ? null : "Must be at least 13 years old";
+      case "email":
+        return /\S+@\S+\.\S+/.test(value) ? null : "Invalid email address";
+      case "password":
+        return value.length >= 6 ? null : "Password must be at least 6 characters";
+      case "confirmPassword":
+        return value === formData.password ? null : "Passwords do not match";
+      default:
+        return null;
+    }
   }
 
   function handleChange(e) {
-    // ...unchanged...
+    const { name, value, type, checked } = e.target;
+    const fieldValue = type === "checkbox" ? checked : value;
+
+    // Update form data
+    setFormData((prev) => ({
+      ...prev,
+      [name]: fieldValue,
+    }));
+
+    // Validate the changed field (skip validation for preferences)
+    if (!["useMetric", "dateFormat", "timeFormat", "theme"].includes(name)) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: validateField(name, fieldValue),
+      }));
+    }
   }
 
   useEffect(() => {
-    // ...unchanged...
+    // Check if all required fields are valid
+    const requiredFields = ["username", "firstName", "lastName", "dateOfBirth", "email", "password", "confirmPassword"];
+    const allFieldsValid = requiredFields.every(field => {
+      const error = validateField(field, formData[field]);
+      return error === null;
+    });
+    
+    setIsValid(allFieldsValid);
   }, [formData]);
 
-  async function handleSubmit(e) {
+  // Update your handleSubmit function:
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValid) return;
-    // ...unchanged...
-  }
+
+    setSubmitError("");
+    
+    try {
+      // Prepare data - ALWAYS default role to 'user' for frontend signups
+      const signupData = {
+        username: formData.username,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        dateOfBirth: formData.dateOfBirth,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        role: 'user', // ALWAYS 'user' from frontend - cannot be changed by client
+        // User preferences
+        useMetric: formData.useMetric,
+        dateFormat: formData.dateFormat,
+        timeFormat: formData.timeFormat,
+        theme: formData.theme
+      };
+
+      const user = await signUp(signupData);
+      
+      // After successful signup, create a default "Hotel Room" bedroom
+      try {
+        const token = getToken(); // Get the token that was just stored from signup
+        if (token) {
+          const defaultBedroom = {
+            bedroomName: "Hotel Room",
+            temperature: formData.useMetric ? 21 : 70, // 21°C or 70°F
+            lightLevel: 2, // Moderate lighting
+            noiseLevel: 1, // Quiet
+            notes: "Default bedroom - feel free to edit these settings to match your actual sleeping environment"
+          };
+          
+          await bedroomService.createBedroom(defaultBedroom, token);
+        }
+      } catch (bedroomError) {
+        // Don't fail the entire signup if bedroom creation fails
+        console.warn('Failed to create default bedroom:', bedroomError);
+      }
+      
+      setUser(user);
+      if (onSignUpSuccess) onSignUpSuccess();
+    } catch (err) {
+      console.error('Signup error details:', err);
+      
+      if (err.message.includes('500') || err.message.includes('Server error')) {
+        setSubmitError("We're experiencing technical difficulties. Please try again in a moment.");
+      } else if (err.message.includes('email')) {
+        setSubmitError("This email address is already registered. Please use a different email or try logging in.");
+      } else if (err.message.includes('username')) {
+        setSubmitError("This username is already taken. Please choose a different username.");
+      } else {
+        setSubmitError(err.message || "Unable to create account. Please try again.");
+      }
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="signup-form">
@@ -172,18 +274,24 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
 
       <hr className="signup-divider" />
 
-      <div className="form-check mb-2 signup-checkbox-field">
-        <input
-          className="form-check-input signup-checkbox"
-          type="checkbox"
-          name="useMetric"
-          checked={formData.useMetric}
-          onChange={handleChange}
-          id="useMetric"
-        />
-        <label className="form-check-label signup-checkbox-label" htmlFor="useMetric">
-          Use metric units
-        </label>
+      <div className="signup-form-field">
+        {/* Use Metric System */}
+        <div className="signup-checkbox-field">
+          <input
+            type="checkbox"
+            id={`useMetric-${formId}`}
+            name="useMetric"
+            className="signup-checkbox"
+            checked={formData.useMetric}
+            onChange={handleChange}
+          />
+          <label htmlFor={`useMetric-${formId}`} className="signup-checkbox-label">
+            Use Metric System
+            <span className="signup-checkbox-explainer">
+              Temperature in Celsius, weight in kilograms, height in centimeters
+            </span>
+          </label>
+        </div>
       </div>
 
       <div className="signup-field mb-2">

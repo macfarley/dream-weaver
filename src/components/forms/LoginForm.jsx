@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
 import { signIn } from "../../services/authService";
 
@@ -7,12 +8,12 @@ import { signIn } from "../../services/authService";
  * @param {function} onShowSignup - Callback to show the signup form.
  */
 function LoginForm({ onShowSignup }) {
-    // Get setUser from UserContext to update user state after login
     const { setUser } = useContext(UserContext);
+    const navigate = useNavigate();
 
     // State for form fields
     const [formData, setFormData] = useState({
-        email: "",
+        username: "",
         password: "",
     });
 
@@ -32,12 +33,10 @@ function LoginForm({ onShowSignup }) {
      * @returns {string|null} - Error message or null if valid
      */
     const validateField = (name, value) => {
-        if (name === "email") {
-            // Simple email regex validation
-            return /\S+@\S+\.\S+/.test(value) ? null : "Invalid email address";
+        if (name === "username") {
+            return value.length >= 3 ? null : "Username must be at least 3 characters";
         }
         if (name === "password") {
-            // Password must be at least 6 characters
             return value.length >= 6 ? null : "Password must be at least 6 characters";
         }
         return null;
@@ -63,15 +62,15 @@ function LoginForm({ onShowSignup }) {
         }));
 
         // Validate both fields to determine if form is valid
-        let emailValid, passwordValid;
-        if (name === "email") {
-            emailValid = validateField("email", value) === null;
+        let usernameValid, passwordValid;
+        if (name === "username") {
+            usernameValid = validateField("username", value) === null;
             passwordValid = validateField("password", formData.password) === null;
         } else if (name === "password") {
-            emailValid = validateField("email", formData.email) === null;
+            usernameValid = validateField("username", formData.username) === null;
             passwordValid = validateField("password", value) === null;
         }
-        setIsValid(emailValid && passwordValid);
+        setIsValid(usernameValid && passwordValid);
     };
 
     /**
@@ -95,49 +94,51 @@ function LoginForm({ onShowSignup }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="text-start  ">
-            <h4 className="mb-3">Log In</h4>
+        <form onSubmit={handleSubmit} className="login-form">
+            <h4 className="login-form-title">Log In</h4>
 
             {/* Show submit error if present */}
-            {submitError && <div className="alert alert-danger">{submitError}</div>}
+            {submitError && <div className="login-form-error">{submitError}</div>}
 
-            {/* Email Field */}
-            <div className="mb-2">
-                <label className="form-label">Email</label>
+            {/* Username Field */}
+            <div className="login-form-field">
+                <label className="login-label">Username</label>
                 <input
-                    type="email"
-                    className="form-control"
-                    name="email"
-                    value={formData.email}
+                    type="text"
+                    className="login-input"
+                    name="username"
+                    value={formData.username}
                     onChange={handleChange}
+                    autoComplete="username"
                 />
-                {/* Show email validation error */}
-                {errors.email && <div className="text-warning small">{errors.email}</div>}
+                {/* Show username validation error */}
+                {errors.username && <div className="login-error-msg">{errors.username}</div>}
             </div>
 
             {/* Password Field */}
-            <div className="mb-3">
-                <label className="form-label">Password</label>
+            <div className="login-form-field">
+                <label className="login-label">Password</label>
                 <input
                     type="password"
-                    className="form-control"
+                    className="login-input"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    autoComplete="current-password"
                 />
                 {/* Show password validation error */}
-                {errors.password && <div className="text-warning small">{errors.password}</div>}
+                {errors.password && <div className="login-error-msg">{errors.password}</div>}
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className="btn btn-primary w-100" disabled={!isValid}>
+            <button type="submit" className="login-submit w-100" disabled={!isValid}>
                 Log In
             </button>
 
             {/* Link to show signup form */}
-            <div className="text-center mt-3">
-                <button type="button" className="btn btn-link  " onClick={onShowSignup}>
-                    Don’t have an account? Sign Up
+            <div className="login-form-switch">
+                <button type="button" className="login-switch-btn" onClick={onShowSignup}>
+                    Don't have an account? Sign Up
                 </button>
             </div>
         </form>
