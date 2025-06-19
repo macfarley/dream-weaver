@@ -65,13 +65,8 @@ function BedroomForm({ onSuccess, onCancel }) {
         }
 
         try {
-            const token = getToken();
-            if (!token) {
-                throw new Error('Authentication required');
-            }
-
             // Create new bedroom with form data (ownerId is set by backend from token)
-            const newBedroom = await bedroomService.createBedroom(formData, token);
+            const newBedroom = await bedroomService.createBedroom(formData);
             // Notify parent of success
             onSuccess(newBedroom);
         } catch (err) {

@@ -124,7 +124,7 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
             notes: "Default bedroom - feel free to edit these settings to match your actual sleeping environment"
           };
           
-          await bedroomService.createBedroom(defaultBedroom, token);
+          await bedroomService.createBedroom(defaultBedroom);
         }
       } catch (bedroomError) {
         // Don't fail the entire signup if bedroom creation fails

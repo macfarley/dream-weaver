@@ -69,11 +69,12 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
 - ⚛️ **React 18** with Vite for fast development and building
 - 🎨 **Bootstrap 5** + Custom Sass for responsive styling
 - 🧠 **React Context API** for state management (User, Dashboard, Theme contexts)
-- 🔄 **Axios** for HTTP requests and API integration with:
-  - Centralized API configuration with automatic token injection
-  - Consistent error handling across all services
-  - Request/response interceptors for authentication
-  - Standardized service architecture
+- 🔄 **Axios** for **all** HTTP requests and API integration with:
+  - **100% standardized** - all services now use centralized API configuration
+  - Automatic Bearer token injection via request interceptors
+  - Consistent error handling and response patterns across all service modules
+  - Complete elimination of fetch() usage and manual token handling
+  - Unified service method signatures (no token parameters required)
 - 🗺️ **React Router v6** for client-side routing and navigation
 - 📅 **date-fns** for robust date formatting and manipulation
 - 🎯 **Lucide React** for consistent iconography
@@ -95,14 +96,14 @@ src/
 │   └── shared/          # Shared utility components (Loading, ThemeToggle, BigActionButton, etc.)
 ├── contexts/            # React Context providers (User, Dashboard, Theme)
 ├── hooks/               # Custom React hooks
-├── services/            # API service modules with centralized axios configuration
-│   ├── apiConfig.js     # Centralized axios instance with interceptors
+├── services/            # **Fully standardized** API service modules with centralized axios configuration
+│   ├── apiConfig.js     # Centralized axios instance with automatic token injection
 │   ├── authService.js   # Authentication and token management
-│   ├── userService.js   # User profile and preferences
-│   ├── adminService.js  # Admin user management
-│   ├── sleepSessionService.js  # Sleep session tracking
-│   ├── sleepDataService.js     # Sleep history and analytics
-│   └── bedroomService.js       # Bedroom environment management
+│   ├── userService.js   # User profile and preferences (converted to axios)
+│   ├── adminService.js  # Admin user management (converted to axios)
+│   ├── sleepSessionService.js  # Sleep session tracking (converted to axios)
+│   ├── sleepDataService.js     # Sleep history and analytics (converted to axios)
+│   └── bedroomService.js       # Bedroom environment management (converted to axios)
 ├── styles/              # Sass stylesheets and component-specific styles
 ├── assets/              # Static assets (images, logos, wireframes)
 ├── App.jsx              # Main application component with routing
@@ -146,7 +147,12 @@ src/
 - **Admin System**: Role-based access control with protected admin routes, user management interface, and secure deletion with cascade data removal
 - **BigActionButton**: Prominent sleep action component with automatic state detection, consistent across multiple pages (landing, about, unauthorized)
 - **Mobile Navigation**: Enhanced UX with right-aligned slide-out panel, click-outside-to-close, and improved accessibility
-- **API Architecture**: Centralized axios configuration with automatic authentication, consistent error handling, and standardized service patterns
+- **API Architecture**: **Fully standardized axios configuration** with:
+  - Centralized API instance with automatic Bearer token injection via interceptors
+  - Consistent error handling patterns across all service modules
+  - Complete removal of fetch() and manual token handling
+  - Standardized service method signatures (no token parameters needed)
+  - Unified response handling and error propagation
 - **State Management**: User preferences (units, theme, time format) sync between frontend contexts and backend storage
 - **Error Handling**: Comprehensive error boundaries and user-friendly error messages throughout the application  
 - **Accessibility**: Built with ARIA labels, screen reader support, and keyboard navigation standards

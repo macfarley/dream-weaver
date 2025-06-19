@@ -59,12 +59,11 @@ async function getBedrooms() {
  * Legacy alias for getBedrooms function.
  * Maintained for backwards compatibility with existing code.
  * 
- * @param {string} token - JWT authentication token
  * @returns {Promise<Array>} Array of bedroom objects
  * @deprecated Use getBedrooms() instead
  */
-async function getBedroomsByUser(token) {
-  return getBedrooms(token);
+async function getBedroomsByUser() {
+  return getBedrooms();
 }
 
 /**
@@ -72,53 +71,35 @@ async function getBedroomsByUser(token) {
  * Names are matched case-insensitively and URL-encoded for safety.
  * 
  * @param {string} bedroomName - The name of the bedroom to fetch
- * @param {string} token - JWT authentication token
  * @returns {Promise<Object>} Bedroom object
  * @throws {Error} If bedroom not found or user lacks permission
  */
-async function getBedroomByName(bedroomName, token) {
+async function getBedroomByName(bedroomName) {
   // Validate input parameters
   if (!bedroomName || typeof bedroomName !== 'string') {
     throw new Error('Bedroom name is required and must be a string');
-  }
-  
-  if (!token || typeof token !== 'string') {
-    throw new Error('Authentication token is required');
   }
 
   try {
     // URL encode the bedroom name to handle special characters safely
     const encodedName = encodeURIComponent(bedroomName);
     
-    const response = await fetch(`${API_BASE}/bedrooms/by-name/${encodedName}`, {
-      method: 'GET',
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-    });
-    
-    if (response.status === 404) {
-      throw new Error(`Bedroom "${bedroomName}" not found or you don't have permission to access it`);
-    }
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to fetch bedroom: ${response.status} - ${errorText}`);
-    }
-    
-    const bedroomData = await response.json();
+    const response = await api.get(`/bedrooms/by-name/${encodedName}`);
     
     // Basic validation of response structure
-    if (!bedroomData || typeof bedroomData !== 'object') {
+    if (!response.data || typeof response.data !== 'object') {
       throw new Error('Invalid bedroom data received from server');
     }
     
-    return bedroomData;
+    return response.data;
     
   } catch (error) {
+    if (error.response?.status === 404) {
+      throw new Error(`Bedroom "${bedroomName}" not found or you don't have permission to access it`);
+    }
+    
     console.error('Error in getBedroomByName:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch bedroom');
   }
 }
 
@@ -132,11 +113,10 @@ async function getBedroomByName(bedroomName, token) {
  * @param {string} bedroomData.lightLevel - Light level ('pitch black', 'very dim', 'dim', 'normal', 'bright', 'daylight')
  * @param {string} bedroomData.noiseLevel - Noise level ('silent', 'very quiet', 'quiet', 'moderate', 'loud', 'very loud')
  * @param {number} bedroomData.temperature - Temperature in Fahrenheit (50-100)
- * @param {string} token - JWT authentication token
  * @returns {Promise<Object>} Created bedroom object with _id
  * @throws {Error} If validation fails or creation unsuccessful
  */
-async function createBedroom(bedroomData, token) {
+async function createBedroom(bedroomData) {
   // Validate input parameters
   if (!bedroomData || typeof bedroomData !== 'object') {
     throw new Error('Bedroom data is required and must be an object');
@@ -145,78 +125,60 @@ async function createBedroom(bedroomData, token) {
   if (!bedroomData.bedroomName || typeof bedroomData.bedroomName !== 'string') {
     throw new Error('Bedroom name is required and must be a string');
   }
-  
-  if (!token || typeof token !== 'string') {
-    throw new Error('Authentication token is required');
-  }
 
   try {
-    const response = await fetch(`${API_BASE}/bedrooms/new`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(bedroomData),
-    });
-    
-    if (!response.ok) {
-      // Try to extract detailed error message from backend
-      let errorMessage = `Failed to create bedroom (${response.status})`;
-      
-      try {
-        const errorData = await response.json();
-        if (errorData.message) {
-          errorMessage = errorData.message;
-        }
-      } catch (parseError) {
-        // If we can't parse the error response, use the status text
-        errorMessage = `${errorMessage}: ${response.statusText}`;
-      }
-      
-      throw new Error(errorMessage);
-    }
-    
-    const newBedroom = await response.json();
+    const response = await api.post('/bedrooms/new', bedroomData);
     
     // Validate the response contains expected data
-    if (!newBedroom || !newBedroom._id) {
+    if (!response.data || !response.data._id) {
       throw new Error('Invalid response: Created bedroom data is missing or malformed');
     }
     
-    console.info('Successfully created bedroom:', newBedroom.bedroomName);
-    return newBedroom;
+    console.info('Successfully created bedroom:', response.data.bedroomName);
+    return response.data;
     
   } catch (error) {
     console.error('Error in createBedroom:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to create bedroom');
   }
 }
 
-async function updateBedroom(id, data, token) {
-  const res = await fetch(`${API_BASE}/bedrooms/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to update bedroom');
-  return await res.json();
+/**
+ * Updates an existing bedroom.
+ * 
+ * @param {string} id - Bedroom ID
+ * @param {Object} data - Updated bedroom data
+ * @returns {Promise<Object>} Updated bedroom object
+ * @throws {Error} If update fails
+ */
+async function updateBedroom(id, data) {
+  try {
+    const response = await api.put(`/bedrooms/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating bedroom:', error);
+    throw new Error(error.response?.data?.message || 'Failed to update bedroom');
+  }
 }
 
-async function deleteBedroom(id, password, token) {
-  const res = await fetch(`${API_BASE}/bedrooms/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ password }),
-  });
-  if (!res.ok) throw new Error('Failed to delete bedroom');
-  return await res.json();
+/**
+ * Deletes a bedroom (requires password confirmation).
+ * 
+ * @param {string} id - Bedroom ID
+ * @param {string} password - User's password for confirmation
+ * @returns {Promise<Object>} Deletion confirmation
+ * @throws {Error} If deletion fails
+ */
+async function deleteBedroom(id, password) {
+  try {
+    const response = await api.delete(`/bedrooms/${id}`, {
+      data: { password }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting bedroom:', error);
+    throw new Error(error.response?.data?.message || 'Failed to delete bedroom');
+  }
 }
 
 export { getBedrooms, getBedroomsByUser, getBedroomByName, createBedroom, updateBedroom, deleteBedroom };

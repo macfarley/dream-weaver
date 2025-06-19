@@ -45,7 +45,7 @@ function BedroomDetails() {
 
                 // If not found, fetch from API
                 if (!room) {
-                    room = await bedroomService.getBedroomByName(decodedBedroomName, token);
+                    room = await bedroomService.getBedroomByName(decodedBedroomName);
                 }
 
                 setBedroom(room);
@@ -88,13 +88,7 @@ function BedroomDetails() {
     const handleSubmit = async e => {
         e.preventDefault();
         try {
-            const token = getToken();
-            if (!token) {
-                alert('Authentication required. Please log in.');
-                return;
-            }
-            
-            await bedroomService.updateBedroom(bedroom._id, formData, token);
+            await bedroomService.updateBedroom(bedroom._id, formData);
             setIsEditing(false);
             refreshDashboard?.();
         } catch (err) {
@@ -118,13 +112,7 @@ function BedroomDetails() {
         }
 
         try {
-            const token = getToken();
-            if (!token) {
-                alert('Authentication required');
-                return;
-            }
-            
-            await bedroomService.deleteBedroom(bedroom._id, deletePassword, token);
+            await bedroomService.deleteBedroom(bedroom._id, deletePassword);
             refreshDashboard?.();
             navigate('/users/dashboard');
         } catch (err) {
