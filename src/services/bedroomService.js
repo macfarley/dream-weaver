@@ -51,13 +51,23 @@ async function getBedrooms(token) {
     
     const bedroomsData = await response.json();
     
-    // Validate response structure
-    if (!Array.isArray(bedroomsData)) {
-      console.warn('Expected array of bedrooms, got:', typeof bedroomsData);
+    // Log the actual response for debugging
+    console.log('Bedrooms API response:', bedroomsData);
+    
+    // Check if response has a data property (common API pattern)
+    let bedroomArray;
+    if (Array.isArray(bedroomsData)) {
+      bedroomArray = bedroomsData;
+    } else if (bedroomsData && Array.isArray(bedroomsData.data)) {
+      bedroomArray = bedroomsData.data;
+    } else if (bedroomsData && Array.isArray(bedroomsData.bedrooms)) {
+      bedroomArray = bedroomsData.bedrooms;
+    } else {
+      console.warn('Expected array of bedrooms, got:', typeof bedroomsData, bedroomsData);
       return [];
     }
     
-    return bedroomsData;
+    return bedroomArray;
     
   } catch (error) {
     console.error('Error in getBedrooms:', error);
