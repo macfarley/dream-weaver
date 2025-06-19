@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
 import { DashboardContext } from "../../contexts/DashboardContext";
@@ -44,6 +44,48 @@ function Navbar() {
   // Hook for programmatic navigation (redirects, back button, etc.)
   const navigate = useNavigate();
 
+  // Mobile menu state
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navbarRef = useRef(null);
+  const collapseRef = useRef(null);
+
+  // Handle click outside to close mobile menu
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        isMobileMenuOpen &&
+        navbarRef.current &&
+        !navbarRef.current.contains(event.target)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+
+    // Handle escape key to close mobile menu
+    function handleEscapeKey(event) {
+      if (event.key === 'Escape' && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+
+    // Add event listeners
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    document.addEventListener('keydown', handleEscapeKey);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isMobileMenuOpen]);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [navigate]);
+
   // Show loading spinner while dashboard data is being fetched or context is not ready
   if (!dashboardCtx || dashboardCtx.loading) {
     return <Loading message="Loading navigation..." />;
@@ -88,8 +130,23 @@ function Navbar() {
     navigate(-1);
   };
 
+  /**
+   * Toggles the mobile menu open/closed state
+   */
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  /**
+   * Closes the mobile menu (used when clicking nav links)
+   */
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <nav
+      ref={navbarRef}
       className="navbar navbar-expand-lg px-3 custom-navbar"
       role="navigation"
       aria-label="Main navigation"
@@ -142,29 +199,42 @@ function Navbar() {
       <button
         className="navbar-toggler custom-navbar-toggler"
         type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarContent"
+        onClick={toggleMobileMenu}
         aria-controls="navbarContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation menu"
+        aria-expanded={isMobileMenuOpen}
+        aria-label={isMobileMenuOpen ? "Close navigation menu" : "Toggle navigation menu"}
       >
         <span className="navbar-toggler-icon" />
       </button>
 
       {/* Collapsible navigation menu */}
-      <div className="collapse navbar-collapse" id="navbarContent">
+      <div 
+        className={`collapse navbar-collapse ${isMobileMenuOpen ? 'show' : ''}`} 
+        id="navbarContent"
+        ref={collapseRef}
+      >
         <ul className="navbar-nav ms-auto custom-navbar-nav">
           
           {/* Navigation for unauthenticated users */}
           {!user && (
             <>
               <li className="nav-item custom-nav-item">
-                <Link className="nav-link" to="/about" title="Learn about DreamWeaver">
+                <Link 
+                  className="nav-link" 
+                  to="/about" 
+                  title="Learn about DreamWeaver"
+                  onClick={closeMobileMenu}
+                >
                   About
                 </Link>
               </li>
               <li className="nav-item custom-nav-item">
-                <Link className="nav-link" to="/join" title="Sign up or log in">
+                <Link 
+                  className="nav-link" 
+                  to="/join" 
+                  title="Sign up or log in"
+                  onClick={closeMobileMenu}
+                >
                   Join Us
                 </Link>
               </li>
@@ -183,6 +253,7 @@ function Navbar() {
                     to="/gotobed/wakeup"
                     title="Wake up from current sleep session"
                     aria-label="Wake up - you have an active sleep session"
+                    onClick={closeMobileMenu}
                   >
                     ⏰ Wake Up
                   </Link>
@@ -193,6 +264,7 @@ function Navbar() {
                     to="/gotobed"
                     title="Start a new sleep session"
                     aria-label="Go to bed - start tracking your sleep"
+                    onClick={closeMobileMenu}
                   >
                     🌙 Go To Bed
                   </Link>
@@ -201,27 +273,52 @@ function Navbar() {
 
               {/* Main dashboard navigation links */}
               <li className="nav-item custom-nav-item">
-                <Link className="nav-link" to="/dashboard" title="View your dashboard">
+                <Link 
+                  className="nav-link" 
+                  to="/dashboard" 
+                  title="View your dashboard"
+                  onClick={closeMobileMenu}
+                >
                   Dashboard
                 </Link>
               </li>
               <li className="nav-item custom-nav-item">
-                <Link className="nav-link" to="/journal" title="View your dream journal">
+                <Link 
+                  className="nav-link" 
+                  to="/journal" 
+                  title="View your dream journal"
+                  onClick={closeMobileMenu}
+                >
                   Dream Journal
                 </Link>
               </li>
               <li className="nav-item custom-nav-item">
-                <Link className="nav-link" to="/sleep" title="View your sleep history">
+                <Link 
+                  className="nav-link" 
+                  to="/sleep" 
+                  title="View your sleep history"
+                  onClick={closeMobileMenu}
+                >
                   Sleep History
                 </Link>
               </li>
               <li className="nav-item custom-nav-item">
-                <Link className="nav-link" to="/bedrooms" title="Manage your bedrooms">
+                <Link 
+                  className="nav-link" 
+                  to="/bedrooms" 
+                  title="Manage your bedrooms"
+                  onClick={closeMobileMenu}
+                >
                   Bedrooms
                 </Link>
               </li>
               <li className="nav-item custom-nav-item">
-                <Link className="nav-link" to="/profile" title="Edit your profile">
+                <Link 
+                  className="nav-link" 
+                  to="/profile" 
+                  title="Edit your profile"
+                  onClick={closeMobileMenu}
+                >
                   Profile
                 </Link>
               </li>
@@ -234,6 +331,7 @@ function Navbar() {
                     to="/admin/dashboard"
                     title="Admin dashboard"
                     aria-label="Admin dashboard - administrative functions"
+                    onClick={closeMobileMenu}
                   >
                     <i className="fas fa-cog me-1"></i>
                     Admin Dashboard
@@ -245,7 +343,10 @@ function Navbar() {
               <li className="nav-item custom-nav-item">
                 <button
                   className="nav-link btn btn-link text-danger"
-                  onClick={handleLogout}
+                  onClick={() => {
+                    closeMobileMenu();
+                    handleLogout();
+                  }}
                   title="Log out of your account"
                   aria-label="Log out"
                 >
