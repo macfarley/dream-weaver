@@ -1,6 +1,6 @@
 # 🌙 DreamWeaver Frontend 😴
 
-![DreamWeaver Logo](./public/logo.png)
+![DreamWeaver Logo](./Public/DW-Logo.png)
 
 > *Mindful sleep, made digital.*
 
@@ -40,7 +40,13 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
 - 📊 **Sleep Analytics** - View sleep history, patterns, and quality assessments over time
 - ⚙️ **User Preferences** - Customizable settings for units (metric/imperial), time format (12/24 hour), and dark/light themes
 - 🧭 **Intuitive Navigation** - Semantic routing with breadcrumbs, back navigation, and user-friendly URLs
-- 🛡️ **Admin Controls** - Administrative dashboard for user management (admin users only)
+- 🛡️ **Admin Dashboard** - Comprehensive administrative interface featuring:
+  - Role-based user management (admins listed first, then users alphabetically)
+  - Individual user profile editing and management
+  - Secure user deletion with admin password confirmation and cascade data removal
+  - Mobile-friendly dual-mode user profile editing (self-edit vs admin-edit)
+  - Permission-based restrictions (cannot edit other admins, delete admin accounts, or delete self)
+  - Protected admin routes with proper authentication and authorization
 - ♿ **Accessibility Features** - Screen reader support, ARIA labels, and keyboard navigation
 
 ---
@@ -72,13 +78,13 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
 src/
 ├── components/           # Reusable UI components
 │   ├── dashboard/       # Dashboard-specific components
-│   ├── forms/           # Form components (Login, Signup, etc.)
+│   ├── forms/           # Form components (Login, Signup, UserProfile, etc.)
 │   ├── layout/          # Layout components (NavBar, Footer)
-│   ├── admin/           # Admin-only components
-│   └── shared/          # Shared utility components
+│   ├── admin/           # Admin-only components (AdminDashboard, AdminUserProfile, AdminOnlyRoute)
+│   └── shared/          # Shared utility components (Loading, ThemeToggle, etc.)
 ├── contexts/            # React Context providers (User, Dashboard, Theme)
 ├── hooks/               # Custom React hooks
-├── services/            # API service modules (auth, user, bedroom, sleep)
+├── services/            # API service modules (auth, user, admin, bedroom, sleep)
 ├── styles/              # Sass stylesheets and component-specific styles
 ├── assets/              # Static assets (images, logos, wireframes)
 ├── App.jsx              # Main application component with routing
@@ -119,12 +125,13 @@ src/
 ## 👩‍💻 Developer Notes
 
 - **Authentication**: All protected routes require JWT token validation through the backend API
+- **Admin System**: Role-based access control with protected admin routes, user management interface, and secure deletion with cascade data removal
 - **State Management**: User preferences (units, theme, time format) sync between frontend contexts and backend storage
 - **Error Handling**: Comprehensive error boundaries and user-friendly error messages throughout the application  
 - **Accessibility**: Built with ARIA labels, screen reader support, and keyboard navigation standards
-- **API Integration**: RESTful API communication with robust error handling and input validation
+- **API Integration**: RESTful API communication with robust error handling and input validation, including dedicated admin endpoints
 - **Code Quality**: Extensive JSDoc documentation, consistent code patterns, and comprehensive commenting
-- **Security**: Input sanitization, token-based authentication, and role-based access controls
+- **Security**: Input sanitization, token-based authentication, role-based access controls, and admin password confirmation for destructive operations
 - **Performance**: Optimized builds, lazy loading, and efficient state management
 - **Responsive Design**: Mobile-first approach with Bootstrap grid system and custom breakpoints
 
