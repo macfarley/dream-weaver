@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { getToken } from '../../services/authService';
 import * as bedroomService from '../../services/bedroomService';
+import { validateBedroomName } from '../../utils/urlSafeNames';
 
 /**
  * BedroomForm component allows users to add a new bedroom with various attributes.
+ * Includes validation to ensure bedroom names are safe for URLs and user-friendly.
+ * 
  * @param {function} onSuccess - Callback when bedroom is successfully created.
  * @param {function} onCancel - Callback when the form is cancelled.
  */
@@ -23,10 +26,12 @@ function BedroomForm({ onSuccess, onCancel }) {
     // Loading and error state
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [nameValidation, setNameValidation] = useState({ isValid: true });
 
     /**
      * Handles changes to any form input.
      * Updates the corresponding value in formData state.
+     * Validates bedroom name in real-time.
      */
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -34,16 +39,30 @@ function BedroomForm({ onSuccess, onCancel }) {
             ...prev,
             [name]: value,
         }));
+
+        // Validate bedroom name in real-time
+        if (name === 'bedroomName') {
+            const validation = validateBedroomName(value);
+            setNameValidation(validation);
+        }
     };
 
     /**
      * Handles form submission.
-     * Calls bedroomService.createBedroom and notifies parent on success.
+     * Validates bedroom name before calling bedroomService.createBedroom.
      */
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        // Final validation check
+        const validation = validateBedroomName(formData.bedroomName);
+        if (!validation.isValid) {
+            setError(validation.error);
+            setLoading(false);
+            return;
+        }
 
         try {
             const token = getToken();
@@ -78,11 +97,21 @@ function BedroomForm({ onSuccess, onCancel }) {
                 <input
                     name="bedroomName"
                     type="text"
-                    className="form-control"
+                    className={`form-control ${!nameValidation.isValid ? 'is-invalid' : ''}`}
                     value={formData.bedroomName}
                     onChange={handleChange}
                     required
+                    maxLength="50"
+                    placeholder="e.g., Master Bedroom, Guest Room"
                 />
+                {!nameValidation.isValid && (
+                    <div className="invalid-feedback">
+                        {nameValidation.error}
+                    </div>
+                )}
+                <div className="form-text">
+                    Choose a name that's easy to remember and unique (max 50 characters)
+                </div>
             </div>
 
             {/* Bed Type Selection */}
@@ -210,7 +239,7 @@ function BedroomForm({ onSuccess, onCancel }) {
                 <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={loading || !formData.bedroomName}
+                    disabled={loading || !formData.bedroomName || !nameValidation.isValid}
                 >
                     {loading ? 'Saving...' : 'Add Bedroom'}
                 </button>

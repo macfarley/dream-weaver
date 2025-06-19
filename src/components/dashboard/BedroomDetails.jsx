@@ -5,6 +5,7 @@ import { getToken } from '../../services/authService';
 import * as bedroomService from '../../services/bedroomService';
 import sleepDataService from '../../services/sleepDataService';
 import { format } from 'date-fns';
+import { decodeBedroomNameFromUrl, bedroomNamesMatch } from '../../utils/urlSafeNames';
 
 // Main BedroomDetails component
 function BedroomDetails() {
@@ -34,14 +35,17 @@ function BedroomDetails() {
                     return;
                 }
 
-                // Try to find the bedroom in dashboard context first
+                // Safely decode the bedroom name from URL
+                const decodedBedroomName = decodeBedroomNameFromUrl(bedroomname);
+
+                // Try to find the bedroom in dashboard context first using safe comparison
                 let room = dashboardData?.bedrooms?.find(
-                    b => b.bedroomName.toLowerCase() === decodeURIComponent(bedroomname).toLowerCase()
+                    b => bedroomNamesMatch(b.bedroomName, decodedBedroomName)
                 );
 
                 // If not found, fetch from API
                 if (!room) {
-                    room = await bedroomService.getBedroomByName(decodeURIComponent(bedroomname), token);
+                    room = await bedroomService.getBedroomByName(decodedBedroomName, token);
                 }
 
                 setBedroom(room);

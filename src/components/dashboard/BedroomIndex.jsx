@@ -4,6 +4,7 @@ import * as bedroomService from '../../services/bedroomService';
 import { getToken } from '../../services/authService';
 import { Link, useNavigate } from 'react-router-dom';
 import BedroomForm from '../forms/BedroomForm';
+import { sanitizeBedroomNameForUrl } from '../../utils/urlSafeNames';
 
 const BedroomIndex = () => {
   const { dashboardData, loading, error, refreshDashboard } = useContext(DashboardContext);
@@ -170,9 +171,9 @@ const BedroomIndex = () => {
                   {expandedIds.has(bedroom._id) ? 'Hide Usage' : 'Show Usage'}
                 </button>
                 {' '}
-                {/* Using bedroomName in URL - URL encode it to be safe */}
+                {/* Using safe URL encoding for bedroom names */}
                 <Link
-                  to={`/users/dashboard/bedrooms/${encodeURIComponent(bedroom.bedroomName)}`}
+                  to={`/users/dashboard/bedrooms/${sanitizeBedroomNameForUrl(bedroom.bedroomName)}`}
                   className="btn btn-primary btn-sm"
                   aria-label={`View details for ${bedroom.bedroomName}`}
                 >
