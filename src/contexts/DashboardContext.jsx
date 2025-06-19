@@ -160,6 +160,14 @@ useEffect(() => {
   if (user && user._id) {
     fetchDashboardData();
   } else {
+    // Clear dashboard data when user logs out
+    setDashboardData({
+      profile: null,
+      bedrooms: [],
+      latestSleepData: null,
+      latestDreamLog: null,
+    });
+    setError(null);
     setLoading(false); // Prevents infinite spinner if no user
   }
 }, [user]);
