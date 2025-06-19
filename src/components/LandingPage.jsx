@@ -1,16 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../contexts/UserContext";
 import logo from "../assets/dream-weaver-logo.png";
 import { Bed, BarChart2, PenTool } from "lucide-react";
 import SignupForm from "../components/forms/SignupForm.jsx";
 import LoginForm from "../components/forms/LoginForm.jsx";
+import BigActionButton from "./shared/BigActionButton";
 
 /**
  * LandingPage component serves as the main entry point for new and returning users.
  *
  * Features:
  * - Welcome message and app overview with feature cards
- * - Smart "Start Tracking" button that detects if user is already logged in
+ * - Smart action button that shows BigActionButton for logged-in users
+ * - Shows "Start Tracking" button for non-authenticated users
  * - Conditional display of signup/login forms based on user interaction
  * - Responsive design with mobile-specific form positioning
  * - Handles successful signup/login by redirecting to dashboard
@@ -21,16 +24,15 @@ import LoginForm from "../components/forms/LoginForm.jsx";
  * - These are mutually exclusive (only one can be true at a time)
  */
 function LandingPage() {
+  // Get user authentication state from context
+  const { user } = useContext(UserContext);
+  
   // State for controlling which authentication form is displayed
   const [showSignup, setShowSignup] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
   // Navigation hook for programmatic routing
   const navigate = useNavigate();
-
-  // Check if user is already authenticated by looking for stored token
-  const existingToken = localStorage.getItem("token");
-  const isUserLoggedIn = !!existingToken; // Convert to boolean for clarity
 
   /**
    * Handles successful user signup by hiding forms and navigating to dashboard.
@@ -48,21 +50,13 @@ function LandingPage() {
   };
 
   /**
-   * Handles the main "Start Tracking Your Sleep" button click.
-   *
-   * Logic:
-   * - If user is already logged in (has token), go directly to dashboard
-   * - If user is not logged in, show signup form to get them started
+   * Handles the main "Start Tracking Your Sleep" button click for non-authenticated users.
+   * For authenticated users, the BigActionButton handles navigation directly.
    */
   function handleStartClick() {
-    if (isUserLoggedIn) {
-      // User is already authenticated, take them to their dashboard
-      navigate("/dashboard");
-    } else {
-      // User needs to create account first, show signup form
-      setShowSignup(true);
-      setShowLogin(false); // Ensure login form is hidden
-    }
+    // Show signup form to get new users started
+    setShowSignup(true);
+    setShowLogin(false); // Ensure login form is hidden
   }
 
   /**
@@ -92,15 +86,21 @@ function LandingPage() {
       <h1 className="display-4 fw-bold mb-2">Welcome to dreamWeaver</h1>
       <p className="lead mb-4">Track your sleep. Record your dreams. Design your nights.</p>
 
-      {/* Primary call-to-action button */}
-      <button
-        className="btn btn-primary btn-lg mb-3"
-        onClick={handleStartClick}
-        type="button"
-        aria-label={isUserLoggedIn ? "Go to dashboard" : "Sign up to start tracking"}
-      >
-        Start Tracking Your Sleep
-      </button>
+      {/* Primary call-to-action - BigActionButton for logged-in users, regular button for guests */}
+      {user ? (
+        <div className="mb-5">
+          <BigActionButton size="large" />
+        </div>
+      ) : (
+        <button
+          className="btn btn-primary btn-lg mb-3"
+          onClick={handleStartClick}
+          type="button"
+          aria-label="Sign up to start tracking"
+        >
+          Start Tracking Your Sleep
+        </button>
+      )}
 
       {/* Main content area with feature cards and authentication forms */}
       <div className="content-wrapper d-flex w-100 justify-content-center align-items-start gap-4">

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
-import { DashboardContext } from '../contexts/DashboardContext';
+import BigActionButton from './shared/BigActionButton';
 
 /**
  * About component displays information about the DreamWeaver app,
@@ -11,16 +11,6 @@ import { DashboardContext } from '../contexts/DashboardContext';
 function About() {
     // Get user authentication state
     const { user } = useContext(UserContext);
-
-    // Get dashboard data (for sleep session state)
-    const { dashboardData } = useContext(DashboardContext);
-
-    // Determine if the user has an active sleep session (no wakeUps means still sleeping)
-    const hasActiveSleep =
-        dashboardData &&
-        dashboardData.latestSleepData &&
-        Array.isArray(dashboardData.latestSleepData.wakeUps) &&
-        dashboardData.latestSleepData.wakeUps.length === 0;
 
     return (
         <div className="container my-4">
@@ -114,13 +104,8 @@ function About() {
                 <>
                     <h3 className="mt-4">You're Signed In</h3>
                     <p>Ready for sleep? Head to your dashboard or use the quick action below.</p>
-                    <div className="text-center">
-                        <Link
-                            className={`btn btn-lg ${hasActiveSleep ? 'btn-success' : 'btn-info'}`}
-                            to={hasActiveSleep ? '/gotobed/wakeup' : '/gotobed'}
-                        >
-                            {hasActiveSleep ? 'Wake Up' : 'Go To Bed'}
-                        </Link>
+                    <div className="d-flex justify-content-center my-4">
+                        <BigActionButton size="medium" />
                     </div>
                 </>
             ) : (

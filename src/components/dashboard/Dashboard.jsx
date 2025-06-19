@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import { UserContext } from '../../contexts/UserContext';
 import DashboardBox from './DashboardBox';
+import BigActionButton from '../shared/BigActionButton';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -94,6 +95,13 @@ function Dashboard() {
   // Main dashboard layout
   return (
     <div className="container py-4">
+      {/* Big Action Button - Main CTA */}
+      <div className="row mb-5">
+        <div className="col-12 text-center">
+          <BigActionButton size="large" />
+        </div>
+      </div>
+
       <div className="row g-4">
         {/* Profile Box */}
         <div className="col-md-6">

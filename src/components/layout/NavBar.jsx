@@ -339,6 +339,18 @@ function Navbar() {
                 </li>
               )}
 
+              {/* Home link */}
+              <li className="nav-item custom-nav-item">
+                <Link 
+                  className="nav-link" 
+                  to="/" 
+                  title="Go to home page"
+                  onClick={closeMobileMenu}
+                >
+                  Home
+                </Link>
+              </li>
+
               {/* Logout action */}
               <li className="nav-item custom-nav-item">
                 <button
