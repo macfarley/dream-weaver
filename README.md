@@ -35,11 +35,18 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
   - Recent sleep sessions and dream journal entries
   - Quick access to all major app functions
 - 🌛 **Sleep Tracking** - One-click "Go To Bed" and "Wake Up" with session logging
+- 🎯 **BigActionButton** - Prominent Shazam-style circular button with:
+  - Context-aware functionality (Go to Bed vs Wake Up based on current sleep state)
+  - DreamWeaver logo integration with pulse animations
+  - Consistent placement across landing page, about page, and error pages
+  - Theme-aware styling and responsive design
 - 📓 **Dream Journaling** - Capture thoughts, dreams, and reflections organized by sleep session
 - 🛏️ **Smart Bedroom Management** - Track environmental factors (light, noise, temperature) across multiple sleeping spaces
 - 📊 **Sleep Analytics** - View sleep history, patterns, and quality assessments over time
 - ⚙️ **User Preferences** - Customizable settings for units (metric/imperial), time format (12/24 hour), and dark/light themes
 - 🧭 **Intuitive Navigation** - Semantic routing with breadcrumbs, back navigation, and user-friendly URLs
+- 📱 **Enhanced Mobile UX** - Right-aligned slide-out navigation panel (50-60% screen width) with improved accessibility
+- 🎨 **BigActionButton Component** - Reusable prominent action button with automatic sleep state detection and consistent theming
 - 🛡️ **Admin Dashboard** - Comprehensive administrative interface featuring:
   - Role-based user management (admins listed first, then users alphabetically)
   - Individual user profile editing and management
@@ -62,7 +69,11 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
 - ⚛️ **React 18** with Vite for fast development and building
 - 🎨 **Bootstrap 5** + Custom Sass for responsive styling
 - 🧠 **React Context API** for state management (User, Dashboard, Theme contexts)
-- 🔄 **Axios** for HTTP requests and API integration
+- 🔄 **Axios** for HTTP requests and API integration with:
+  - Centralized API configuration with automatic token injection
+  - Consistent error handling across all services
+  - Request/response interceptors for authentication
+  - Standardized service architecture
 - 🗺️ **React Router v6** for client-side routing and navigation
 - 📅 **date-fns** for robust date formatting and manipulation
 - 🎯 **Lucide React** for consistent iconography
@@ -81,10 +92,17 @@ src/
 │   ├── forms/           # Form components (Login, Signup, UserProfile, etc.)
 │   ├── layout/          # Layout components (NavBar, Footer)
 │   ├── admin/           # Admin-only components (AdminDashboard, AdminUserProfile, AdminOnlyRoute)
-│   └── shared/          # Shared utility components (Loading, ThemeToggle, etc.)
+│   └── shared/          # Shared utility components (Loading, ThemeToggle, BigActionButton, etc.)
 ├── contexts/            # React Context providers (User, Dashboard, Theme)
 ├── hooks/               # Custom React hooks
-├── services/            # API service modules (auth, user, admin, bedroom, sleep)
+├── services/            # API service modules with centralized axios configuration
+│   ├── apiConfig.js     # Centralized axios instance with interceptors
+│   ├── authService.js   # Authentication and token management
+│   ├── userService.js   # User profile and preferences
+│   ├── adminService.js  # Admin user management
+│   ├── sleepSessionService.js  # Sleep session tracking
+│   ├── sleepDataService.js     # Sleep history and analytics
+│   └── bedroomService.js       # Bedroom environment management
 ├── styles/              # Sass stylesheets and component-specific styles
 ├── assets/              # Static assets (images, logos, wireframes)
 ├── App.jsx              # Main application component with routing
@@ -126,6 +144,9 @@ src/
 
 - **Authentication**: All protected routes require JWT token validation through the backend API
 - **Admin System**: Role-based access control with protected admin routes, user management interface, and secure deletion with cascade data removal
+- **BigActionButton**: Prominent sleep action component with automatic state detection, consistent across multiple pages (landing, about, unauthorized)
+- **Mobile Navigation**: Enhanced UX with right-aligned slide-out panel, click-outside-to-close, and improved accessibility
+- **API Architecture**: Centralized axios configuration with automatic authentication, consistent error handling, and standardized service patterns
 - **State Management**: User preferences (units, theme, time format) sync between frontend contexts and backend storage
 - **Error Handling**: Comprehensive error boundaries and user-friendly error messages throughout the application  
 - **Accessibility**: Built with ARIA labels, screen reader support, and keyboard navigation standards

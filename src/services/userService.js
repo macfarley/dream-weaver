@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from './apiConfig.js';
 
 /**
  * User Service Module
@@ -10,16 +10,10 @@ import axios from 'axios';
  * - User authentication state utilities
  * 
  * API Configuration:
- * - Uses base URL from environment variable VITE_BACK_END_SERVER_URL
+ * - Uses centralized axios instance from apiConfig.js
+ * - Automatic Bearer token authentication via interceptors
  * - Includes credentials for cookie-based authentication
- * - Uses Bearer token authentication for protected routes
  */
-
-// Create an Axios instance with base configuration
-const api = axios.create({
-  baseURL: import.meta.env.VITE_BACK_END_SERVER_URL || '',
-  withCredentials: true, // Allows cookies for authentication
-});
 
 // ====================
 // Current User Profile Operations
@@ -36,21 +30,9 @@ const api = axios.create({
  * Response includes: username, firstName, lastName, email, preferences, etc.
  */
 async function getProfile() {
-  // Get authentication token from localStorage
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
-    throw new Error('No authentication token found. Please log in.');
-  }
-
+  // Authentication token handled automatically by interceptor
   try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACK_END_SERVER_URL}/users/profile`,
-      { 
-        headers: { Authorization: `Bearer ${token}` } 
-      }
-    );
-    
+    const response = await api.get('/users/profile');
     return response.data;
   } catch (error) {
     // Provide more specific error messages based on response status

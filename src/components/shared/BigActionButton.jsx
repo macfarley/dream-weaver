@@ -41,6 +41,12 @@ function BigActionButton({
     Array.isArray(dashboardData.latestSleepData.wakeUps) &&
     dashboardData.latestSleepData.wakeUps.length === 0;
 
+  // Debug logging
+  console.log('BigActionButton - Dashboard data:', dashboardData);
+  console.log('BigActionButton - Latest sleep data:', dashboardData?.latestSleepData);
+  console.log('BigActionButton - Wake ups:', dashboardData?.latestSleepData?.wakeUps);
+  console.log('BigActionButton - Has active sleep:', hasActiveSleep);
+
   // Configure button based on sleep state
   const buttonConfig = hasActiveSleep
     ? {

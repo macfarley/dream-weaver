@@ -16,8 +16,7 @@
  * - Base64 atob() for JWT decoding
  */
 
-// Base URL for all authentication API endpoints
-const BASE_URL = `${import.meta.env.VITE_BACK_END_SERVER_URL}/auth`;
+import api from './apiConfig.js';
 
 /**
  * Safely decodes a JWT token payload without verification.
@@ -66,24 +65,12 @@ function logOut() {
  * Processes the response, stores the token if present, and returns decoded user data.
  * Throws descriptive errors for various failure scenarios.
  * 
- * @param {Response} res - The fetch API response object
+ * @param {Object} response - The axios response object
  * @returns {Promise<Object>} Decoded user data from the JWT token
  * @throws {Error} With user-friendly error messages
  */
-async function handleAuthResponse(res) {
-  let data;
-  
-  try {
-    data = await res.json();
-  } catch (parseError) {
-    throw new Error('Server response was not valid JSON. Please try again.');
-  }
-  
-  // Handle HTTP error status codes
-  if (!res.ok) {
-    const errorMessage = data.err || data.message || `Server error (${res.status})`;
-    throw new Error(errorMessage);
-  }
+async function handleAuthResponse(response) {
+  const data = response.data;
   
   // Handle application-level errors in successful HTTP responses
   if (data.err) {
@@ -127,22 +114,23 @@ async function handleAuthResponse(res) {
  */
 async function signUp(formData) {
   try {
-    const res = await fetch(`${BASE_URL}/sign-up`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-    
-    return await handleAuthResponse(res);
+    const response = await api.post('/auth/sign-up', formData);
+    return await handleAuthResponse(response);
   } catch (err) {
     console.error('SignUp service error:', err);
     
-    // Re-throw with context for better debugging
-    if (err.message.includes('fetch')) {
+    // Handle axios errors
+    if (err.response) {
+      // Server responded with error status
+      const errorMessage = err.response.data?.err || err.response.data?.message || `Server error (${err.response.status})`;
+      throw new Error(errorMessage);
+    } else if (err.request) {
+      // Network error
       throw new Error('Network error - please check your connection and try again');
+    } else {
+      // Other error
+      throw new Error(err.message || 'An unexpected error occurred');
     }
-    
-    throw err;
   }
 }
 
@@ -158,22 +146,23 @@ async function signUp(formData) {
  */
 async function signIn(formData) {
   try {
-    const res = await fetch(`${BASE_URL}/sign-in`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-    
-    return await handleAuthResponse(res);
+    const response = await api.post('/auth/sign-in', formData);
+    return await handleAuthResponse(response);
   } catch (err) {
     console.error('SignIn service error:', err);
     
-    // Re-throw with context for better debugging
-    if (err.message.includes('fetch')) {
+    // Handle axios errors
+    if (err.response) {
+      // Server responded with error status
+      const errorMessage = err.response.data?.err || err.response.data?.message || `Server error (${err.response.status})`;
+      throw new Error(errorMessage);
+    } else if (err.request) {
+      // Network error
       throw new Error('Network error - please check your connection and try again');
+    } else {
+      // Other error
+      throw new Error(err.message || 'An unexpected error occurred');
     }
-    
-    throw err;
   }
 }
 

@@ -4,7 +4,6 @@ import { UserContext } from '../../contexts/UserContext';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import * as bedroomService from '../../services/bedroomService';
 import sleepSessionService from '../../services/sleepSessionService';
-import { getToken } from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -127,14 +126,8 @@ function GoToBed() {
             setError(''); // Clear previous errors
 
             // Get JWT token for authentication
-            const token = getToken();
-            if (!token) {
-                setError('Authentication required. Please log in.');
-                return;
-            }
-
-            // Start sleep session using the service
-            const newSleepSession = await sleepSessionService.startSleepSession(sleepData, token);
+            // Start sleep session using the service (token handled by interceptor)
+            const newSleepSession = await sleepSessionService.startSleepSession(sleepData);
 
             // Optionally refresh dashboard data
             refreshDashboard?.();

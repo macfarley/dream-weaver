@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import sleepSessionService from '../../services/sleepSessionService';
-import { getToken } from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
 
 function WakeUpForm() {
@@ -10,7 +9,7 @@ function WakeUpForm() {
     const { user } = useContext(UserContext);
 
     // Get the dashboard refresh function from context (if available)
-    const { refreshDashboard } = useContext(DashboardContext) || {};
+    const { refreshDashboard, dashboardData } = useContext(DashboardContext) || {};
 
     // For navigation after form submission
     const navigate = useNavigate();
@@ -30,32 +29,29 @@ function WakeUpForm() {
     // State for error messages
     const [error, setError] = useState('');
 
-    // Fetch the most recent unfinished sleep session when the user changes
+    // Get the current sleep session from dashboard context
     useEffect(() => {
-        const fetchCurrentSleepData = async () => {
-            try {
-                // Get the auth token from local storage
-                const token = localStorage.getItem('token');
-
-                // Request the current sleep session from the backend
-                const res = await axios.get(`${API_BASE}/gotobed/current`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                // Save the sleep session data to state
-                setSleepData(res.data);
-            } catch (err) {
-                // If no session is found or there's an error, show a message
-                console.error('No active sleep session found:', err);
-                setError('No current sleep session available.');
+        console.log('WakeUpForm - Dashboard data:', dashboardData);
+        console.log('WakeUpForm - Latest sleep data:', dashboardData?.latestSleepData);
+        
+        if (dashboardData?.latestSleepData) {
+            // Check if the latest sleep session has no wake-ups (meaning it's still active)
+            const isActiveSleep = Array.isArray(dashboardData.latestSleepData.wakeUps) && 
+                                 dashboardData.latestSleepData.wakeUps.length === 0;
+            
+            console.log('WakeUpForm - Is active sleep:', isActiveSleep);
+            console.log('WakeUpForm - Wake ups array:', dashboardData.latestSleepData.wakeUps);
+            
+            if (isActiveSleep) {
+                setSleepData(dashboardData.latestSleepData);
+                setError(''); // Clear any previous errors
+            } else {
+                setError('No active sleep session found. Please start a new sleep session first.');
             }
-        };
-
-        // Only fetch if the user is logged in
-        if (user?._id) fetchCurrentSleepData();
-    }, [user]);
+        } else {
+            setError('No sleep session data available. Please start a new sleep session first.');
+        }
+    }, [dashboardData]);
 
     // Handle form submission
     // finalWakeUp: true if the user is staying awake, false if going back to bed
@@ -67,13 +63,6 @@ function WakeUpForm() {
             setSubmitting(true); // Show loading state
             setError(''); // Clear previous errors
 
-            // Get the auth token
-            const token = getToken();
-            if (!token) {
-                setError('Authentication required. Please log in.');
-                return;
-            }
-
             // Prepare wakeup data according to backend expectations
             const wakeupData = {
                 sleepQuality,
@@ -83,8 +72,8 @@ function WakeUpForm() {
                 backToBedAt: finalWakeUp ? null : new Date(), // If going back to bed, set time
             };
 
-            // Send the wakeup data to the backend using the service
-            await sleepSessionService.addWakeupEvent(wakeupData, token);
+            // Send the wakeup data to the backend using the service (token handled by interceptor)
+            await sleepSessionService.addWakeupEvent(wakeupData);
 
             // Refresh the dashboard if possible
             if (refreshDashboard) refreshDashboard();
