@@ -4,6 +4,7 @@ import * as bedroomService from '../../services/bedroomService';
 import { validateBedroomName } from '../../utils/urlSafeNames';
 import { usePreferenceSync } from '../../hooks/usePreferenceSync';
 import { getTemperatureUnit, convertTemperature } from '../../utils/userPreferences';
+import SemanticSlider from '../shared/SemanticSlider';
 
 /**
  * BedroomForm component allows users to add a new bedroom with various attributes.
@@ -110,7 +111,8 @@ function BedroomForm({ onSuccess, onCancel }) {
                     </div>
                 )}
                 <div className="form-text">
-                    Choose a name that's easy to remember and unique (max 50 characters)
+                    Choose a name that's easy to remember and unique (max 50 characters). 
+                    <br /><small className="text-muted">Note: The name will appear in web addresses as a simplified version (e.g., "Master Bedroom" becomes "master-bedroom").</small>
                 </div>
             </div>
 
@@ -172,40 +174,24 @@ function BedroomForm({ onSuccess, onCancel }) {
             </div>
 
             {/* Light Level Selection */}
-            <div className="mb-2">
-                <label className="form-label">Light Level</label>
-                <select
-                    name="lightLevel"
-                    className="form-select"
-                    value={formData.lightLevel}
-                    onChange={handleChange}
-                >
-                    <option value="pitch black">Pitch Black</option>
-                    <option value="very dim">Very Dim</option>
-                    <option value="dim">Dim</option>
-                    <option value="normal">Normal</option>
-                    <option value="bright">Bright</option>
-                    <option value="daylight">Daylight</option>
-                </select>
-            </div>
+            <SemanticSlider
+                label="Light Level"
+                options={['pitch black', 'very dim', 'dim', 'normal', 'bright', 'daylight']}
+                value={formData.lightLevel}
+                onChange={(newValue) => handleChange({ target: { name: 'lightLevel', value: newValue } })}
+                id="light-level-slider"
+                iconType="light"
+            />
 
             {/* Noise Level Selection */}
-            <div className="mb-2">
-                <label className="form-label">Noise Level</label>
-                <select
-                    name="noiseLevel"
-                    className="form-select"
-                    value={formData.noiseLevel}
-                    onChange={handleChange}
-                >
-                    <option value="silent">Silent</option>
-                    <option value="very quiet">Very Quiet</option>
-                    <option value="quiet">Quiet</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="loud">Loud</option>
-                    <option value="very loud">Very Loud</option>
-                </select>
-            </div>
+            <SemanticSlider
+                label="Noise Level"
+                options={['silent', 'very quiet', 'quiet', 'moderate', 'loud', 'very loud']}
+                value={formData.noiseLevel}
+                onChange={(newValue) => handleChange({ target: { name: 'noiseLevel', value: newValue } })}
+                id="noise-level-slider"
+                iconType="volume"
+            />
 
             {/* Pillows Selection */}
             <div className="mb-3">

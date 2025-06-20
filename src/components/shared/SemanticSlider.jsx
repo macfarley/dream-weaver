@@ -1,4 +1,14 @@
 import React from 'react';
+import { 
+  Moon, 
+  Sun, 
+  Snowflake, 
+  Flame, 
+  VolumeX, 
+  Volume2,
+  Bed,
+  BedDouble
+} from 'lucide-react';
 
 /**
  * SemanticSlider component renders a range slider with semantic labels instead of numeric values.
@@ -12,6 +22,7 @@ import React from 'react';
  * @param {string} props.value - Current selected semantic value (must be one of the options)
  * @param {function} props.onChange - Callback function called with new semantic value when changed
  * @param {string} props.id - Unique identifier for the input element and associated datalist
+ * @param {string} props.iconType - Optional icon type for visual enhancement ('light', 'temperature', 'volume', 'size')
  * 
  * Features:
  * - Maps semantic values to slider positions automatically
@@ -35,6 +46,7 @@ function SemanticSlider({
   value,          // string: current selected semantic value
   onChange,       // function: called with new semantic value on change
   id,             // string: unique id for input and datalist
+  iconType,       // string: optional icon type ('light', 'temperature', 'volume', 'size')
 }) {
   // Find the index of the current value in the options array
   // This maps the semantic value to a numeric position for the range slider
@@ -42,6 +54,27 @@ function SemanticSlider({
   
   // Use index 0 as fallback if current value is not found in options array
   const currentIndex = valueIndex >= 0 ? valueIndex : 0;
+
+  /**
+   * Gets the appropriate icons for the slider based on iconType.
+   * Returns an object with minIcon and maxIcon components.
+   */
+  const getIcons = () => {
+    switch (iconType) {
+      case 'light':
+        return { minIcon: <Moon size={18} />, maxIcon: <Sun size={18} /> };
+      case 'temperature':
+        return { minIcon: <Snowflake size={18} />, maxIcon: <Flame size={18} /> };
+      case 'volume':
+        return { minIcon: <VolumeX size={18} />, maxIcon: <Volume2 size={18} /> };
+      case 'size':
+        return { minIcon: <Bed size={18} />, maxIcon: <BedDouble size={18} /> };
+      default:
+        return { minIcon: null, maxIcon: null };
+    }
+  };
+
+  const { minIcon, maxIcon } = getIcons();
 
   /**
    * Handles slider value changes by converting numeric index back to semantic value.
@@ -65,19 +98,36 @@ function SemanticSlider({
         {label}: <strong>{value || 'None'}</strong>
       </label>
       
-      {/* Range slider input */}
-      <input
-        type="range"
-        id={id}
-        min="0"
-        max={options.length - 1}
-        step="1"
-        value={currentIndex}
-        onChange={handleChange}
-        list={`${id}-labels`}
-        className="form-range"
-        aria-describedby={`${id}-description`}
-      />
+      {/* Slider container with icons */}
+      <div className="d-flex align-items-center gap-3">
+        {/* Min icon */}
+        {minIcon && (
+          <div className="text-muted" title={options[0]}>
+            {minIcon}
+          </div>
+        )}
+        
+        {/* Range slider input */}
+        <input
+          type="range"
+          id={id}
+          min="0"
+          max={options.length - 1}
+          step="1"
+          value={currentIndex}
+          onChange={handleChange}
+          list={`${id}-labels`}
+          className="form-range flex-grow-1"
+          aria-describedby={`${id}-description`}
+        />
+        
+        {/* Max icon */}
+        {maxIcon && (
+          <div className="text-muted" title={options[options.length - 1]}>
+            {maxIcon}
+          </div>
+        )}
+      </div>
       
       {/* Datalist provides semantic labels at slider positions */}
       <datalist id={`${id}-labels`}>

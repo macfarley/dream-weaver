@@ -8,6 +8,7 @@ import { format, parseISO } from 'date-fns';
 import { decodeBedroomNameFromUrl, bedroomNamesMatch, sanitizeBedroomNameForUrl } from '../../utils/urlSafeNames';
 import { usePreferenceSync } from '../../hooks/usePreferenceSync';
 import { formatTemperature, getTemperatureUnit } from '../../utils/userPreferences';
+import SemanticSlider from '../shared/SemanticSlider';
 
 // Main BedroomDetails component
 function BedroomDetails() {
@@ -208,12 +209,20 @@ function BedroomInfo({ bedroom, onEdit, prefersImperial }) {
 function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel, prefersImperial }) {
     return (
         <form onSubmit={handleSubmit}>
-            <input
-                name="bedroomName"
-                value={formData.bedroomName}
-                onChange={handleChange}
-                className="form-control mb-2"
-            />
+            <div className="mb-2">
+                <label className="form-label">Bedroom Name</label>
+                <input
+                    name="bedroomName"
+                    value={formData.bedroomName}
+                    onChange={handleChange}
+                    className="form-control"
+                    required
+                    maxLength="50"
+                />
+                <div className="form-text">
+                    <small className="text-muted">Note: The name will appear in web addresses as a simplified version (e.g., "Master Bedroom" becomes "master-bedroom").</small>
+                </div>
+            </div>
             <select
                 name="bedType"
                 value={formData.bedType}
@@ -242,18 +251,14 @@ function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel, prefe
                         <option value="air">Air</option>
                         <option value="water">Water</option>
                     </select>
-                    <select
-                        name="bedSize"
+                    <SemanticSlider
+                        label="Bed Size"
+                        options={['twin', 'full', 'queen', 'king', 'california king']}
                         value={formData.bedSize}
-                        onChange={handleChange}
-                        className="form-select mb-2"
-                    >
-                        <option value="twin">Twin</option>
-                        <option value="full">Full</option>
-                        <option value="queen">Queen</option>
-                        <option value="king">King</option>
-                        <option value="california king">California King</option>
-                    </select>
+                        onChange={(newValue) => setFormData({...formData, bedSize: newValue})}
+                        id="bed-size-slider"
+                        iconType="size"
+                    />
                 </>
             )}
             <input
@@ -266,26 +271,22 @@ function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel, prefe
                 className="form-control mb-2"
                 placeholder={`Temperature (${getTemperatureUnit(prefersImperial)})`}
             />
-            <select
-                name="lightLevel"
+            <SemanticSlider
+                label="Light Level"
+                options={['pitch black', 'very dim', 'dim', 'normal', 'bright', 'daylight']}
                 value={formData.lightLevel}
-                onChange={handleChange}
-                className="form-select mb-2"
-            >
-                {['pitch black', 'very dim', 'dim', 'normal', 'bright', 'daylight'].map(l => (
-                    <option key={l} value={l}>{l}</option>
-                ))}
-            </select>
-            <select
-                name="noiseLevel"
+                onChange={(newValue) => setFormData({...formData, lightLevel: newValue})}
+                id="light-level-slider"
+                iconType="light"
+            />
+            <SemanticSlider
+                label="Noise Level"
+                options={['silent', 'very quiet', 'quiet', 'moderate', 'loud', 'very loud']}
                 value={formData.noiseLevel}
-                onChange={handleChange}
-                className="form-select mb-2"
-            >
-                {['silent', 'very quiet', 'quiet', 'moderate', 'loud', 'very loud'].map(n => (
-                    <option key={n} value={n}>{n}</option>
-                ))}
-            </select>
+                onChange={(newValue) => setFormData({...formData, noiseLevel: newValue})}
+                id="noise-level-slider"
+                iconType="volume"
+            />
             <textarea
                 name="notes"
                 value={formData.notes}

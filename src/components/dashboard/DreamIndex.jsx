@@ -2,19 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import sleepDataService from '../../services/sleepDataService';
-
-/**
- * Helper to format ISO date string to a readable format.
- * Example: "2024-06-01T12:00:00Z" -> "Jun 1, 2024"
- */
-function formatDate(iso) {
-  const date = new Date(iso);
-  return date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
+import { usePreferenceSync } from '../../hooks/usePreferenceSync';
+import { formatDate as formatDateWithPrefs } from '../../utils/userPreferences';
 
 /**
  * Helper to format ISO date string to YYYYMMDD.
@@ -27,6 +16,9 @@ function formatYYYYMMDD(iso) {
 function DreamIndex() {
   // Get dashboard data from context
   const { dashboardData } = useContext(DashboardContext);
+  
+  // Get user preferences for date formatting
+  const { dateFormat } = usePreferenceSync();
 
   // Local state for sleep data
   const [sleepData, setSleepData] = useState([]);

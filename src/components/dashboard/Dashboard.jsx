@@ -4,6 +4,8 @@ import { UserContext } from '../../contexts/UserContext';
 import DashboardBox from './DashboardBox';
 import BigActionButton from '../shared/BigActionButton';
 import { useNavigate } from 'react-router-dom';
+import { usePreferenceSync } from '../../hooks/usePreferenceSync';
+import { formatTemperature, formatDate, formatTime } from '../../utils/userPreferences';
 
 /**
  * Dashboard component displays user profile, bedroom info,
@@ -14,6 +16,9 @@ function Dashboard() {
   const { dashboardData, loading, error } = useContext(DashboardContext);
   const { user, loading: userLoading } = useContext(UserContext);
   const navigate = useNavigate();
+  
+  // Get user preferences for formatting
+  const { prefersImperial, dateFormat, timeFormat } = usePreferenceSync();
 
   // Handle authentication redirect in useEffect
   useEffect(() => {
@@ -61,7 +66,7 @@ function Dashboard() {
     return (
       <div>
         <p><strong>Name:</strong> {bedroom.bedroomName}</p>
-        <p><strong>Temperature:</strong> {bedroom.temperature}°</p>
+        <p><strong>Temperature:</strong> {formatTemperature(bedroom.temperature, prefersImperial, true)}</p>
         <p><strong>Light Level:</strong> {bedroom.lightLevel}/5</p>
       </div>
     );
@@ -70,7 +75,7 @@ function Dashboard() {
   // Helper: Render latest sleep session summary
   function renderSleepSession(sleep) {
     if (!sleep) return <p>No sleep data.</p>;
-    const started = sleep.createdAt ? new Date(sleep.createdAt).toLocaleString() : 'Unknown';
+    const started = sleep.createdAt ? formatDate(new Date(sleep.createdAt), dateFormat) + ' ' + formatTime(new Date(sleep.createdAt), timeFormat) : 'Unknown';
     const status = sleep.wakeUps?.length ? 'Completed' : 'Ongoing';
     return (
       <div>
