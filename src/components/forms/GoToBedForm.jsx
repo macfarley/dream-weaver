@@ -140,19 +140,17 @@ function GoToBed() {
             // Navigate back to dashboard
             navigate('/users/dashboard');
         } catch (err) {
-            // Log and show error with more details
+            // Log error for debugging
             console.error('Error starting sleep session:', err);
-            console.error('Error response:', err.response?.data);
-            console.error('Error status:', err.response?.status);
             
             // Check if this is the "active session" error and our frontend thinks it's finished
             if (err.message?.includes('active sleep session') && 
                 dashboardData?.latestSleepData && 
                 isSessionActuallyFinished(dashboardData.latestSleepData)) {
                 
-                // Show a more helpful error message with options
+                // Show a more helpful error message with options for sync issues
                 setError(
-                    'Backend detected an active sleep session, but your last session appears to be finished. ' +
+                    'SYNC_ISSUE: Backend detected an active sleep session, but your last session appears to be finished. ' +
                     'This might be a synchronization issue. Try refreshing the page or go to the Wake Up page ' +
                     'to properly finish your session.'
                 );
@@ -173,7 +171,7 @@ function GoToBed() {
                 <div className="alert alert-danger">
                     {error}
                     {/* Show action buttons if this is a session sync issue */}
-                    {error.includes('synchronization issue') && (
+                    {(error.includes('synchronization issue') || error.includes('SYNC_ISSUE:')) && (
                         <div className="mt-3">
                             <button 
                                 type="button" 
