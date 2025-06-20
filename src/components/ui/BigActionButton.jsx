@@ -83,14 +83,14 @@ function BigActionButton({
     if (hasActiveSleep) {
       return {
         text: "Wake Up",
-        path: "/dashboard/wake-up",
+        path: "/gotobed/wakeup",
         variant: "wake",
         disabled: false
       };
     } else {
       return {
         text: "Go to Bed",
-        path: "/dashboard/go-to-bed",
+        path: "/gotobed",
         variant: "sleep",
         disabled: false
       };

@@ -16,6 +16,7 @@ import GoToBedForm from './components/sleep/GoToBedForm';
 import WakeUpForm from './components/sleep/WakeUpForm';
 import JoinUs from './pages/JoinUs';
 import About from './pages/About';
+import NotFound from './pages/NotFound';
 
 // Admin Components - Lazy loaded since most users won't need them
 import AdminOnlyRoute from './components/admin/AdminOnlyRoute';
@@ -71,6 +72,9 @@ function App() {
           <Route path="/dreams" element={<DreamIndex />} />
           <Route path="/sleep" element={<SleepDataIndex />} />
           <Route path="/profile" element={<UserProfile />} />
+          
+          {/* 404 Catch-all Route - Must be last */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer />
