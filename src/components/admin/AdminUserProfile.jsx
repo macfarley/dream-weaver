@@ -121,6 +121,15 @@ function AdminUserProfile() {
       return;
     }
 
+    // Additional confirmation for safety
+    const confirmMessage = `Are you absolutely sure you want to delete user "${targetUser.username}"? This action cannot be undone and will remove all their data including bedrooms, sleep sessions, and other records.`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    setDeleteError(''); // Clear any previous errors
+    
     try {
       await deleteUser(userId, deletePassword);
       
@@ -130,7 +139,21 @@ function AdminUserProfile() {
       });
     } catch (err) {
       console.error('Failed to delete user:', err);
-      setDeleteError('Failed to delete user: ' + (err.message || 'Invalid password'));
+      
+      // More specific error messages based on error type
+      let errorMessage = 'Failed to delete user: ';
+      
+      if (err.message.includes('Status: 500')) {
+        errorMessage += 'Server error - the user may have associated data that needs to be handled first, or the admin deletion feature may not be fully implemented on the backend.';
+      } else if (err.message.includes('Status: 401') || err.message.includes('Status: 403')) {
+        errorMessage += 'Invalid admin password or insufficient permissions.';
+      } else if (err.message.includes('Status: 404')) {
+        errorMessage += 'User not found or already deleted.';
+      } else {
+        errorMessage += err.message || 'Unknown error occurred.';
+      }
+      
+      setDeleteError(errorMessage);
     }
   };
 
@@ -473,6 +496,13 @@ function AdminUserProfile() {
                   You are about to permanently delete the user account for <strong>{targetUser?.username}</strong>.
                   This will remove all their data including sleep sessions, dreams, and preferences.
                 </p>
+                
+                <div className="alert alert-info">
+                  <small>
+                    <strong>Note:</strong> If deletion fails with a server error, the backend deletion feature may not be fully implemented yet, 
+                    or there may be database constraints preventing deletion of users with associated data.
+                  </small>
+                </div>
                 
                 {deleteError && (
                   <div className="alert alert-danger">

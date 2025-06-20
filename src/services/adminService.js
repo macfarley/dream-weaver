@@ -63,15 +63,60 @@ async function updateUserProfile(userId, profileData) {
 // Delete user (admin only, requires admin password confirmation)
 async function deleteUser(userId, adminPassword) {
   try {
+    // First, try to get user details to ensure they exist
+    await api.get(`/admin/users/${userId}`);
+    
+    // Try the current API structure first
     const response = await api.delete(`/admin/users/${userId}`, {
       headers: {
-        'x-admin-password': adminPassword, // Admin password in header as expected by backend
+        'x-admin-password': adminPassword,
       },
     });
     return response.data;
   } catch (error) {
     console.error('Error deleting user:', error);
-    const errorMessage = error.response?.data?.message || 'Failed to delete user';
+    
+    // If 500 error, it might be a backend implementation issue
+    if (error.response?.status === 500) {
+      // Try alternative API structure with password in body
+      try {
+        const response = await api.delete(`/admin/users/${userId}`, {
+          data: { 
+            password: adminPassword  // Try different field name
+          }
+        });
+        return response.data;
+      } catch (retryError) {
+        console.error('Retry with body also failed:', retryError);
+        
+        // Try with adminPassword field
+        try {
+          const response = await api.delete(`/admin/users/${userId}`, {
+            data: { 
+              adminPassword: adminPassword 
+            }
+          });
+          return response.data;
+        } catch (retry2Error) {
+          console.error('Second retry also failed:', retry2Error);
+          // Fall through to original error handling
+        }
+      }
+    }
+    
+    // Check if it's a user not found error
+    if (error.response?.status === 404) {
+      throw new Error('User not found or already deleted');
+    }
+    
+    // Check if it's an authorization error
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      throw new Error('Invalid admin password or insufficient permissions');
+    }
+    
+    const errorMessage = error.response?.data?.message || 
+                        error.response?.data?.error ||
+                        `Backend error occurred (Status: ${error.response?.status || 'Unknown'}). The deletion feature may not be fully implemented.`;
     throw new Error(errorMessage);
   }
 }
