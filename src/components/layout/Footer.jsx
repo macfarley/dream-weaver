@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Breadcrumb } from 'react-bootstrap';
 import { UserContext } from '../../contexts/UserContext';
@@ -36,6 +36,38 @@ function Footer() {
   const { user } = useContext(UserContext);
   const { dashboardData } = useContext(DashboardContext);
 
+  // State for footer expansion
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(false);
+
+  // Scroll detection for footer expansion
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Calculate how close we are to the bottom (within 100px)
+      const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
+      const nearBottom = distanceFromBottom <= 100;
+      
+      setIsNearBottom(nearBottom);
+      
+      // Expand footer when very close to bottom (within 20px) or hard scroll
+      const veryNearBottom = distanceFromBottom <= 20;
+      setIsExpanded(veryNearBottom);
+    };
+
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll);
+    
+    // Check initial position
+    handleScroll();
+    
+    // Cleanup
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Parse current URL path into segments for breadcrumb navigation
   // Filter out empty strings from leading/trailing slashes
   const pathnames = location.pathname.split('/').filter(Boolean);
@@ -66,16 +98,11 @@ function Footer() {
       };
 
   return (
-    <div className="custom-footer">
+    <div className={`custom-footer ${isExpanded ? 'custom-footer--expanded' : ''} ${isNearBottom ? 'custom-footer--near-bottom' : ''}`}>
       <div className="container">
-        {/* Footer informational details */}
-        <div className="text-center">
-          <p className="mb-1">
-            <Link to="/about" className="text-info">
-              About / Help
-            </Link>
-          </p>
-          <p className="mb-2 small"> {/* Increased bottom margin for spacing */}
+        {/* Always visible copyright line */}
+        <div className="custom-footer__copyright">
+          <p className="mb-0 small text-center">
             © {new Date().getFullYear()} DreamWeaver. Built by{' '}
             <a
               href="https://www.linkedin.com/in/travis-mccoy-630775b9/"
@@ -88,49 +115,66 @@ function Footer() {
           </p>
         </div>
 
-        {/* Breadcrumb navigation with label */}
-        <div className="breadcrumb-container">
-          <div className="breadcrumb-label">Where you are:</div>
-          <Breadcrumb className="mb-0"> {/* Remove bottom margin */}
-          {/* Always show Home link */}
-          <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
-            Home
-          </Breadcrumb.Item>
-          {/* Dynamically render breadcrumbs for each path segment */}
-          {pathnames.map((name, index) => {
-            const routeTo = '/' + pathnames.slice(0, index + 1).join('/');
-            // Capitalize first letter for display
-            const label = name.charAt(0).toUpperCase() + name.slice(1);
-
-            // Last breadcrumb is active, others are links
-            return index === pathnames.length - 1 ? (
-              <Breadcrumb.Item key={routeTo} active>
-                {label}
-              </Breadcrumb.Item>
-            ) : (
-              <Breadcrumb.Item
-                key={routeTo}
-                linkAs={Link}
-                linkProps={{ to: routeTo }}
-              >
-                {label}
-              </Breadcrumb.Item>
-            );
-          })}
-        </Breadcrumb>
-        </div> {/* Close breadcrumb-container */}
-
-        {/* Primary action button - only shown to authenticated users and not on sleep routes */}
-        {user && !isOnSleepRoute && (
-          <div className="my-3 text-center"> {/* Moved to bottom with more margin */}
-            <Link
-              to={primaryAction.to}
-              className={`btn ${primaryAction.style} btn-lg w-100`}
-              aria-label={primaryAction.ariaLabel}
-              title={primaryAction.ariaLabel}
-            >
-              {primaryAction.label}
+        {/* Expandable content section */}
+        <div className="custom-footer__expandable">
+          {/* About link */}
+          <div className="text-center mb-2">
+            <Link to="/about" className="text-info">
+              About / Help
             </Link>
+          </div>
+
+          {/* Breadcrumb navigation */}
+          <div className="breadcrumb-container mb-3">
+            <div className="breadcrumb-label">Where you are:</div>
+            <Breadcrumb className="mb-0">
+              {/* Always show Home link */}
+              <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
+                Home
+              </Breadcrumb.Item>
+              {/* Dynamically render breadcrumbs for each path segment */}
+              {pathnames.map((name, index) => {
+                const routeTo = '/' + pathnames.slice(0, index + 1).join('/');
+                // Capitalize first letter for display
+                const label = name.charAt(0).toUpperCase() + name.slice(1);
+
+                // Last breadcrumb is active, others are links
+                return index === pathnames.length - 1 ? (
+                  <Breadcrumb.Item key={routeTo} active>
+                    {label}
+                  </Breadcrumb.Item>
+                ) : (
+                  <Breadcrumb.Item
+                    key={routeTo}
+                    linkAs={Link}
+                    linkProps={{ to: routeTo }}
+                  >
+                    {label}
+                  </Breadcrumb.Item>
+                );
+              })}
+            </Breadcrumb>
+          </div>
+
+          {/* Primary action button - only shown to authenticated users and not on sleep routes */}
+          {user && !isOnSleepRoute && (
+            <div className="text-center">
+              <Link
+                to={primaryAction.to}
+                className={`btn ${primaryAction.style} btn-lg w-100`}
+                aria-label={primaryAction.ariaLabel}
+                title={primaryAction.ariaLabel}
+              >
+                {primaryAction.label}
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Scroll hint indicator when not expanded */}
+        {!isExpanded && (
+          <div className="custom-footer__scroll-hint">
+            <small className="text-muted">Scroll to bottom for navigation</small>
           </div>
         )}
       </div>

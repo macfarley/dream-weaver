@@ -23,10 +23,11 @@
 main {
   background-color: var(--color-bg) !important;
   color: var(--color-text) !important;
-  min-height: calc(100vh - 15vh);
+  min-height: calc(100vh - 80px - 60px); /* Account for navbar and fixed footer */
   flex: 1 0 auto;
   padding: 0;
   margin: 0;
+  padding-bottom: 0; /* Remove extra padding since body handles it */
 }
 
 /* Container styling */
