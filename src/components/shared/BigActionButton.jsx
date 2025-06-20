@@ -2,6 +2,7 @@ import React, { useContext, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
 import { DashboardContext } from "../../contexts/DashboardContext";
+import { hasActiveSleepSession } from "../../utils/sleepStateUtils";
 import DWLogo from "../../assets/DW-Logo.png";
 
 /**
@@ -35,11 +36,9 @@ function BigActionButton({
     return null;
   }
 
-  // Determine if user has an active sleep session using useMemo for performance
+  // Determine if user has an active sleep session using centralized utility
   const hasActiveSleep = useMemo(() => {
-    return dashboardData?.latestSleepData && 
-           Array.isArray(dashboardData.latestSleepData.wakeUps) &&
-           dashboardData.latestSleepData.wakeUps.length === 0;
+    return hasActiveSleepSession(dashboardData);
   }, [dashboardData?.latestSleepData?.wakeUps]);
 
   // Configure button based on sleep state using useMemo for performance

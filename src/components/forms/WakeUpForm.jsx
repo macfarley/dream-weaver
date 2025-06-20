@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import sleepSessionService from '../../services/sleepSessionService';
 import { useNavigate } from 'react-router-dom';
+import { hasActiveSleepSession, getActiveSleepSession } from '../../utils/sleepStateUtils';
 
 function WakeUpForm() {
     // Get the current user from context
@@ -32,11 +33,8 @@ function WakeUpForm() {
     // Get the current sleep session from dashboard context
     useEffect(() => {        
         if (dashboardData?.latestSleepData) {
-            // Check if the latest sleep session has no wake-ups (meaning it's still active)
-            const isActiveSleep = Array.isArray(dashboardData.latestSleepData.wakeUps) && 
-                                 dashboardData.latestSleepData.wakeUps.length === 0;
-            
-            if (isActiveSleep) {
+            // Use centralized utility for consistent sleep state checking
+            if (hasActiveSleepSession(dashboardData)) {
                 setSleepData(dashboardData.latestSleepData);
                 setError(''); // Clear any previous errors
             } else {

@@ -5,6 +5,7 @@ import { DashboardContext } from '../../contexts/DashboardContext';
 import * as bedroomService from '../../services/bedroomService';
 import sleepSessionService from '../../services/sleepSessionService';
 import { useNavigate } from 'react-router-dom';
+import { hasActiveSleepSession } from '../../utils/sleepStateUtils';
 
 /**
  * GoToBed component allows a user to start a new sleep session.
@@ -65,10 +66,8 @@ function GoToBed() {
      * Check if user has an active sleep session and redirect to wake up if so.
      */
     const checkForActiveSleepSession = () => {
-        // Check dashboard data for active sleep session (same logic as Footer)
-        const hasActiveSleep = dashboardData?.latestSleepData?.wakeUps?.length === 0;
-        
-        if (hasActiveSleep) {
+        // Use centralized utility for consistent sleep state checking
+        if (hasActiveSleepSession(dashboardData)) {
             // Redirect to wake up form if there's an active sleep session
             navigate('/gotobed/wakeup');
         }
