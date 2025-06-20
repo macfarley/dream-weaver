@@ -1,0 +1,399 @@
+/* src/styles/componentStyles/_wakeup.scss */
+
+/* =============================
+   WAKE UP FORM — DreamWeaver
+   Morning routine & dream capture
+   ============================= */
+
+.wakeup-form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.wakeup-form__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.wakeup-form__subtitle {
+  font-size: 1.125rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin-bottom: 2.5rem;
+  line-height: 1.5;
+}
+
+.wakeup-form__error {
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
+}
+
+/* Dream Journal Section - High Contrast, Prominent */
+.wakeup-form__dream-section {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.15),
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      0 0 0 4px rgba(var(--color-accent-rgb), 0.15);
+  }
+}
+
+.wakeup-form__dream-label {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  
+  &::before {
+    content: '💭 ';
+    margin-right: 0.5rem;
+  }
+}
+
+.wakeup-form__dream-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+    font-style: italic;
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    background: var(--color-surface);
+    box-shadow: 0 0 0 4px rgba(var(--color-accent-rgb), 0.15);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--color-surface-muted);
+  }
+}
+
+.wakeup-form__dream-hint {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* Action Buttons */
+.wakeup-form__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+/* Small "Still Sleepy" Button - WCAG Compliant */
+.wakeup-form__sleepy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  min-height: 44px; /* WCAG minimum touch target */
+  min-width: 44px;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+    border-color: var(--color-text-secondary);
+    color: var(--color-text);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(var(--color-accent-rgb), 0.15);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+/* Main Wake Up Button */
+.wakeup-form__main-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.wakeup-form__wake-btn {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, 
+    #f59e0b 0%,
+    #fbbf24 30%,
+    #fcd34d 70%,
+    #fef3c7 100%);
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 8px 32px rgba(245, 158, 11, 0.3),
+    0 4px 16px rgba(245, 158, 11, 0.2),
+    inset 0 2px 0 rgba(255, 255, 255, 0.2);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 
+      0 12px 40px rgba(245, 158, 11, 0.4),
+      0 6px 20px rgba(245, 158, 11, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.3);
+      
+    &::before {
+      opacity: 1;
+    }
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 
+      0 8px 32px rgba(245, 158, 11, 0.3),
+      0 4px 16px rgba(245, 158, 11, 0.2),
+      inset 0 2px 0 rgba(255, 255, 255, 0.2),
+      0 0 0 4px rgba(245, 158, 11, 0.3);
+  }
+  
+  &:active:not(:disabled) {
+    transform: scale(1.02);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    
+    &::before {
+      opacity: 0;
+    }
+  }
+}
+
+.wakeup-form__wake-btn-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 0.5rem;
+}
+
+.wakeup-form__wake-btn-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.wakeup-form__wake-btn-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.wakeup-form__main-action-hint {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+/* Theme-specific adjustments */
+[data-theme="light"] {
+  .wakeup-form__dream-section {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    
+    &:focus-within {
+      background: #fafbfc;
+    }
+  }
+  
+  .wakeup-form__dream-input {
+    background: #ffffff;
+    border-color: #cbd5e0;
+    
+    &:focus {
+      background: #fafbfc;
+    }
+  }
+  
+  .wakeup-form__sleepy-btn {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    
+    &:hover:not(:disabled) {
+      background: #f1f5f9;
+      border-color: #cbd5e0;
+    }
+  }
+}
+
+[data-theme="dark"] {
+  .wakeup-form__dream-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    
+    &:focus-within {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+  
+  .wakeup-form__dream-input {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+    
+    &:focus {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  .wakeup-form__sleepy-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .wakeup-form {
+    padding: 1.5rem 1rem;
+  }
+  
+  .wakeup-form__title {
+    font-size: 2rem;
+  }
+  
+  .wakeup-form__subtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .wakeup-form__dream-section {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .wakeup-form__wake-btn {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .wakeup-form__wake-btn-icon {
+    font-size: 2.5rem;
+  }
+  
+  .wakeup-form__wake-btn-text {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wakeup-form {
+    padding: 1rem 0.5rem;
+  }
+  
+  .wakeup-form__title {
+    font-size: 1.75rem;
+  }
+  
+  .wakeup-form__dream-section {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .wakeup-form__wake-btn {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .wakeup-form__wake-btn-icon {
+    font-size: 2rem;
+  }
+  
+  .wakeup-form__wake-btn-text {
+    font-size: 0.875rem;
+  }
+  
+  .wakeup-form__actions {
+    gap: 1.5rem;
+  }
+}

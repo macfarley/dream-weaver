@@ -1,9 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import sleepSessionService from '../../services/sleepSessionService';
 import { useNavigate } from 'react-router-dom';
-import { hasActiveSleepSession, getActiveSleepSession } from '../../utils/sleep/sleepStateUtils';
+import { hasActiveSleepSession } from '../../utils/sleep/sleepStateUtils';
 
 function WakeUpForm() {
     // Get the current user from context
@@ -21,13 +21,6 @@ function WakeUpForm() {
     // State for the dream journal input
     const [dreamJournal, setDreamJournal] = useState('');
 
-    // State for the sleep quality slider (default 3)
-    const [sleepQuality, setSleepQuality] = useState(3);
-
-    // State for retroactive wake-up time
-    const [actualWakeUpTime, setActualWakeUpTime] = useState('');
-    const [useCustomWakeUpTime, setUseCustomWakeUpTime] = useState(false);
-
     // State to indicate if the form is submitting
     const [submitting, setSubmitting] = useState(false);
 
@@ -42,19 +35,6 @@ function WakeUpForm() {
                 const sleepSession = dashboardData.latestSleepData;
                 setSleepData(sleepSession);
                 setError(''); // Clear any previous errors
-                
-                // Check if this is a long sleep session (over 12 hours)
-                const sleepStart = new Date(sleepSession.createdAt);
-                const now = new Date();
-                const hoursAsleep = (now - sleepStart) / (1000 * 60 * 60);
-                
-                // For long sessions, suggest but don't force retroactive time setting
-                if (hoursAsleep > 12) {
-                    // Set a default time to 8 hours after sleep start as a suggestion
-                    const defaultWakeTime = new Date(sleepStart.getTime() + (8 * 60 * 60 * 1000));
-                    setActualWakeUpTime(defaultWakeTime.toISOString().slice(0, 16)); // Format for datetime-local input
-                    // Don't automatically enable custom time - let user choose
-                }
             } else {
                 setError('No active sleep session found. Please start a new sleep session first.');
             }
@@ -64,40 +44,74 @@ function WakeUpForm() {
     }, [dashboardData]);
 
     // Handle form submission
-    // finalWakeUp: true if the user is staying awake, false if going back to bed
-    const handleSubmit = async (finalWakeUp = false) => {
-        // Don't submit if there's no sleep session loaded
+    const handleWakeUp = async () => {
         if (!sleepData) return;
 
         try {
-            setSubmitting(true); // Show loading state
-            setError(''); // Clear previous errors
+            setSubmitting(true);
+            setError('');
 
-            // Prepare wakeup data according to backend expectations
+            // Prepare wakeup data - staying awake with current time
             const wakeupData = {
-                sleepQuality,
+                sleepQuality: 4, // Default good quality
                 dreamJournal,
-                awakenAt: useCustomWakeUpTime && actualWakeUpTime 
-                    ? new Date(actualWakeUpTime)  // Use custom time if provided
-                    : new Date(),                 // Default to now for quick wake-ups
-                finishedSleeping: finalWakeUp, // Whether user is staying awake
-                backToBedAt: finalWakeUp ? null : new Date(), // If going back to bed, set time
+                awakenAt: new Date(),
+                finishedSleeping: true,
+                backToBedAt: null,
             };
 
-            // Send the wakeup data to the backend using the service (token handled by interceptor)
             await sleepSessionService.addWakeupEvent(wakeupData);
 
             // Refresh the dashboard if possible
             if (refreshDashboard) refreshDashboard();
 
-            // Navigate to the dashboard page
+            // Show success message temporarily then navigate
+            setError(''); // Clear any errors
+            
+            // Navigate to dashboard with success state
+            navigate('/users/dashboard', { 
+                state: { 
+                    message: 'Good morning! Sleep session completed successfully! 🌅',
+                    type: 'success'
+                }
+            });
+        } catch (err) {
+            console.error('Failed to complete sleep session:', err);
+            setError(err.message || 'Something went wrong while completing your sleep session.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // Handle going back to bed
+    const handleBackToBed = async () => {
+        if (!sleepData) return;
+
+        try {
+            setSubmitting(true);
+            setError('');
+
+            // Prepare wakeup data - going back to bed
+            const wakeupData = {
+                sleepQuality: 3, // Neutral quality for brief wake
+                dreamJournal,
+                awakenAt: new Date(),
+                finishedSleeping: false,
+                backToBedAt: new Date(),
+            };
+
+            await sleepSessionService.addWakeupEvent(wakeupData);
+
+            // Refresh the dashboard if possible
+            if (refreshDashboard) refreshDashboard();
+
+            // Navigate back to dashboard
             navigate('/users/dashboard');
         } catch (err) {
-            // Show an error if the request fails
-            console.error('Failed to update sleep session:', err);
-            setError(err.message || 'Something went wrong while waking up.');
+            console.error('Failed to record back to bed:', err);
+            setError(err.message || 'Something went wrong while recording your wake event.');
         } finally {
-            setSubmitting(false); // Reset loading state
+            setSubmitting(false);
         }
     };
 
@@ -113,122 +127,69 @@ function WakeUpForm() {
     // Main form UI
     return (
         <div className="container mt-4">
-            <h2>Wake Up</h2>
-            <p className="text-muted">
-                Record how you slept and any dreams you remember.
-            </p>
+            <div className="wakeup-form">
+                <h2 className="wakeup-form__title">Good Morning! 🌅</h2>
+                <p className="wakeup-form__subtitle">
+                    Hope you slept well! Record any dreams before they fade away.
+                </p>
 
-            {/* Quick Wake-Up Option */}
-            <div className="mb-4 p-3 bg-light rounded">
-                <h5>Quick Wake-Up</h5>
-                <p className="mb-2">Just waking up and want to skip the details?</p>
-                <button
-                    className="btn btn-primary"
-                    disabled={submitting}
-                    onClick={() => handleSubmit(true)}
-                >
-                    {submitting ? 'Submitting...' : "I'm awake! (Skip details)"}
-                </button>
-            </div>
-
-            <hr />
-            <h5>Or add details about your sleep...</h5>
-
-            {/* Show hint for long sleep sessions */}
-            {(() => {
-                const sleepStart = new Date(sleepData.createdAt);
-                const now = new Date();
-                const hoursAsleep = (now - sleepStart) / (1000 * 60 * 60);
-                
-                if (hoursAsleep > 12) {
-                    return (
-                        <div className="alert alert-info">
-                            <strong>Long sleep session detected!</strong> You've been asleep for {Math.round(hoursAsleep)} hours. 
-                            If you actually woke up earlier but forgot to log it, you can set your actual wake-up time below.
-                        </div>
-                    );
-                }
-                return null;
-            })()}
-
-            {/* Retroactive Wake-Up Time (Optional) */}
-            <div className="mb-3">
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="useCustomTime"
-                        checked={useCustomWakeUpTime}
-                        onChange={(e) => setUseCustomWakeUpTime(e.target.checked)}
-                    />
-                    <label className="form-check-label" htmlFor="useCustomTime">
-                        I actually woke up at a different time
-                    </label>
-                </div>
-                
-                {useCustomWakeUpTime && (
-                    <div className="mt-2">
-                        <label className="form-label">Actual wake-up time:</label>
-                        <input
-                            type="datetime-local"
-                            className="form-control"
-                            value={actualWakeUpTime}
-                            onChange={(e) => setActualWakeUpTime(e.target.value)}
-                            max={new Date().toISOString().slice(0, 16)} // Can't be in the future
-                            min={sleepData ? new Date(sleepData.createdAt).toISOString().slice(0, 16) : ''}
-                        />
-                        <small className="form-text text-muted">
-                            Leave unchecked to use current time ({new Date().toLocaleTimeString()})
-                        </small>
+                {/* Error display */}
+                {error && (
+                    <div className="alert alert-danger wakeup-form__error">
+                        {error}
                     </div>
                 )}
-            </div>
 
-            {/* Dream Journal Input */}
-            <div className="mb-3">
-                <label className="form-label">Dream Journal</label>
-                <textarea
-                    className="form-control"
-                    rows={4}
-                    value={dreamJournal}
-                    onChange={(e) => setDreamJournal(e.target.value)}
-                    placeholder="Describe your dreams here..."
-                />
-            </div>
+                {/* Dream Journal - High contrast, prominent position */}
+                <div className="wakeup-form__dream-section">
+                    <label className="wakeup-form__dream-label">
+                        Dream Journal
+                    </label>
+                    <textarea
+                        className="wakeup-form__dream-input"
+                        rows={4}
+                        value={dreamJournal}
+                        onChange={(e) => setDreamJournal(e.target.value)}
+                        placeholder="Capture your dreams while they're still fresh..."
+                        disabled={submitting}
+                    />
+                    <small className="wakeup-form__dream-hint">
+                        Optional - dreams fade quickly, so jot down anything you remember!
+                    </small>
+                </div>
 
-            {/* Sleep Quality Slider */}
-            <div className="mb-3">
-                <label className="form-label">Sleep Quality (1–5)</label>
-                <input
-                    type="range"
-                    min={1}
-                    max={5}
-                    value={sleepQuality}
-                    onChange={(e) => setSleepQuality(Number(e.target.value))}
-                    className="form-range"
-                />
-                <div>Rating: {sleepQuality}</div>
-            </div>
+                {/* Action Buttons */}
+                <div className="wakeup-form__actions">
+                    {/* Small "Still Sleepy" button */}
+                    <button
+                        className="wakeup-form__sleepy-btn"
+                        onClick={handleBackToBed}
+                        disabled={submitting}
+                        type="button"
+                    >
+                        {submitting ? 'Recording...' : 'Still sleepy, back to bed 😴'}
+                    </button>
 
-            {/* Action Buttons */}
-            <div className="d-flex gap-3">
-                {/* Button for staying awake */}
-                <button
-                    className="btn btn-success"
-                    disabled={submitting}
-                    onClick={() => handleSubmit(true)}
-                >
-                    {submitting ? 'Submitting...' : "I'm staying awake"}
-                </button>
-
-                {/* Button for going back to bed */}
-                <button
-                    className="btn btn-secondary"
-                    disabled={submitting}
-                    onClick={() => handleSubmit(false)}
-                >
-                    {submitting ? 'Submitting...' : 'Too sleepy, back to bed'}
-                </button>
+                    {/* Big Wake Up button for completing session */}
+                    <div className="wakeup-form__main-action">
+                        <button
+                            className="wakeup-form__wake-btn"
+                            onClick={handleWakeUp}
+                            disabled={submitting}
+                            type="button"
+                        >
+                            <div className="wakeup-form__wake-btn-content">
+                                <span className="wakeup-form__wake-btn-icon">☀️</span>
+                                <span className="wakeup-form__wake-btn-text">
+                                    {submitting ? 'Completing...' : "I'm Awake!"}
+                                </span>
+                            </div>
+                        </button>
+                        <p className="wakeup-form__main-action-hint">
+                            Complete your sleep session and see your stats!
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     );
