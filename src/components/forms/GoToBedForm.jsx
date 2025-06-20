@@ -49,6 +49,7 @@ function GoToBed() {
     useEffect(() => {
         if (user?._id) {
             loadBedrooms();
+            checkForActiveSession();
         }
         // eslint-disable-next-line
     }, [user]);
@@ -63,7 +64,25 @@ function GoToBed() {
     }, [dashboardData, navigate]);
 
     /**
-     * Check if user has an active sleep session and redirect to wake up if so.
+     * Check for active sleep sessions using the backend endpoint.
+     * If an active session is found, redirect to wake up page.
+     */
+    const checkForActiveSession = async () => {
+        try {
+            const result = await sleepSessionService.checkActiveSleepSession();
+            if (result?.hasActiveSession && result?.redirectTo) {
+                // Redirect to the recommended path (likely /gotobed/wakeup)
+                navigate(result.redirectTo);
+            }
+        } catch (err) {
+            // Log error but don't block the form - let user proceed
+            console.error('Failed to check for active session:', err);
+        }
+    };
+
+    /**
+     * Check if user has an active sleep session based on dashboard data and redirect to wake up if so.
+     * This is a fallback check in addition to the backend endpoint check.
      */
     const checkForActiveSleepSession = () => {
         // Use centralized utility for consistent sleep state checking
@@ -142,6 +161,14 @@ function GoToBed() {
         } catch (err) {
             // Log error for debugging
             console.error('Error starting sleep session:', err);
+            
+            // Check if this is an active session error (409 status with ACTIVE_SESSION_EXISTS)
+            if (err.response?.status === 409 && err.response?.data?.code === 'ACTIVE_SESSION_EXISTS') {
+                // Use the redirect path provided by the backend
+                const redirectTo = err.response.data.redirectTo || '/gotobed/wakeup';
+                navigate(redirectTo);
+                return; // Don't show error message, just redirect
+            }
             
             // Check if this is the "active session" error and our frontend thinks it's finished
             if (err.message?.includes('active sleep session') && 

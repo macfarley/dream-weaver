@@ -43,13 +43,19 @@ const addWakeupEvent = async (wakeupData) => {
 
 /**
  * Check if user has an active sleep session
- * This would require a GET endpoint on the backend that checks for active sessions
- * For now, we'll handle this in the component logic
+ * GET /gotobed/active
  */
 const checkActiveSleepSession = async () => {
-  // TODO: Add a backend endpoint for this, like GET /gotobed/active
-  // For now, return null (no active session check)
-  return null;
+  try {
+    const response = await api.get('/gotobed/active');
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      // No active session found
+      return { hasActiveSession: false };
+    }
+    throw new Error(error.response?.data?.message || 'Failed to check active sleep session');
+  }
 };
 
 const sleepSessionService = {
