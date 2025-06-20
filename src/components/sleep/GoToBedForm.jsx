@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import BedroomForm from './BedroomForm';
 import { UserContext } from '../../contexts/UserContext';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import * as bedroomService from '../../services/bedroomService';
 import sleepSessionService from '../../services/sleepSessionService';
+import { getToken } from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -49,30 +50,29 @@ function GoToBed() {
         if (user?._id) {
             loadBedrooms();
         }
-        // eslint-disable-next-line
     }, [user]);
 
     /**
      * Check for active sleep sessions when dashboard data changes.
      */
     useEffect(() => {
+        /**
+         * Check if user has an active sleep session and redirect to wake up if so.
+         */
+        const checkForActiveSleepSession = () => {
+            // Check dashboard data for active sleep session (same logic as Footer)
+            const hasActiveSleep = dashboardData?.latestSleepData?.wakeUps?.length === 0;
+            
+            if (hasActiveSleep) {
+                // Redirect to wake up form if there's an active sleep session
+                navigate('/gotobed/wakeup');
+            }
+        };
+
         if (dashboardData?.latestSleepData) {
             checkForActiveSleepSession();
         }
     }, [dashboardData, navigate]);
-
-    /**
-     * Check if user has an active sleep session and redirect to wake up if so.
-     */
-    const checkForActiveSleepSession = () => {
-        // Check dashboard data for active sleep session (same logic as Footer)
-        const hasActiveSleep = dashboardData?.latestSleepData?.wakeUps?.length === 0;
-        
-        if (hasActiveSleep) {
-            // Redirect to wake up form if there's an active sleep session
-            navigate('/gotobed/wakeup');
-        }
-    };
 
     /**
      * Loads bedrooms for the current user from the backend.
@@ -127,7 +127,7 @@ function GoToBed() {
 
             // Get JWT token for authentication
             // Start sleep session using the service (token handled by interceptor)
-            const newSleepSession = await sleepSessionService.startSleepSession(sleepData);
+            await sleepSessionService.startSleepSession(sleepData);
 
             // Optionally refresh dashboard data
             refreshDashboard?.();
