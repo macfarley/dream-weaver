@@ -93,22 +93,94 @@ function SleepDataIndex() {
   }, [dashboardData]);
 
   // Loading and error states
-  if (dashLoading || loading) return <p>Loading sleep data...</p>;
-  if (error) return <p className="text-danger">{error}</p>;
-  if (dashError) return <p className="text-danger">{dashError}</p>;
+  if (dashLoading || loading) {
+    return (
+      <div>
+        <h3>Your Sleep Sessions</h3>
+        <div className="alert alert-info">
+          <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+          Loading sleep data...
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div>
+        <h3>Your Sleep Sessions</h3>
+        <div className="alert alert-danger">
+          <strong>Error:</strong> {error}
+          <br />
+          <button 
+            className="btn btn-outline-primary btn-sm mt-2 me-2"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
+          <button 
+            className="btn btn-outline-secondary btn-sm mt-2"
+            onClick={() => navigate('/users/dashboard')}
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  if (dashError) {
+    return (
+      <div>
+        <h3>Your Sleep Sessions</h3>
+        <div className="alert alert-warning">
+          <strong>Dashboard Error:</strong> {dashError}
+          <br />
+          <button 
+            className="btn btn-outline-secondary btn-sm mt-2"
+            onClick={() => navigate('/users/dashboard')}
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
   
   if (!sleepSessions.length) {
     return (
       <div>
         <h3>Your Sleep Sessions</h3>
+        
+        {/* Debug info */}
+        <div className="alert alert-secondary small">
+          <strong>Debug Info:</strong><br />
+          Dashboard loading: {dashLoading ? 'Yes' : 'No'}<br />
+          Component loading: {loading ? 'Yes' : 'No'}<br />
+          Sleep sessions count: {sleepSessions.length}<br />
+          Dashboard has latest data: {dashboardData?.latestSleepData ? 'Yes' : 'No'}<br />
+          Error: {error || 'None'}
+        </div>
+        
         <div className="alert alert-info">
-          <h5>No sleep sessions logged yet!</h5>
-          <p>You haven't started tracking your sleep yet. Click the "Go to Bed" button to start your first sleep session.</p>
+          <h5>No sleep sessions found!</h5>
+          <p>
+            {dashboardData?.latestSleepData 
+              ? "The dashboard shows you have sleep data, but the sleep-data API isn't returning it. This might be a backend endpoint issue."
+              : "You haven't started tracking your sleep yet. Click the 'Go to Bed' button to start your first sleep session."
+            }
+          </p>
           <button 
-            className="btn btn-primary"
+            className="btn btn-primary me-2"
             onClick={() => navigate('/gotobed')}
           >
-            Start Your First Sleep Session
+            Start New Sleep Session
+          </button>
+          <button 
+            className="btn btn-outline-secondary"
+            onClick={() => navigate('/users/dashboard')}
+          >
+            Back to Dashboard
           </button>
         </div>
       </div>
