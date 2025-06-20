@@ -45,7 +45,7 @@ function App() {
               <Route path="/users/dashboard/bedrooms" element={<BedroomIndex />} />
               <Route path="/users/dashboard/bedrooms/:bedroomname" element={<BedroomDetails />} />
               <Route path="/users/dashboard/sleepdata" element={<SleepDataIndex />} />
-              <Route path="/users/dashboard/sleepdata/:date" element={<SleepSession />} />
+              <Route path="/users/dashboard/sleepdata/:id" element={<SleepSession />} />
               <Route path="/users/dashboard/dreamjournal/:date" element={<SleepSession />} />
               <Route path="/users/dashboard/dreams" element={<DreamIndex />} />
               <Route path="/users/profile" element={<UserProfile />} />

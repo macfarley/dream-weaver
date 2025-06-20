@@ -4,8 +4,8 @@ import sleepDataService from '../../services/sleepDataService';
 import { DashboardContext } from '../../contexts/DashboardContext';
 
 function SleepSession() {
-  // Get the date param from the URL
-  const { date } = useParams();
+  // Get the id param from the URL (could be date for dreamjournal route or id for sleepdata route)
+  const { date, id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -19,19 +19,32 @@ function SleepSession() {
   const [sleepData, setSleepData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Try to find the sleep session for the given date from context, otherwise fetch from API
+  // Try to find the sleep session for the given date/id from context, otherwise fetch from API
   useEffect(() => {
-    // Find entry in dashboardData matching the date
-    const entry = dashboardData?.sleepSessions?.find(entry =>
-      new Date(entry.createdAt).toISOString().startsWith(date)
-    );
+    // Determine what we're looking for (date or id)
+    const searchParam = id || date;
+    
+    let entry;
+    if (id) {
+      // Looking for specific ID (from sleepdata route)
+      entry = dashboardData?.sleepSessions?.find(entry => entry._id === id);
+    } else if (date) {
+      // Looking for date (from dreamjournal route)
+      entry = dashboardData?.sleepSessions?.find(entry =>
+        new Date(entry.createdAt).toISOString().startsWith(date)
+      );
+    }
 
     if (entry) {
       setSleepData(entry);
       setLoading(false);
     } else {
       // Fetch from API if not found in context
-      sleepDataService.getSleepDataByDate(date)
+      const fetchPromise = id 
+        ? sleepDataService.get(id)  // Fetch by ID
+        : sleepDataService.getSleepDataByDate(date); // Fetch by date (for dreamjournal)
+        
+      fetchPromise
         .then(data => setSleepData(data))
         .catch(err => {
           console.error(err);
@@ -39,7 +52,7 @@ function SleepSession() {
         })
         .finally(() => setLoading(false));
     }
-  }, [date, dashboardData]);
+  }, [date, id, dashboardData]);
 
   // Smooth scroll to anchor if hash is present in URL (e.g. #dreamJournal)
   useEffect(() => {
