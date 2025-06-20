@@ -48,11 +48,6 @@ const DashboardProvider = ({ children }) => {
             } else {
                 console.warn('Failed to load sleep data:', sleepEntries.reason?.message);
             }
-            
-            // Log the actual sleep data response for debugging
-            console.log('Sleep data response:', sleepEntriesResult);
-            console.log('Type of sleep data response:', typeof sleepEntriesResult);
-            console.log('Is Array:', Array.isArray(sleepEntriesResult));
 
             // Ensure we have an array for sorting (handle different response formats)
             let sleepArray = [];

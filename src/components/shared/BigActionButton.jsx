@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
 import { DashboardContext } from "../../contexts/DashboardContext";
@@ -35,20 +35,16 @@ function BigActionButton({
     return null;
   }
 
-  // Determine if user has an active sleep session
-  const hasActiveSleep = 
-    dashboardData?.latestSleepData && 
-    Array.isArray(dashboardData.latestSleepData.wakeUps) &&
-    dashboardData.latestSleepData.wakeUps.length === 0;
+  // Determine if user has an active sleep session using useMemo for performance
+  const hasActiveSleep = useMemo(() => {
+    return dashboardData?.latestSleepData && 
+           Array.isArray(dashboardData.latestSleepData.wakeUps) &&
+           dashboardData.latestSleepData.wakeUps.length === 0;
+  }, [dashboardData?.latestSleepData?.wakeUps]);
 
-  // Debug logging
-  console.log('BigActionButton - Dashboard data:', dashboardData);
-  console.log('BigActionButton - Latest sleep data:', dashboardData?.latestSleepData);
-  console.log('BigActionButton - Wake ups:', dashboardData?.latestSleepData?.wakeUps);
-  console.log('BigActionButton - Has active sleep:', hasActiveSleep);
-
-  // Configure button based on sleep state
-  const buttonConfig = hasActiveSleep
+  // Configure button based on sleep state using useMemo for performance
+  const buttonConfig = useMemo(() => {
+    return hasActiveSleep
     ? {
         to: "/gotobed/wakeup",
         label: "Wake Up",
@@ -65,6 +61,7 @@ function BigActionButton({
         variant: "sleep",
         ariaLabel: "Go to bed - start tracking your sleep"
       };
+  }, [hasActiveSleep]);
 
   const sizeClasses = {
     small: "big-action-button--small",
@@ -119,4 +116,5 @@ function BigActionButton({
   );
 }
 
-export default BigActionButton;
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(BigActionButton);

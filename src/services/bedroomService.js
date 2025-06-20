@@ -24,9 +24,6 @@ async function getBedrooms() {
   try {
     const response = await api.get('/bedrooms');
     
-    // Log the actual response for debugging
-    console.log('Bedrooms API response:', response.data);
-    
     // Check if response has a data property (common API pattern)
     let bedroomArray;
     if (Array.isArray(response.data)) {

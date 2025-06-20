@@ -30,17 +30,11 @@ function WakeUpForm() {
     const [error, setError] = useState('');
 
     // Get the current sleep session from dashboard context
-    useEffect(() => {
-        console.log('WakeUpForm - Dashboard data:', dashboardData);
-        console.log('WakeUpForm - Latest sleep data:', dashboardData?.latestSleepData);
-        
+    useEffect(() => {        
         if (dashboardData?.latestSleepData) {
             // Check if the latest sleep session has no wake-ups (meaning it's still active)
             const isActiveSleep = Array.isArray(dashboardData.latestSleepData.wakeUps) && 
                                  dashboardData.latestSleepData.wakeUps.length === 0;
-            
-            console.log('WakeUpForm - Is active sleep:', isActiveSleep);
-            console.log('WakeUpForm - Wake ups array:', dashboardData.latestSleepData.wakeUps);
             
             if (isActiveSleep) {
                 setSleepData(dashboardData.latestSleepData);

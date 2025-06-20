@@ -124,7 +124,7 @@ function UserProvider({ children }) {
     // Add listener for mock user updates in development
     if (import.meta.env.DEV) {
       const handleMockUserUpdate = (event) => {
-        console.log('🔄 Mock user update received:', event.detail.user);
+        console.info('🔄 Mock user update received:', event.detail.user);
         setUser(event.detail.user);
       };
       

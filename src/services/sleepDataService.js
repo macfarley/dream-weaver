@@ -13,9 +13,6 @@ const getAll = async () => {
   try {
     const response = await api.get('/sleep-data/');
     
-    // Log the actual response for debugging
-    console.log('Sleep data API response:', response.data);
-    
     // Handle different response formats (similar to bedroom service)
     if (Array.isArray(response.data)) {
       return response.data;
