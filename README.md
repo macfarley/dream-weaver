@@ -43,7 +43,13 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
 - 📓 **Dream Journaling** - Capture thoughts, dreams, and reflections organized by sleep session
 - 🛏️ **Smart Bedroom Management** - Track environmental factors (light, noise, temperature) across multiple sleeping spaces
 - 📊 **Sleep Analytics** - View sleep history, patterns, and quality assessments over time
-- ⚙️ **User Preferences** - Customizable settings for units (metric/imperial), time format (12/24 hour), and dark/light themes
+- ⚙️ **User Preferences** - Comprehensive preference system with site-wide consistency:
+  - **Theme**: Dark/light mode with instant switching and persistence
+  - **Units**: Imperial (°F, miles) vs Metric (°C, kilometers) for all measurements
+  - **Date Format**: MM/DD/YYYY, DD/MM/YYYY, or YYYY-MM-DD across all components
+  - **Time Format**: 12-hour (AM/PM) or 24-hour display for all time fields
+  - **Sleep Reminders**: Configurable browser-based reminder system
+  - Real-time preference sync across all app components and views
 - 🧭 **Intuitive Navigation** - Semantic routing with breadcrumbs, back navigation, and user-friendly URLs
 - 📱 **Enhanced Mobile UX** - Right-aligned slide-out navigation panel (50-60% screen width) with improved accessibility
 - 🎨 **BigActionButton Component** - Reusable prominent action button with automatic sleep state detection and consistent theming

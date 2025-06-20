@@ -48,12 +48,41 @@ function About() {
                     <strong>Can I view past sessions?</strong> Yes, go to Sleep History or Dream Journal to browse your sessions by date and see full details.
                 </li>
                 <li>
-                    <strong>What if I forget to wake up?</strong> You can resume an ongoing session or edit previous entries later through your Sleep History.
+                    <strong>What if I forget to wake up?</strong> No worries! You can set a retroactive wake-up time when you return, use the "Quick Wake-Up" button for instant closure, or check out our reminder tips below.
                 </li>
                 <li>
                     <strong>Are my preferences saved?</strong> Yes. You can adjust theme, units, and date/time format anytime in your Profile settings.
                 </li>
             </ul>
+
+            {/* Sleep Reminders & Tips */}
+            <h3 className="mt-4">Never Forget to Wake Up 💡</h3>
+            <p>
+                Forgot to close a sleep session after waking up? No problem! DreamWeaver makes it easy to handle these situations:
+            </p>
+            <div className="row">
+                <div className="col-md-6">
+                    <h5>⏰ Quick Recovery</h5>
+                    <ul>
+                        <li><strong>Retroactive Wake-Up:</strong> When you return to close a session, you can set your actual wake-up time instead of "now"</li>
+                        <li><strong>Quick Wake-Up:</strong> In a hurry? Use the "Quick Wake-Up" button to close the session instantly</li>
+                        <li><strong>Smart Suggestions:</strong> For long sessions (12+ hours), the app will suggest setting a retroactive time</li>
+                    </ul>
+                </div>
+                <div className="col-md-6">
+                    <h5>📱 Set Up Reminders</h5>
+                    <ul>
+                        <li><strong>Phone Alarm:</strong> Set a recurring alarm for your usual wake-up time with the note "Close DreamWeaver session"</li>
+                        <li><strong>Calendar Event:</strong> Create a daily reminder that links directly to your wake-up page</li>
+                        <li><strong>Browser Bookmark:</strong> Save <code>/dashboard</code> to your bookmarks bar for one-click access</li>
+                        <li><strong>Home Screen:</strong> Add DreamWeaver to your phone's home screen for instant access</li>
+                    </ul>
+                </div>
+            </div>
+            <div className="alert alert-light mt-3" role="alert">
+                <strong>💡 Pro Tip:</strong> Create a calendar event that repeats daily at your wake-up time. 
+                In the event description, add a link to <code>{window.location.origin}/dashboard</code> so you can jump straight to closing your session!
+            </div>
 
             {/* Important Disclaimer */}
             <div className="alert alert-info mt-4" role="alert">

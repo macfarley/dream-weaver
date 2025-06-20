@@ -2,6 +2,8 @@ import React, { useEffect, useState, useContext } from 'react';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import sleepDataService from '../../services/sleepDataService';
 import { useNavigate } from 'react-router-dom';
+import { usePreferenceSync } from '../../hooks/usePreferenceSync';
+import { formatSessionLabel as formatSessionLabelWithPrefs, formatDate } from '../../utils/userPreferences';
 
 /**
  * Converts a date string to a compact YYYYMMDD format.
@@ -61,6 +63,7 @@ function calculateSleepDuration(start, wakeUps) {
  */
 function SleepDataIndex() {
   const { dashboardData, loading: dashLoading, error: dashError } = useContext(DashboardContext);
+  const { dateFormat } = usePreferenceSync();
   const [sleepSessions, setSleepSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -182,7 +185,7 @@ function SleepDataIndex() {
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .map((session) => {
           // Prepare display values
-          const label = formatSessionLabel(session.createdAt);
+          const label = formatSessionLabelWithPrefs(session.createdAt, dateFormat);
           const dateKey = formatDateKey(session.createdAt);
           const duration = calculateSleepDuration(session.createdAt, session.wakeUps);
           const restfulness = session.wakeUps?.[session.wakeUps.length - 1]?.sleepQuality || 'Not rated';

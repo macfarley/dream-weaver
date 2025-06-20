@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { getToken } from '../../services/authService';
 import * as bedroomService from '../../services/bedroomService';
 import { validateBedroomName } from '../../utils/urlSafeNames';
+import { usePreferenceSync } from '../../hooks/usePreferenceSync';
+import { getTemperatureUnit, convertTemperature } from '../../utils/userPreferences';
 
 /**
  * BedroomForm component allows users to add a new bedroom with various attributes.
@@ -11,13 +13,16 @@ import { validateBedroomName } from '../../utils/urlSafeNames';
  * @param {function} onCancel - Callback when the form is cancelled.
  */
 function BedroomForm({ onSuccess, onCancel }) {
+    // Get user preferences
+    const { prefersImperial } = usePreferenceSync();
+    
     // Initial form state
     const [formData, setFormData] = useState({
         bedroomName: '',
         bedType: 'bed',
         mattressType: '',
         bedSize: '',
-        temperature: 70,
+        temperature: prefersImperial ? 70 : 21, // Default to 70°F or 21°C
         lightLevel: 'normal',
         noiseLevel: 'moderate',
         pillows: 'one',
@@ -154,13 +159,13 @@ function BedroomForm({ onSuccess, onCancel }) {
 
             {/* Temperature Input */}
             <div className="mb-2">
-                <label className="form-label">Temperature (°F)</label>
+                <label className="form-label">Temperature ({getTemperatureUnit(prefersImperial)})</label>
                 <input
                     name="temperature"
                     type="number"
                     className="form-control"
-                    min="50"
-                    max="100"
+                    min={prefersImperial ? "50" : "10"}
+                    max={prefersImperial ? "100" : "38"}
                     value={formData.temperature}
                     onChange={handleChange}
                 />

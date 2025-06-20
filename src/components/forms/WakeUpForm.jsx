@@ -24,6 +24,10 @@ function WakeUpForm() {
     // State for the sleep quality slider (default 3)
     const [sleepQuality, setSleepQuality] = useState(3);
 
+    // State for retroactive wake-up time
+    const [actualWakeUpTime, setActualWakeUpTime] = useState('');
+    const [useCustomWakeUpTime, setUseCustomWakeUpTime] = useState(false);
+
     // State to indicate if the form is submitting
     const [submitting, setSubmitting] = useState(false);
 
@@ -35,8 +39,22 @@ function WakeUpForm() {
         if (dashboardData?.latestSleepData) {
             // Use centralized utility for consistent sleep state checking
             if (hasActiveSleepSession(dashboardData)) {
-                setSleepData(dashboardData.latestSleepData);
+                const sleepSession = dashboardData.latestSleepData;
+                setSleepData(sleepSession);
                 setError(''); // Clear any previous errors
+                
+                // Check if this is a long sleep session (over 12 hours)
+                const sleepStart = new Date(sleepSession.createdAt);
+                const now = new Date();
+                const hoursAsleep = (now - sleepStart) / (1000 * 60 * 60);
+                
+                // For long sessions, suggest but don't force retroactive time setting
+                if (hoursAsleep > 12) {
+                    // Set a default time to 8 hours after sleep start as a suggestion
+                    const defaultWakeTime = new Date(sleepStart.getTime() + (8 * 60 * 60 * 1000));
+                    setActualWakeUpTime(defaultWakeTime.toISOString().slice(0, 16)); // Format for datetime-local input
+                    // Don't automatically enable custom time - let user choose
+                }
             } else {
                 setError('No active sleep session found. Please start a new sleep session first.');
             }
@@ -59,7 +77,9 @@ function WakeUpForm() {
             const wakeupData = {
                 sleepQuality,
                 dreamJournal,
-                awakenAt: new Date(), // Current time
+                awakenAt: useCustomWakeUpTime && actualWakeUpTime 
+                    ? new Date(actualWakeUpTime)  // Use custom time if provided
+                    : new Date(),                 // Default to now for quick wake-ups
                 finishedSleeping: finalWakeUp, // Whether user is staying awake
                 backToBedAt: finalWakeUp ? null : new Date(), // If going back to bed, set time
             };
@@ -97,6 +117,72 @@ function WakeUpForm() {
             <p className="text-muted">
                 Record how you slept and any dreams you remember.
             </p>
+
+            {/* Quick Wake-Up Option */}
+            <div className="mb-4 p-3 bg-light rounded">
+                <h5>Quick Wake-Up</h5>
+                <p className="mb-2">Just waking up and want to skip the details?</p>
+                <button
+                    className="btn btn-primary"
+                    disabled={submitting}
+                    onClick={() => handleSubmit(true)}
+                >
+                    {submitting ? 'Submitting...' : "I'm awake! (Skip details)"}
+                </button>
+            </div>
+
+            <hr />
+            <h5>Or add details about your sleep...</h5>
+
+            {/* Show hint for long sleep sessions */}
+            {(() => {
+                const sleepStart = new Date(sleepData.createdAt);
+                const now = new Date();
+                const hoursAsleep = (now - sleepStart) / (1000 * 60 * 60);
+                
+                if (hoursAsleep > 12) {
+                    return (
+                        <div className="alert alert-info">
+                            <strong>Long sleep session detected!</strong> You've been asleep for {Math.round(hoursAsleep)} hours. 
+                            If you actually woke up earlier but forgot to log it, you can set your actual wake-up time below.
+                        </div>
+                    );
+                }
+                return null;
+            })()}
+
+            {/* Retroactive Wake-Up Time (Optional) */}
+            <div className="mb-3">
+                <div className="form-check">
+                    <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="useCustomTime"
+                        checked={useCustomWakeUpTime}
+                        onChange={(e) => setUseCustomWakeUpTime(e.target.checked)}
+                    />
+                    <label className="form-check-label" htmlFor="useCustomTime">
+                        I actually woke up at a different time
+                    </label>
+                </div>
+                
+                {useCustomWakeUpTime && (
+                    <div className="mt-2">
+                        <label className="form-label">Actual wake-up time:</label>
+                        <input
+                            type="datetime-local"
+                            className="form-control"
+                            value={actualWakeUpTime}
+                            onChange={(e) => setActualWakeUpTime(e.target.value)}
+                            max={new Date().toISOString().slice(0, 16)} // Can't be in the future
+                            min={sleepData ? new Date(sleepData.createdAt).toISOString().slice(0, 16) : ''}
+                        />
+                        <small className="form-text text-muted">
+                            Leave unchecked to use current time ({new Date().toLocaleTimeString()})
+                        </small>
+                    </div>
+                )}
+            </div>
 
             {/* Dream Journal Input */}
             <div className="mb-3">

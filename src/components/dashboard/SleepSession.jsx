@@ -2,6 +2,8 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import sleepDataService from '../../services/sleepDataService';
 import { DashboardContext } from '../../contexts/DashboardContext';
+import { usePreferenceSync } from '../../hooks/usePreferenceSync';
+import { formatDate, formatTime } from '../../utils/userPreferences';
 
 function SleepSession() {
   // Get the id param from the URL (could be date for dreamjournal route or id for sleepdata route)
@@ -14,6 +16,9 @@ function SleepSession() {
 
   // Get dashboard data and refresh function from context
   const { dashboardData, refreshDashboard } = useContext(DashboardContext);
+  
+  // Get user preferences for date/time formatting
+  const { dateFormat, timeFormat } = usePreferenceSync();
 
   // Local state for sleep data and loading status
   const [sleepData, setSleepData] = useState(null);
@@ -251,7 +256,7 @@ function SleepSession() {
   return (
     <div className="container my-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Sleep Session - {start.toLocaleDateString()}</h2>
+        <h2>Sleep Session - {formatDate(start, dateFormat)}</h2>
         {!isEditing && (
           <button 
             className="btn btn-primary"
@@ -272,6 +277,8 @@ function SleepSession() {
               latestWake={latestWake}
               totalSleepDuration={totalSleepDuration}
               isDreamJournalFocus={isDreamJournalFocus}
+              dateFormat={dateFormat}
+              timeFormat={timeFormat}
             />
           ) : (
             <SleepSessionEditForm
@@ -282,6 +289,7 @@ function SleepSession() {
               sleepData={sleepData}
               start={start}
               totalSleepDuration={totalSleepDuration}
+              timeFormat={timeFormat}
             />
           )}
         </div>
@@ -337,7 +345,7 @@ function SleepSession() {
 }
 
 // Subcomponent: Display sleep session info (view mode)
-function SleepSessionInfo({ sleepData, start, latestWake, totalSleepDuration, isDreamJournalFocus }) {
+function SleepSessionInfo({ sleepData, start, latestWake, totalSleepDuration, isDreamJournalFocus, dateFormat, timeFormat }) {
   const { bedroom, cuddleBuddy, sleepyThoughts, wakeUps } = sleepData;
 
   return (
@@ -345,7 +353,7 @@ function SleepSessionInfo({ sleepData, start, latestWake, totalSleepDuration, is
       <div className="card mb-4">
         <div className="card-body">
           <h5 className="card-title">Session Overview</h5>
-          <p><strong>Started at:</strong> {start.toLocaleTimeString()}</p>
+          <p><strong>Started at:</strong> {formatTime(start, timeFormat)}</p>
           <p><strong>Bedroom:</strong> {bedroom?.bedroomName || 'N/A'}</p>
           <p><strong>Cuddle Buddy:</strong> {cuddleBuddy || 'None'}</p>
           <p>
@@ -392,10 +400,10 @@ function SleepSessionInfo({ sleepData, start, latestWake, totalSleepDuration, is
             ) : (
               wakeUps.map((wake, index) => {
                 const awakenAt = wake.awakenAt
-                  ? new Date(wake.awakenAt).toLocaleTimeString()
+                  ? formatTime(new Date(wake.awakenAt), timeFormat)
                   : 'N/A';
                 const backToBedAt = wake.backToBedAt
-                  ? new Date(wake.backToBedAt).toLocaleTimeString()
+                  ? formatTime(new Date(wake.backToBedAt), timeFormat)
                   : null;
 
                 return (
@@ -425,7 +433,7 @@ function SleepSessionInfo({ sleepData, start, latestWake, totalSleepDuration, is
 }
 
 // Subcomponent: Edit form for sleep session
-function SleepSessionEditForm({ formData, handleChange, handleSubmit, onCancel, sleepData, start, totalSleepDuration }) {
+function SleepSessionEditForm({ formData, handleChange, handleSubmit, onCancel, sleepData, start, totalSleepDuration, timeFormat }) {
   const { bedroom } = sleepData;
 
   return (
@@ -436,7 +444,7 @@ function SleepSessionEditForm({ formData, handleChange, handleSubmit, onCancel, 
           
           {/* Read-only session info */}
           <div className="mb-3">
-            <p><strong>Started at:</strong> {start.toLocaleTimeString()}</p>
+            <p><strong>Started at:</strong> {formatTime(start, timeFormat)}</p>
             <p><strong>Bedroom:</strong> {bedroom?.bedroomName || 'N/A'}</p>
             <p>
               <strong>Total Sleep:</strong>{' '}

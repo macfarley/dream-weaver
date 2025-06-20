@@ -49,6 +49,8 @@ function UserProfile() {
     theme: 'dark',
     dateFormat: 'MM/DD/YYYY',
     timeFormat: '12-hour',
+    sleepReminderEnabled: true,
+    sleepReminderHours: 12,
   });
 
   // State for tracking related data counts for deletion warning
@@ -76,6 +78,8 @@ function UserProfile() {
             theme: userData.theme || 'dark',
             dateFormat: userData.dateFormat || 'MM/DD/YYYY',
             timeFormat: userData.timeFormat || '12-hour',
+            sleepReminderEnabled: userData.sleepReminderEnabled ?? true,
+            sleepReminderHours: userData.sleepReminderHours || 12,
           });
         } catch (error) {
           console.error('Failed to load user data:', error);
@@ -97,6 +101,8 @@ function UserProfile() {
           theme: user.theme || 'dark',
           dateFormat: user.dateFormat || 'MM/DD/YYYY',
           timeFormat: user.timeFormat || '12-hour',
+          sleepReminderEnabled: user.sleepReminderEnabled ?? true,
+          sleepReminderHours: user.sleepReminderHours || 12,
         });
       }
     };
@@ -477,6 +483,70 @@ function UserProfile() {
                         <option value="12-hour">12-hour (AM/PM)</option>
                         <option value="24-hour">24-hour</option>
                       </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sleep Reminder Settings */}
+                <div className="mb-4">
+                  <label className="form-label fw-bold">Sleep Reminders</label>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <div className="form-text">Current:</div>
+                      <div className="p-2 bg-light rounded border">
+                        {profileUser.sleepReminderEnabled ?? true ? (
+                          <>
+                            ✅ Enabled
+                            <br />
+                            <small className="text-muted">
+                              Remind after {profileUser.sleepReminderHours || 12} hours
+                            </small>
+                          </>
+                        ) : (
+                          '❌ Disabled'
+                        )}
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-text">Update:</div>
+                      <div className="form-check mt-2 mb-3">
+                        <input
+                          type="checkbox"
+                          id="sleepReminderEnabled"
+                          name="sleepReminderEnabled"
+                          checked={formData.sleepReminderEnabled}
+                          onChange={handleChange}
+                          disabled={!canEdit}
+                          className="form-check-input"
+                        />
+                        <label htmlFor="sleepReminderEnabled" className="form-check-label">
+                          Enable sleep reminders
+                        </label>
+                      </div>
+                      {formData.sleepReminderEnabled && (
+                        <div>
+                          <label htmlFor="sleepReminderHours" className="form-label">
+                            Remind me after:
+                          </label>
+                          <div className="input-group">
+                            <input
+                              type="number"
+                              id="sleepReminderHours"
+                              name="sleepReminderHours"
+                              value={formData.sleepReminderHours}
+                              onChange={handleChange}
+                              disabled={!canEdit}
+                              className="form-control"
+                              min="1"
+                              max="48"
+                            />
+                            <span className="input-group-text">hours</span>
+                          </div>
+                          <div className="form-text">
+                            Browser will remind you to log sleep after this many hours
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

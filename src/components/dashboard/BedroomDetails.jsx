@@ -6,6 +6,8 @@ import * as bedroomService from '../../services/bedroomService';
 import sleepDataService from '../../services/sleepDataService';
 import { format, parseISO } from 'date-fns';
 import { decodeBedroomNameFromUrl, bedroomNamesMatch, sanitizeBedroomNameForUrl } from '../../utils/urlSafeNames';
+import { usePreferenceSync } from '../../hooks/usePreferenceSync';
+import { formatTemperature, getTemperatureUnit } from '../../utils/userPreferences';
 
 // Main BedroomDetails component
 function BedroomDetails() {
@@ -15,6 +17,9 @@ function BedroomDetails() {
 
     // Get dashboard data and refresh function from context
     const { dashboardData, refreshDashboard } = useContext(DashboardContext);
+    
+    // Get user preferences
+    const { prefersImperial } = usePreferenceSync();
 
     // Local state for bedroom details, edit mode, form data, delete password, usage dates, and loading
     const [bedroom, setBedroom] = useState(null);
@@ -145,6 +150,7 @@ function BedroomDetails() {
                         <BedroomInfo
                             bedroom={bedroom}
                             onEdit={() => setIsEditing(true)}
+                            prefersImperial={prefersImperial}
                         />
                     ) : (
                         <BedroomEditForm
@@ -152,6 +158,7 @@ function BedroomDetails() {
                             handleChange={handleChange}
                             handleSubmit={handleSubmit}
                             onCancel={() => setIsEditing(false)}
+                            prefersImperial={prefersImperial}
                         />
                     )}
                 </div>
@@ -174,7 +181,7 @@ function BedroomDetails() {
 }
 
 // Subcomponent: Display bedroom info
-function BedroomInfo({ bedroom, onEdit }) {
+function BedroomInfo({ bedroom, onEdit, prefersImperial }) {
     return (
         <div>
             <p><strong>Bed Type:</strong> {bedroom.bedType}</p>
@@ -184,7 +191,7 @@ function BedroomInfo({ bedroom, onEdit }) {
                     <p><strong>Size:</strong> {bedroom.bedSize}</p>
                 </>
             )}
-            <p><strong>Temp:</strong> {bedroom.temperature}°F</p>
+            <p><strong>Temp:</strong> {formatTemperature(bedroom.temperature, prefersImperial, true)}</p>
             <p><strong>Light:</strong> {bedroom.lightLevel}</p>
             <p><strong>Noise:</strong> {bedroom.noiseLevel}</p>
             <p><strong>Pillows:</strong> {bedroom.pillows}</p>
@@ -198,7 +205,7 @@ function BedroomInfo({ bedroom, onEdit }) {
 }
 
 // Subcomponent: Edit form for bedroom
-function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel }) {
+function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel, prefersImperial }) {
     return (
         <form onSubmit={handleSubmit}>
             <input
@@ -252,11 +259,12 @@ function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel }) {
             <input
                 name="temperature"
                 type="number"
-                min={50}
-                max={100}
+                min={prefersImperial ? 50 : 10}
+                max={prefersImperial ? 100 : 38}
                 value={formData.temperature}
                 onChange={handleChange}
                 className="form-control mb-2"
+                placeholder={`Temperature (${getTemperatureUnit(prefersImperial)})`}
             />
             <select
                 name="lightLevel"
