@@ -121,6 +121,18 @@
   }
 }
 
+/* Inward pulse animation for "Go to Bed" - draws user into sleep */
+@keyframes pulse-ring-inward {
+  0% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -231,6 +243,8 @@
   
   .big-action-button__pulse-ring {
     border-color: #6366f1;
+    /* Use inward animation for "Go to Bed" - draws user into sleep */
+    animation: pulse-ring-inward 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   
   &:hover .big-action-button__circle {
@@ -239,26 +253,37 @@
       0 6px 20px rgba(99, 102, 241, 0.3),
       inset 0 2px 0 rgba(255, 255, 255, 0.2);
   }
+  
+  &:hover .big-action-button__pulse-ring {
+    animation-duration: 1.5s;
+  }
 }
 
 .big-action-button--wake {
   .big-action-button__circle::before {
+    /* Orange/yellow daytime colors for wake up */
     background: linear-gradient(135deg, 
-      #059669 0%,
-      #10b981 30%,
-      #34d399 70%,
-      #6ee7b7 100%);
+      #f59e0b 0%,
+      #fbbf24 30%,
+      #fcd34d 70%,
+      #fef3c7 100%);
   }
   
   .big-action-button__pulse-ring {
-    border-color: #10b981;
+    border-color: #f59e0b;
+    /* Keep outward animation for "Wake Up" - pushing out into day */
+    animation: pulse-ring 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   
   &:hover .big-action-button__circle {
     box-shadow: 
-      0 12px 40px rgba(16, 185, 129, 0.4),
-      0 6px 20px rgba(16, 185, 129, 0.3),
+      0 12px 40px rgba(245, 158, 11, 0.4),
+      0 6px 20px rgba(245, 158, 11, 0.3),
       inset 0 2px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  &:hover .big-action-button__pulse-ring {
+    animation-duration: 1.5s;
   }
 }
 
@@ -273,7 +298,7 @@
   
   .big-action-button__pulse-ring {
     border-color: #9ca3af;
-    animation-duration: 2s; // Half speed: doubled from 1s to 2s
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; // Half speed: doubled from 1s to 2s
   }
 }
 
@@ -293,10 +318,6 @@
 
 /* Hover states */
 .big-action-button:hover {
-  .big-action-button__pulse-ring {
-    animation-duration: 1.5s;
-  }
-  
   .big-action-button__label {
     color: var(--color-accent);
   }

@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState, useEffect } from "react";
+import { useContext, useMemo, useState, useEffect, memo } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
 import { DashboardContext } from "../../contexts/DashboardContext";
@@ -178,4 +178,4 @@ function BigActionButton({
 }
 
 // Memoize the component to prevent unnecessary re-renders
-export default React.memo(BigActionButton);
+export default memo(BigActionButton);
