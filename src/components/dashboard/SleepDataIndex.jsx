@@ -74,9 +74,7 @@ function SleepDataIndex() {
     const loadData = async () => {
       setLoading(true);
       try {
-        console.log('SleepDataIndex: Fetching all sleep sessions...');
         const data = await sleepDataService.getSleepDataByUser();
-        console.log('SleepDataIndex: Received data:', data);
         setSleepSessions(data);
         setError(null); // Clear any previous errors
       } catch (err) {
@@ -151,22 +149,11 @@ function SleepDataIndex() {
     return (
       <div>
         <h3>Your Sleep Sessions</h3>
-        
-        {/* Debug info */}
-        <div className="alert alert-secondary small">
-          <strong>Debug Info:</strong><br />
-          Dashboard loading: {dashLoading ? 'Yes' : 'No'}<br />
-          Component loading: {loading ? 'Yes' : 'No'}<br />
-          Sleep sessions count: {sleepSessions.length}<br />
-          Dashboard has latest data: {dashboardData?.latestSleepData ? 'Yes' : 'No'}<br />
-          Error: {error || 'None'}
-        </div>
-        
         <div className="alert alert-info">
           <h5>No sleep sessions found!</h5>
           <p>
             {dashboardData?.latestSleepData 
-              ? "The dashboard shows you have sleep data, but the sleep-data API isn't returning it. This might be a backend endpoint issue."
+              ? "It looks like you have sleep data, but no sessions are showing here. Try refreshing the page or check your connection."
               : "You haven't started tracking your sleep yet. Click the 'Go to Bed' button to start your first sleep session."
             }
           </p>
