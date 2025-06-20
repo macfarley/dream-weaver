@@ -63,26 +63,27 @@ function SleepDataIndex() {
   const { dashboardData, loading: dashLoading, error: dashError } = useContext(DashboardContext);
   const [sleepSessions, setSleepSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     /**
      * Loads sleep session data.
-     * If dashboardData has latestSleepData, use it.
-     * Otherwise, fetch all sessions from the service.
+     * Always fetch all sessions for the index page, don't just use latest from dashboard.
      */
     const loadData = async () => {
       setLoading(true);
       try {
-        if (dashboardData?.latestSleepData) {
-          // In future, replace with full array if dashboard has all sessions
-          setSleepSessions([dashboardData.latestSleepData]);
-        } else {
-          const data = await sleepDataService.getSleepDataByUser();
-          setSleepSessions(data);
-        }
+        console.log('SleepDataIndex: Fetching all sleep sessions...');
+        const data = await sleepDataService.getSleepDataByUser();
+        console.log('SleepDataIndex: Received data:', data);
+        setSleepSessions(data);
+        setError(null); // Clear any previous errors
       } catch (err) {
         console.error('Error loading sleep data:', err);
+        // Set a user-friendly error message
+        setError(`Failed to load sleep sessions: ${err.message}`);
+        setSleepSessions([]); // Clear sessions on error
       } finally {
         setLoading(false);
       }
@@ -93,8 +94,26 @@ function SleepDataIndex() {
 
   // Loading and error states
   if (dashLoading || loading) return <p>Loading sleep data...</p>;
+  if (error) return <p className="text-danger">{error}</p>;
   if (dashError) return <p className="text-danger">{dashError}</p>;
-  if (!sleepSessions.length) return <p>No sleep sessions logged yet.</p>;
+  
+  if (!sleepSessions.length) {
+    return (
+      <div>
+        <h3>Your Sleep Sessions</h3>
+        <div className="alert alert-info">
+          <h5>No sleep sessions logged yet!</h5>
+          <p>You haven't started tracking your sleep yet. Click the "Go to Bed" button to start your first sleep session.</p>
+          <button 
+            className="btn btn-primary"
+            onClick={() => navigate('/gotobed')}
+          >
+            Start Your First Sleep Session
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Render sleep session cards
   return (
