@@ -197,7 +197,9 @@ function SleepDataIndex() {
                 <p className="card-text"><strong>Restfulness:</strong> {restfulness}</p>
                 <button
                   className="btn btn-primary"
-                  onClick={() => navigate(`/users/dashboard/sleepdata/${session._id}`)}
+                  onClick={() => navigate(`/users/dashboard/sleepdata/${session._id}`, { 
+                    state: { sessionData: session } 
+                  })}
                   aria-label={`View details for ${label}`}
                 >
                   View Session

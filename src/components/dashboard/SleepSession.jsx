@@ -21,38 +21,64 @@ function SleepSession() {
 
   // Try to find the sleep session for the given date/id from context, otherwise fetch from API
   useEffect(() => {
+    // First check if we received session data via navigation state
+    if (location.state?.sessionData) {
+      setSleepData(location.state.sessionData);
+      setLoading(false);
+      return;
+    }
+
     // Determine what we're looking for (date or id)
     const searchParam = id || date;
     
     let entry;
     if (id) {
       // Looking for specific ID (from sleepdata route)
+      // First try to find in dashboardData.sleepSessions (if it exists)
       entry = dashboardData?.sleepSessions?.find(entry => entry._id === id);
+      
+      // If not found and we have latestSleepData, check if it matches
+      if (!entry && dashboardData?.latestSleepData?._id === id) {
+        entry = dashboardData.latestSleepData;
+      }
     } else if (date) {
       // Looking for date (from dreamjournal route)
       entry = dashboardData?.sleepSessions?.find(entry =>
         new Date(entry.createdAt).toISOString().startsWith(date)
       );
+      
+      // Fallback: check latestSleepData
+      if (!entry && dashboardData?.latestSleepData) {
+        const latestDate = new Date(dashboardData.latestSleepData.createdAt).toISOString();
+        if (latestDate.startsWith(date)) {
+          entry = dashboardData.latestSleepData;
+        }
+      }
     }
 
     if (entry) {
       setSleepData(entry);
       setLoading(false);
     } else {
-      // Fetch from API if not found in context
-      const fetchPromise = id 
-        ? sleepDataService.get(id)  // Fetch by ID
-        : sleepDataService.getSleepDataByDate(date); // Fetch by date (for dreamjournal)
-        
-      fetchPromise
-        .then(data => setSleepData(data))
-        .catch(err => {
-          console.error(err);
-          setSleepData(null);
-        })
-        .finally(() => setLoading(false));
+      // Only try to fetch from API if we don't have the data in context
+      // For now, let's avoid the broken /sleep-data/:id endpoint
+      if (date) {
+        // For date-based lookups (dreamjournal), try the date endpoint
+        sleepDataService.getSleepDataByDate(date)
+          .then(data => setSleepData(data))
+          .catch(err => {
+            console.error('Failed to fetch by date:', err);
+            setSleepData(null);
+          })
+          .finally(() => setLoading(false));
+      } else {
+        // For ID-based lookups, show an error since the endpoint is broken
+        console.error('Sleep session not found in cache and backend /sleep-data/:id endpoint is unavailable');
+        setSleepData(null);
+        setLoading(false);
+      }
     }
-  }, [date, id, dashboardData]);
+  }, [date, id, dashboardData, location.state]);
 
   // Smooth scroll to anchor if hash is present in URL (e.g. #dreamJournal)
   useEffect(() => {
@@ -68,8 +94,44 @@ function SleepSession() {
   }, [location, sleepData]);
 
   // Show loading or not found messages
-  if (loading) return <p>Loading sleep data...</p>;
-  if (!sleepData) return <p>Sleep data not found.</p>;
+  if (loading) {
+    return (
+      <div className="container mt-4">
+        <div className="alert alert-info">
+          <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+          Loading sleep data...
+        </div>
+      </div>
+    );
+  }
+  
+  if (!sleepData) {
+    return (
+      <div className="container mt-4">
+        <div className="alert alert-warning">
+          <h5>Sleep Session Not Found</h5>
+          <p>
+            {id 
+              ? `Could not find sleep session with ID: ${id}. The session might not be available or there may be a backend connectivity issue.`
+              : `Could not find sleep session for date: ${date}.`
+            }
+          </p>
+          <button 
+            className="btn btn-outline-primary btn-sm me-2"
+            onClick={() => navigate('/users/dashboard/sleepdata')}
+          >
+            Back to Sleep Data Index
+          </button>
+          <button 
+            className="btn btn-outline-secondary btn-sm"
+            onClick={() => navigate('/users/dashboard')}
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Destructure relevant fields from sleepData
   const { bedroom, cuddleBuddy, sleepyThoughts, wakeUps, createdAt } = sleepData;
