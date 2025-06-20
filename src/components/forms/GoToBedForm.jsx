@@ -74,6 +74,19 @@ function GoToBed() {
     };
 
     /**
+     * Helper function to check if a sleep session should be considered finished
+     * based on the wakeUps array and finishedSleeping flag.
+     */
+    const isSessionActuallyFinished = (sleepData) => {
+        if (!sleepData?.wakeUps || !Array.isArray(sleepData.wakeUps) || sleepData.wakeUps.length === 0) {
+            return false;
+        }
+        // Check if the last wake-up event has finishedSleeping: true
+        const lastWakeUp = sleepData.wakeUps[sleepData.wakeUps.length - 1];
+        return lastWakeUp?.finishedSleeping === true;
+    };
+
+    /**
      * Loads bedrooms for the current user from the backend.
      */
     const loadBedrooms = async () => {
@@ -127,9 +140,25 @@ function GoToBed() {
             // Navigate back to dashboard
             navigate('/users/dashboard');
         } catch (err) {
-            // Log and show error
+            // Log and show error with more details
             console.error('Error starting sleep session:', err);
-            setError(err.message || 'Could not start sleep session.');
+            console.error('Error response:', err.response?.data);
+            console.error('Error status:', err.response?.status);
+            
+            // Check if this is the "active session" error and our frontend thinks it's finished
+            if (err.message?.includes('active sleep session') && 
+                dashboardData?.latestSleepData && 
+                isSessionActuallyFinished(dashboardData.latestSleepData)) {
+                
+                // Show a more helpful error message with options
+                setError(
+                    'Backend detected an active sleep session, but your last session appears to be finished. ' +
+                    'This might be a synchronization issue. Try refreshing the page or go to the Wake Up page ' +
+                    'to properly finish your session.'
+                );
+            } else {
+                setError(err.message || 'Could not start sleep session.');
+            }
         } finally {
             setSubmitting(false); // Reset submitting state
         }
@@ -140,7 +169,33 @@ function GoToBed() {
             <h2>Go To Bed</h2>
 
             {/* Show error message if any */}
-            {error && <div className="alert alert-danger">{error}</div>}
+            {error && (
+                <div className="alert alert-danger">
+                    {error}
+                    {/* Show action buttons if this is a session sync issue */}
+                    {error.includes('synchronization issue') && (
+                        <div className="mt-3">
+                            <button 
+                                type="button" 
+                                className="btn btn-outline-primary btn-sm me-2"
+                                onClick={() => {
+                                    refreshDashboard?.();
+                                    setError('');
+                                }}
+                            >
+                                Refresh Data
+                            </button>
+                            <button 
+                                type="button" 
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => navigate('/gotobed/wakeup')}
+                            >
+                                Go to Wake Up Page
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit}>
                 {/* Bedroom Selection Section */}

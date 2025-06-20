@@ -6,37 +6,50 @@
  */
 
 /**
- * Checks if the user has an active sleep session.
+ * Checks if the user has an active sleep session according to frontend logic.
  * 
- * An active sleep session is one where:
+ * Frontend considers a session active when:
  * - latestSleepData exists
  * - wakeUps is an array
  * - wakeUps array is empty (no wake-up events yet)
  * 
+ * Note: Backend may use different logic (e.g., checking finishedSleeping flag)
+ * 
  * @param {Object} dashboardData - Dashboard context data
- * @returns {boolean} True if there's an active sleep session
+ * @returns {boolean} True if there's an active sleep session (frontend logic)
  */
 export const hasActiveSleepSession = (dashboardData) => {
   if (!dashboardData?.latestSleepData) {
-    console.debug('No latestSleepData found');
     return false;
   }
   
   const { wakeUps } = dashboardData.latestSleepData;
   
-  console.debug('Sleep state check:', {
-    hasLatestSleepData: !!dashboardData.latestSleepData,
-    wakeUps: wakeUps,
-    isArray: Array.isArray(wakeUps),
-    length: wakeUps?.length,
-    sleepDataId: dashboardData.latestSleepData._id
-  });
-  
   // Check if wakeUps is an array and has no entries
-  const isActive = Array.isArray(wakeUps) && wakeUps.length === 0;
-  console.debug('Sleep session is active:', isActive);
+  return Array.isArray(wakeUps) && wakeUps.length === 0;
+};
+
+/**
+ * Checks if backend might consider the session active based on different criteria.
+ * 
+ * @param {Object} dashboardData - Dashboard context data
+ * @returns {boolean} True if backend might consider session active
+ */
+export const backendMightConsiderActive = (dashboardData) => {
+  if (!dashboardData?.latestSleepData) {
+    return false;
+  }
   
-  return isActive;
+  const { wakeUps } = dashboardData.latestSleepData;
+  
+  // If no wakeUps or empty wakeUps, definitely active
+  if (!Array.isArray(wakeUps) || wakeUps.length === 0) {
+    return true;
+  }
+  
+  // Check if the last wake-up doesn't have finishedSleeping: true
+  const lastWakeUp = wakeUps[wakeUps.length - 1];
+  return lastWakeUp?.finishedSleeping !== true;
 };
 
 /**
