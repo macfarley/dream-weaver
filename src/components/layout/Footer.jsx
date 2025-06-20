@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Breadcrumb } from 'react-bootstrap';
 import { UserContext } from '../../contexts/UserContext';
@@ -47,6 +47,9 @@ function Footer() {
     Array.isArray(dashboardData.latestSleepData.wakeUps) &&
     dashboardData.latestSleepData.wakeUps.length === 0;
 
+  // Don't show sleep action buttons on sleep-related routes to avoid confusion
+  const isOnSleepRoute = location.pathname.startsWith('/gotobed');
+
   // Configure primary action button based on current sleep state
   const primaryAction = hasActiveSleep
     ? {
@@ -65,20 +68,6 @@ function Footer() {
   return (
     <div className="custom-footer">
       <div className="container">
-        {/* Primary action button - only shown to authenticated users */}
-        {user && (
-          <div className="my-2 text-center"> {/* Reduced margin */}
-            <Link
-              to={primaryAction.to}
-              className={`btn ${primaryAction.style} btn-lg w-100`}
-              aria-label={primaryAction.ariaLabel}
-              title={primaryAction.ariaLabel}
-            >
-              {primaryAction.label}
-            </Link>
-          </div>
-        )}
-
         {/* Footer informational details */}
         <div className="text-center">
           <p className="mb-1">
@@ -130,6 +119,20 @@ function Footer() {
           })}
         </Breadcrumb>
         </div> {/* Close breadcrumb-container */}
+
+        {/* Primary action button - only shown to authenticated users and not on sleep routes */}
+        {user && !isOnSleepRoute && (
+          <div className="my-3 text-center"> {/* Moved to bottom with more margin */}
+            <Link
+              to={primaryAction.to}
+              className={`btn ${primaryAction.style} btn-lg w-100`}
+              aria-label={primaryAction.ariaLabel}
+              title={primaryAction.ariaLabel}
+            >
+              {primaryAction.label}
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

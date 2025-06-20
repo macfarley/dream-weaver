@@ -4,6 +4,7 @@ import { DashboardContext } from '../../contexts/DashboardContext';
 import sleepSessionService from '../../services/sleepSessionService';
 import { useNavigate } from 'react-router-dom';
 import { hasActiveSleepSession } from '../../utils/sleep/sleepStateUtils';
+import DWLogo from '../../assets/DW-Logo.png';
 
 function WakeUpForm() {
     // Get the current user from context
@@ -21,6 +22,10 @@ function WakeUpForm() {
     // State for the dream journal input
     const [dreamJournal, setDreamJournal] = useState('');
 
+    // State for retroactive wake-up time
+    const [actualWakeUpTime, setActualWakeUpTime] = useState('');
+    const [useCustomWakeUpTime, setUseCustomWakeUpTime] = useState(false);
+
     // State to indicate if the form is submitting
     const [submitting, setSubmitting] = useState(false);
 
@@ -35,6 +40,9 @@ function WakeUpForm() {
                 const sleepSession = dashboardData.latestSleepData;
                 setSleepData(sleepSession);
                 setError(''); // Clear any previous errors
+                
+                // Set default wake-up time to now
+                setActualWakeUpTime(new Date().toISOString().slice(0, 16));
             } else {
                 setError('No active sleep session found. Please start a new sleep session first.');
             }
@@ -55,7 +63,9 @@ function WakeUpForm() {
             const wakeupData = {
                 sleepQuality: 4, // Default good quality
                 dreamJournal,
-                awakenAt: new Date(),
+                awakenAt: useCustomWakeUpTime && actualWakeUpTime 
+                    ? new Date(actualWakeUpTime)  // Use custom time if provided
+                    : new Date(),                 // Default to now
                 finishedSleeping: true,
                 backToBedAt: null,
             };
@@ -158,6 +168,41 @@ function WakeUpForm() {
                     </small>
                 </div>
 
+                {/* Retroactive Wake-Up Time */}
+                <div className="wakeup-form__time-section">
+                    <div className="form-check">
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="useCustomTime"
+                            checked={useCustomWakeUpTime}
+                            onChange={(e) => setUseCustomWakeUpTime(e.target.checked)}
+                            disabled={submitting}
+                        />
+                        <label className="form-check-label" htmlFor="useCustomTime">
+                            I forgot, I actually woke up at a different time
+                        </label>
+                    </div>
+                    
+                    {useCustomWakeUpTime && (
+                        <div className="wakeup-form__time-input">
+                            <label className="form-label">Actual wake-up time:</label>
+                            <input
+                                type="datetime-local"
+                                className="form-control"
+                                value={actualWakeUpTime}
+                                onChange={(e) => setActualWakeUpTime(e.target.value)}
+                                max={new Date().toISOString().slice(0, 16)} // Can't be in the future
+                                min={sleepData ? new Date(sleepData.createdAt).toISOString().slice(0, 16) : ''}
+                                disabled={submitting}
+                            />
+                            <small className="form-text text-muted">
+                                Leave unchecked to use current time ({new Date().toLocaleTimeString()})
+                            </small>
+                        </div>
+                    )}
+                </div>
+
                 {/* Action Buttons */}
                 <div className="wakeup-form__actions">
                     {/* Small "Still Sleepy" button */}
@@ -179,7 +224,11 @@ function WakeUpForm() {
                             type="button"
                         >
                             <div className="wakeup-form__wake-btn-content">
-                                <span className="wakeup-form__wake-btn-icon">☀️</span>
+                                <img 
+                                    src={DWLogo} 
+                                    alt="DreamWeaver" 
+                                    className="wakeup-form__wake-btn-icon"
+                                />
                                 <span className="wakeup-form__wake-btn-text">
                                     {submitting ? 'Completing...' : "I'm Awake!"}
                                 </span>
