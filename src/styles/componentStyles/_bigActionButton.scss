@@ -62,7 +62,7 @@
       var(--color-accent-light) 0%, 
       var(--color-accent) 50%, 
       var(--color-primary) 100%);
-    opacity: 0.9;
+    opacity: 0.4; /* Much more transparent to let logo show through */
     z-index: 1;
   }
 }
@@ -74,8 +74,8 @@
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2;
-  opacity: 0.15;
-  filter: grayscale(100%) contrast(200%);
+  opacity: 0.8; /* More visible, less transparent */
+  filter: contrast(120%) brightness(1.1); /* Better contrast */
 }
 
 .big-action-button__logo {
@@ -83,16 +83,6 @@
   max-width: 100%;
   height: auto;
   object-fit: contain;
-}
-
-/* Action icon overlay */
-.big-action-button__icon {
-  position: relative;
-  z-index: 3;
-  font-size: 3rem;
-  line-height: 1;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 /* Pulse animation rings */
@@ -181,10 +171,6 @@
     width: 200px;
     height: 200px;
   }
-  
-  .big-action-button__icon {
-    font-size: 4rem;
-  }
 }
 
 .big-action-button--medium {
@@ -201,10 +187,6 @@
   .big-action-button__pulse-ring {
     width: 150px;
     height: 150px;
-  }
-  
-  .big-action-button__icon {
-    font-size: 3rem;
   }
   
   .big-action-button__label {
@@ -226,10 +208,6 @@
   .big-action-button__pulse-ring {
     width: 100px;
     height: 100px;
-  }
-  
-  .big-action-button__icon {
-    font-size: 2rem;
   }
   
   .big-action-button__label {
@@ -297,10 +275,6 @@
     border-color: #9ca3af;
     animation-duration: 2s; // Half speed: doubled from 1s to 2s
   }
-  
-  .big-action-button__icon {
-    animation: pulse 1.5s ease-in-out infinite;
-  }
 }
 
 .big-action-button--disabled {
@@ -321,10 +295,6 @@
 .big-action-button:hover {
   .big-action-button__pulse-ring {
     animation-duration: 1.5s;
-  }
-  
-  .big-action-button__icon {
-    transform: scale(1.1);
   }
   
   .big-action-button__label {
@@ -357,10 +327,6 @@
   .big-action-button__label {
     text-shadow: 0 1px 3px rgba(44, 26, 61, 0.2);
   }
-  
-  .big-action-button__icon {
-    text-shadow: 0 2px 8px rgba(44, 26, 61, 0.2);
-  }
 }
 
 [data-theme="dark"] {
@@ -390,10 +356,6 @@
       height: 160px;
     }
     
-    .big-action-button__icon {
-      font-size: 3.5rem;
-    }
-    
     .big-action-button__label {
       font-size: 1.25rem;
     }
@@ -419,10 +381,6 @@
     .big-action-button__pulse-ring {
       width: 140px;
       height: 140px;
-    }
-    
-    .big-action-button__icon {
-      font-size: 3rem;
     }
     
     .big-action-button__label {

@@ -103,13 +103,13 @@ const getSleepDataByDate = async (date) => {
   return getByDate(date);
 };
 
-export default {
+export {
   getAll,
   get,
   getByDate,
   getSleepDataByDate, // Alias for getByDate
   create,
   update,
-  delete: remove,
+  remove as delete,
   getSleepDataByUser,
 };

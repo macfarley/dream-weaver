@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig(({ command, mode }) => {
   const originalWarn = console.warn;
@@ -19,7 +20,16 @@ export default defineConfig(({ command, mode }) => {
   };
 
   return {
-    plugins: [react(), tsconfigPaths()],
+    plugins: [
+      react(), 
+      tsconfigPaths(),
+      visualizer({
+        filename: 'dist/stats.html',
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+      })
+    ],
     css: {
       preprocessorOptions: {
         scss: {
@@ -27,5 +37,18 @@ export default defineConfig(({ command, mode }) => {
         },
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            bootstrap: ['react-bootstrap', 'bootstrap'],
+            router: ['react-router', 'react-router-dom'],
+            icons: ['lucide-react'],
+            dateFns: ['date-fns'],
+          }
+        }
+      }
+    }
   };
 });

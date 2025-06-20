@@ -1,14 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../../contexts/DashboardContext';
-import { getToken } from '../../services/authService';
 import * as bedroomService from '../../services/bedroomService';
-import sleepDataService from '../../services/sleepDataService';
+import * as sleepDataService from '../../services/sleepDataService';
 import { format, parseISO } from 'date-fns';
-import { decodeBedroomNameFromUrl, bedroomNamesMatch, sanitizeBedroomNameForUrl } from '../../utils/urlSafeNames';
-import { usePreferenceSync } from '../../hooks/usePreferenceSync';
-import { formatTemperature, getTemperatureUnit } from '../../utils/userPreferences';
-import SemanticSlider from '../shared/SemanticSlider';
+
 
 // Main BedroomDetails component
 function BedroomDetails() {
@@ -18,9 +14,6 @@ function BedroomDetails() {
 
     // Get dashboard data and refresh function from context
     const { dashboardData, refreshDashboard } = useContext(DashboardContext);
-    
-    // Get user preferences
-    const { prefersImperial } = usePreferenceSync();
 
     // Local state for bedroom details, edit mode, form data, delete password, usage dates, and loading
     const [bedroom, setBedroom] = useState(null);
@@ -34,45 +27,27 @@ function BedroomDetails() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const token = getToken();
-                if (!token) {
-                    console.error('No authentication token found');
-                    navigate('/join');
-                    return;
-                }
-
-                // Safely decode the bedroom name from URL (this gives us the slug)
-                const urlSlug = decodeBedroomNameFromUrl(bedroomname);
-
-                // Try to find the bedroom in dashboard context first using slug comparison
+                // Try to find the bedroom in dashboard context first
                 let room = dashboardData?.bedrooms?.find(
-                    b => bedroomNamesMatch(b.bedroomName, urlSlug)
+                    b => b.bedroomName.toLowerCase() === bedroomname.toLowerCase()
                 );
 
-                // If not found, fetch from API and try to match by slug
+                // If not found, fetch from API
                 if (!room) {
-                    // We need to get all bedrooms and find the one that matches the slug
-                    const allBedrooms = await bedroomService.getBedrooms();
-                    room = allBedrooms.find(b => bedroomNamesMatch(b.bedroomName, urlSlug));
-                    
-                    if (!room) {
-                        console.error('Bedroom not found for slug:', urlSlug);
-                        navigate('/users/dashboard');
-                        return;
-                    }
+                    room = await bedroomService.getBedroomByName(bedroomname);
                 }
 
                 setBedroom(room);
                 setFormData(room);
 
-                // Get all sleep data for the current user (using token, not ownerId)
+                // Get all sleep data for the owner
                 const allSleepData = dashboardData?.latestSleepData
-                    ? [dashboardData.latestSleepData] // Wrap in array if it's a single item
-                    : await sleepDataService.getSleepDataByUser(token);
+                    ? dashboardData.latestSleepData
+                    : await sleepDataService.getSleepDataByUser();
 
                 // Filter sleep data for this bedroom and sort by date descending
-                const datesUsed = (Array.isArray(allSleepData) ? allSleepData : [allSleepData])
-                    .filter(entry => entry && entry.bedroom && entry.bedroom === room._id)
+                const datesUsed = allSleepData
+                    .filter(entry => entry.bedroom && entry.bedroom === room._id)
                     .map(entry => ({
                         id: entry._id,
                         date: entry.createdAt,
@@ -107,7 +82,6 @@ function BedroomDetails() {
             refreshDashboard?.();
         } catch (err) {
             console.error('Error updating bedroom:', err);
-            alert('Failed to update bedroom. Please try again.');
         }
     };
 
@@ -117,18 +91,10 @@ function BedroomDetails() {
             alert('Password required');
             return;
         }
-
-        // Check if this is the user's only bedroom
-        const bedroomCount = dashboardData?.bedrooms?.length || 0;
-        if (bedroomCount <= 1) {
-            alert('You cannot delete your only bedroom. Please create another bedroom first.');
-            return;
-        }
-
         try {
             await bedroomService.deleteBedroom(bedroom._id, deletePassword);
             refreshDashboard?.();
-            navigate('/users/dashboard');
+            navigate('/dashboard');
         } catch (err) {
             console.error('Error deleting bedroom:', err);
             alert('Failed to delete bedroom.');
@@ -151,7 +117,6 @@ function BedroomDetails() {
                         <BedroomInfo
                             bedroom={bedroom}
                             onEdit={() => setIsEditing(true)}
-                            prefersImperial={prefersImperial}
                         />
                     ) : (
                         <BedroomEditForm
@@ -159,7 +124,6 @@ function BedroomDetails() {
                             handleChange={handleChange}
                             handleSubmit={handleSubmit}
                             onCancel={() => setIsEditing(false)}
-                            prefersImperial={prefersImperial}
                         />
                     )}
                 </div>
@@ -182,7 +146,7 @@ function BedroomDetails() {
 }
 
 // Subcomponent: Display bedroom info
-function BedroomInfo({ bedroom, onEdit, prefersImperial }) {
+function BedroomInfo({ bedroom, onEdit }) {
     return (
         <div>
             <p><strong>Bed Type:</strong> {bedroom.bedType}</p>
@@ -192,7 +156,7 @@ function BedroomInfo({ bedroom, onEdit, prefersImperial }) {
                     <p><strong>Size:</strong> {bedroom.bedSize}</p>
                 </>
             )}
-            <p><strong>Temp:</strong> {formatTemperature(bedroom.temperature, prefersImperial, true)}</p>
+            <p><strong>Temp:</strong> {bedroom.temperature}°F</p>
             <p><strong>Light:</strong> {bedroom.lightLevel}</p>
             <p><strong>Noise:</strong> {bedroom.noiseLevel}</p>
             <p><strong>Pillows:</strong> {bedroom.pillows}</p>
@@ -206,23 +170,15 @@ function BedroomInfo({ bedroom, onEdit, prefersImperial }) {
 }
 
 // Subcomponent: Edit form for bedroom
-function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel, prefersImperial }) {
+function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel }) {
     return (
         <form onSubmit={handleSubmit}>
-            <div className="mb-2">
-                <label className="form-label">Bedroom Name</label>
-                <input
-                    name="bedroomName"
-                    value={formData.bedroomName}
-                    onChange={handleChange}
-                    className="form-control"
-                    required
-                    maxLength="50"
-                />
-                <div className="form-text">
-                    <small className="text-muted">Note: The name will appear in web addresses as a simplified version (e.g., "Master Bedroom" becomes "master-bedroom").</small>
-                </div>
-            </div>
+            <input
+                name="bedroomName"
+                value={formData.bedroomName}
+                onChange={handleChange}
+                className="form-control mb-2"
+            />
             <select
                 name="bedType"
                 value={formData.bedType}
@@ -251,42 +207,49 @@ function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel, prefe
                         <option value="air">Air</option>
                         <option value="water">Water</option>
                     </select>
-                    <SemanticSlider
-                        label="Bed Size"
-                        options={['twin', 'full', 'queen', 'king', 'california king']}
+                    <select
+                        name="bedSize"
                         value={formData.bedSize}
-                        onChange={(newValue) => setFormData({...formData, bedSize: newValue})}
-                        id="bed-size-slider"
-                        iconType="size"
-                    />
+                        onChange={handleChange}
+                        className="form-select mb-2"
+                    >
+                        <option value="twin">Twin</option>
+                        <option value="full">Full</option>
+                        <option value="queen">Queen</option>
+                        <option value="king">King</option>
+                        <option value="california king">California King</option>
+                    </select>
                 </>
             )}
             <input
                 name="temperature"
                 type="number"
-                min={prefersImperial ? 50 : 10}
-                max={prefersImperial ? 100 : 38}
+                min={50}
+                max={100}
                 value={formData.temperature}
                 onChange={handleChange}
                 className="form-control mb-2"
-                placeholder={`Temperature (${getTemperatureUnit(prefersImperial)})`}
             />
-            <SemanticSlider
-                label="Light Level"
-                options={['pitch black', 'very dim', 'dim', 'normal', 'bright', 'daylight']}
+            <select
+                name="lightLevel"
                 value={formData.lightLevel}
-                onChange={(newValue) => setFormData({...formData, lightLevel: newValue})}
-                id="light-level-slider"
-                iconType="light"
-            />
-            <SemanticSlider
-                label="Noise Level"
-                options={['silent', 'very quiet', 'quiet', 'moderate', 'loud', 'very loud']}
+                onChange={handleChange}
+                className="form-select mb-2"
+            >
+                {['pitch black', 'very dim', 'dim', 'normal', 'bright', 'daylight'].map(l => (
+                    <option key={l} value={l}>{l}</option>
+                ))}
+            </select>
+            <select
+                name="noiseLevel"
                 value={formData.noiseLevel}
-                onChange={(newValue) => setFormData({...formData, noiseLevel: newValue})}
-                id="noise-level-slider"
-                iconType="volume"
-            />
+                onChange={handleChange}
+                className="form-select mb-2"
+            >
+                {['silent', 'very quiet', 'quiet', 'moderate', 'loud', 'very loud'].map(n => (
+                    <option key={n} value={n}>{n}</option>
+                ))}
+            </select>
             <textarea
                 name="notes"
                 value={formData.notes}

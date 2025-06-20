@@ -5,7 +5,7 @@ import { updateProfile } from '../../services/userService';
 import { getUserById, updateUserProfile, deleteUser } from '../../services/adminService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import Loading from '../shared/Loading';
+import Loading from '../ui/Loading';
 
 /**
  * UserProfile component allows users to view and update their profile information.

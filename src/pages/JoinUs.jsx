@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import LoginForm from "./forms/LoginForm";
-import SignupForm from "./forms/SignupForm";
+import LoginForm from "../components/auth/LoginForm";
+import SignupForm from "../components/auth/SignupForm";
 
 /**
  * JoinUs component provides a unified authentication page that handles both login and signup.

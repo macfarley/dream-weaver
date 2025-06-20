@@ -1,61 +1,11 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { DashboardContext } from '../../contexts/DashboardContext';
-import sleepDataService from '../../services/sleepDataService';
+import * as sleepDataService from '../../services/sleepDataService';
 import { useNavigate } from 'react-router-dom';
 import { usePreferenceSync } from '../../hooks/usePreferenceSync';
-import { formatSessionLabel as formatSessionLabelWithPrefs, formatDate } from '../../utils/userPreferences';
-
-/**
- * Converts a date string to a compact YYYYMMDD format.
- * @param {string} dateStr - The date string to format.
- * @returns {string} - The formatted date key.
- */
-function formatDateKey(dateStr) {
-  const date = new Date(dateStr);
-  // toISOString returns 'YYYY-MM-DDTHH:mm:ss.sssZ'
-  // slice(0, 10) gets 'YYYY-MM-DD'
-  // replace(/-/g, '') removes dashes
-  return date.toISOString().slice(0, 10).replace(/-/g, '');
-}
-
-/**
- * Generates a human-readable label for a sleep session.
- * If the session started before 4am, it's considered the previous 'night'.
- * Otherwise, it's a 'morning' session.
- * @param {string} startDateStr - The session's start date string.
- * @returns {string} - The formatted session label.
- */
-function formatSessionLabel(startDateStr) {
-  const date = new Date(startDateStr);
-  const hour = date.getHours();
-  const labelDate = new Date(date);
-
-  // If session started before 4am, label as previous night
-  const suffix = hour < 4 ? 'night' : 'morning';
-  if (hour < 4) labelDate.setDate(labelDate.getDate() - 1);
-
-  // Format: "Monday, Jan 1 night"
-  const options = { weekday: 'long', month: 'short', day: 'numeric' };
-  return `${labelDate.toLocaleDateString(undefined, options)} ${suffix}`;
-}
-
-/**
- * Calculates the total sleep duration from session start to last wake-up.
- * @param {string} start - The session's start date string.
- * @param {Array} wakeUps - Array of wake-up objects with 'awakenAt' property.
- * @returns {string|null} - Duration in "Xh Ym" format, or null if incomplete.
- */
-function calculateSleepDuration(start, wakeUps) {
-  if (!wakeUps?.length) return null;
-  const endTime = new Date(wakeUps[wakeUps.length - 1].awakenAt);
-  const startTime = new Date(start);
-  const durationMs = endTime - startTime;
-  if (durationMs < 0) return null;
-
-  const hours = Math.floor(durationMs / (1000 * 60 * 60));
-  const minutes = Math.floor((durationMs / (1000 * 60)) % 60);
-  return `${hours}h ${minutes}m`;
-}
+import { formatSessionLabel as formatSessionLabelWithPrefs } from '../../utils/format/userPreferences';
+import { calculateSleepStreaks, formatStreakDisplay } from '../../utils/sleep/sleepStreaks';
+import { formatDateKey, calculateSleepDuration } from '../../utils/sleep/sleepDataUtils';
 
 /**
  * Displays a list of the user's sleep sessions.
@@ -181,6 +131,44 @@ function SleepDataIndex() {
   return (
     <div>
       <h3>Your Sleep Sessions</h3>
+      
+      {/* Streak Statistics Card */}
+      {(() => {
+        const streakStats = calculateSleepStreaks(sleepSessions);
+        const { currentStreakText, longestStreakText, totalSessionsText, motivationalMessage } = formatStreakDisplay(streakStats);
+        
+        return (
+          <div className="card mb-4 sleep-streak-card">
+            <div className="card-body">
+              <h5 className="card-title">🏆 Your Sleep Tracking Progress</h5>
+              <div className="row text-center">
+                <div className="col-md-4">
+                  <div className="streak-stat">
+                    <h6 className="text-primary">Current Streak</h6>
+                    <p className="mb-0 fw-bold">{currentStreakText}</p>
+                  </div>
+                </div>
+                <div className="col-md-4">
+                  <div className="streak-stat">
+                    <h6 className="text-success">Best Streak</h6>
+                    <p className="mb-0 fw-bold">{longestStreakText}</p>
+                  </div>
+                </div>
+                <div className="col-md-4">
+                  <div className="streak-stat">
+                    <h6 className="text-info">Total Sessions</h6>
+                    <p className="mb-0 fw-bold">{totalSessionsText}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center">
+                <span className="motivational-text text-muted fst-italic">{motivationalMessage}</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+      
       {sleepSessions
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .map((session) => {
@@ -215,10 +203,4 @@ function SleepDataIndex() {
   );
 }
 
-// Export all at the bottom for clarity
-export {
-  formatDateKey,
-  formatSessionLabel,
-  calculateSleepDuration,
-  SleepDataIndex as default,
-};
+export default SleepDataIndex;

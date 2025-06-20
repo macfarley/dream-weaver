@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { getUserById, updateUserProfile, deleteUser } from '../../services/adminService';
-import Loading from '../shared/Loading';
+import Loading from '../ui/Loading';
 
 /**
  * AdminUserProfile component allows admins to view and edit user profiles.

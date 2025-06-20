@@ -1,30 +1,21 @@
 import React, { useState } from 'react';
-import { getToken } from '../../services/authService';
 import * as bedroomService from '../../services/bedroomService';
-import { validateBedroomName } from '../../utils/urlSafeNames';
-import { usePreferenceSync } from '../../hooks/usePreferenceSync';
-import { getTemperatureUnit, convertTemperature } from '../../utils/userPreferences';
-import SemanticSlider from '../shared/SemanticSlider';
 
 /**
  * BedroomForm component allows users to add a new bedroom with various attributes.
- * Includes validation to ensure bedroom names are safe for URLs and user-friendly.
- * 
+ * @param {string} userId - The ID of the current user (owner).
  * @param {function} onSuccess - Callback when bedroom is successfully created.
  * @param {function} onCancel - Callback when the form is cancelled.
  */
-function BedroomForm({ onSuccess, onCancel }) {
-    // Get user preferences
-    const { prefersImperial } = usePreferenceSync();
-    
+function BedroomForm({ userId, onSuccess, onCancel }) {
     // Initial form state
     const [formData, setFormData] = useState({
         bedroomName: '',
         bedType: 'bed',
         mattressType: '',
         bedSize: '',
-        temperature: prefersImperial ? 70 : 21, // Default to 70°F or 21°C
-        lightLevel: 'normal',
+        temperature: 70,
+        lightLevel: 'moderate',
         noiseLevel: 'moderate',
         pillows: 'one',
     });
@@ -32,12 +23,10 @@ function BedroomForm({ onSuccess, onCancel }) {
     // Loading and error state
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [nameValidation, setNameValidation] = useState({ isValid: true });
 
     /**
      * Handles changes to any form input.
      * Updates the corresponding value in formData state.
-     * Validates bedroom name in real-time.
      */
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -45,34 +34,23 @@ function BedroomForm({ onSuccess, onCancel }) {
             ...prev,
             [name]: value,
         }));
-
-        // Validate bedroom name in real-time
-        if (name === 'bedroomName') {
-            const validation = validateBedroomName(value);
-            setNameValidation(validation);
-        }
     };
 
     /**
      * Handles form submission.
-     * Validates bedroom name before calling bedroomService.createBedroom.
+     * Calls bedroomService.createBedroom and notifies parent on success.
      */
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
-        // Final validation check
-        const validation = validateBedroomName(formData.bedroomName);
-        if (!validation.isValid) {
-            setError(validation.error);
-            setLoading(false);
-            return;
-        }
-
         try {
-            // Create new bedroom with form data (ownerId is set by backend from token)
-            const newBedroom = await bedroomService.createBedroom(formData);
+            // Create new bedroom with form data and ownerId
+            const newBedroom = await bedroomService.createBedroom({
+                ...formData,
+                ownerId: userId,
+            });
             // Notify parent of success
             onSuccess(newBedroom);
         } catch (err) {
@@ -98,22 +76,11 @@ function BedroomForm({ onSuccess, onCancel }) {
                 <input
                     name="bedroomName"
                     type="text"
-                    className={`form-control ${!nameValidation.isValid ? 'is-invalid' : ''}`}
+                    className="form-control"
                     value={formData.bedroomName}
                     onChange={handleChange}
                     required
-                    maxLength="50"
-                    placeholder="e.g., Master Bedroom, Guest Room"
                 />
-                {!nameValidation.isValid && (
-                    <div className="invalid-feedback">
-                        {nameValidation.error}
-                    </div>
-                )}
-                <div className="form-text">
-                    Choose a name that's easy to remember and unique (max 50 characters). 
-                    <br /><small className="text-muted">Note: The name will appear in web addresses as a simplified version (e.g., "Master Bedroom" becomes "master-bedroom").</small>
-                </div>
             </div>
 
             {/* Bed Type Selection */}
@@ -161,37 +128,50 @@ function BedroomForm({ onSuccess, onCancel }) {
 
             {/* Temperature Input */}
             <div className="mb-2">
-                <label className="form-label">Temperature ({getTemperatureUnit(prefersImperial)})</label>
+                <label className="form-label">Temperature (°F)</label>
                 <input
                     name="temperature"
                     type="number"
                     className="form-control"
-                    min={prefersImperial ? "50" : "10"}
-                    max={prefersImperial ? "100" : "38"}
+                    min="50"
+                    max="100"
                     value={formData.temperature}
                     onChange={handleChange}
                 />
             </div>
 
             {/* Light Level Selection */}
-            <SemanticSlider
-                label="Light Level"
-                options={['pitch black', 'very dim', 'dim', 'normal', 'bright', 'daylight']}
-                value={formData.lightLevel}
-                onChange={(newValue) => handleChange({ target: { name: 'lightLevel', value: newValue } })}
-                id="light-level-slider"
-                iconType="light"
-            />
+            <div className="mb-2">
+                <label className="form-label">Light Level</label>
+                <select
+                    name="lightLevel"
+                    className="form-select"
+                    value={formData.lightLevel}
+                    onChange={handleChange}
+                >
+                    <option value="very bright">Very Bright</option>
+                    <option value="bright">Bright</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="dim">Dim</option>
+                    <option value="very dim">Very Dim</option>
+                </select>
+            </div>
 
             {/* Noise Level Selection */}
-            <SemanticSlider
-                label="Noise Level"
-                options={['silent', 'very quiet', 'quiet', 'moderate', 'loud', 'very loud']}
-                value={formData.noiseLevel}
-                onChange={(newValue) => handleChange({ target: { name: 'noiseLevel', value: newValue } })}
-                id="noise-level-slider"
-                iconType="volume"
-            />
+            <div className="mb-2">
+                <label className="form-label">Noise Level</label>
+                <select
+                    name="noiseLevel"
+                    className="form-select"
+                    value={formData.noiseLevel}
+                    onChange={handleChange}
+                >
+                    <option value="loud">Loud</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="quiet">Quiet</option>
+                    <option value="very quiet">Very Quiet</option>
+                </select>
+            </div>
 
             {/* Pillows Selection */}
             <div className="mb-3">
@@ -225,7 +205,7 @@ function BedroomForm({ onSuccess, onCancel }) {
                 <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={loading || !formData.bedroomName || !nameValidation.isValid}
+                    disabled={loading || !formData.bedroomName}
                 >
                     {loading ? 'Saving...' : 'Add Bedroom'}
                 </button>

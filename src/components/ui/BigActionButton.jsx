@@ -2,7 +2,7 @@ import React, { useContext, useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
 import { DashboardContext } from "../../contexts/DashboardContext";
-import { hasActiveSleepSession } from "../../utils/sleepStateUtils";
+import { hasActiveSleepSession } from "../../utils/sleep/sleepStateUtils";
 import sleepSessionService from "../../services/sleepSessionService";
 import DWLogo from "../../assets/DW-Logo.png";
 
@@ -36,18 +36,6 @@ function BigActionButton({
   const [backendActiveSession, setBackendActiveSession] = useState(null);
   const [isCheckingBackend, setIsCheckingBackend] = useState(false);
 
-  // Don't render if user is not logged in
-  if (!user) {
-    return null;
-  }
-
-  // Check backend for active session when component mounts or user changes
-  useEffect(() => {
-    if (user?._id) {
-      checkBackendForActiveSession();
-    }
-  }, [user?._id]);
-
   // Check backend for active session
   const checkBackendForActiveSession = async () => {
     try {
@@ -62,6 +50,13 @@ function BigActionButton({
     }
   };
 
+  // Check backend for active session when component mounts or user changes
+  useEffect(() => {
+    if (user?._id) {
+      checkBackendForActiveSession();
+    }
+  }, [user?._id]);
+
   // Determine if user has an active sleep session 
   // Prioritize backend check, fallback to dashboard data
   const hasActiveSleep = useMemo(() => {
@@ -71,41 +66,41 @@ function BigActionButton({
     }
     // Fallback to dashboard data check
     return hasActiveSleepSession(dashboardData);
-  }, [backendActiveSession, dashboardData?.latestSleepData?.wakeUps]);
+  }, [backendActiveSession, dashboardData]);
 
   // Configure button based on sleep state using useMemo for performance
   const buttonConfig = useMemo(() => {
     // Show loading state while checking backend
     if (isCheckingBackend) {
       return {
-        to: "#",
-        label: "Checking...",
-        icon: "⏳",
-        subtext: "Checking sleep status",
+        text: "Checking...",
+        path: null,
         variant: "loading",
-        ariaLabel: "Checking for active sleep session",
         disabled: true
       };
     }
 
-    return hasActiveSleep
-    ? {
-        to: "/gotobed/wakeup",
-        label: "Wake Up",
-        icon: "⏰",
-        subtext: backendActiveSession?.activeSession?.status || "End your sleep session",
+    if (hasActiveSleep) {
+      return {
+        text: "Wake Up",
+        path: "/dashboard/wake-up",
         variant: "wake",
-        ariaLabel: "Wake up - you have an active sleep session"
-      }
-    : {
-        to: "/gotobed",
-        label: "Go to Bed",
-        icon: "🌙",
-        subtext: "Start tracking your sleep",
-        variant: "sleep",
-        ariaLabel: "Go to bed - start tracking your sleep"
+        disabled: false
       };
-  }, [hasActiveSleep, isCheckingBackend, backendActiveSession]);
+    } else {
+      return {
+        text: "Go to Bed",
+        path: "/dashboard/go-to-bed",
+        variant: "sleep",
+        disabled: false
+      };
+    }
+  }, [isCheckingBackend, hasActiveSleep]);
+
+  // Don't render if user is not logged in
+  if (!user) {
+    return null;
+  }
 
   const sizeClasses = {
     small: "big-action-button--small",
@@ -118,8 +113,8 @@ function BigActionButton({
       {buttonConfig.disabled ? (
         <div
           className={`big-action-button big-action-button--${buttonConfig.variant} ${sizeClasses[size]} big-action-button--disabled`}
-          aria-label={buttonConfig.ariaLabel}
-          title={buttonConfig.ariaLabel}
+          aria-label={buttonConfig.text}
+          title={buttonConfig.text}
         >
           {/* Main button circle */}
           <div className="big-action-button__circle">
@@ -127,15 +122,10 @@ function BigActionButton({
             <div className="big-action-button__logo-bg">
               <img
                 src={DWLogo}
-                alt=""
+                alt="DreamWeaver"
                 className="big-action-button__logo"
                 loading="lazy"
               />
-            </div>
-            
-            {/* Action icon overlay */}
-            <div className="big-action-button__icon">
-              {buttonConfig.icon}
             </div>
           </div>
 
@@ -143,20 +133,17 @@ function BigActionButton({
           {showLabel && (
             <div className="big-action-button__text">
               <div className="big-action-button__label">
-                {buttonConfig.label}
-              </div>
-              <div className="big-action-button__subtext">
-                {buttonConfig.subtext}
+                {buttonConfig.text}
               </div>
             </div>
           )}
         </div>
       ) : (
         <Link
-          to={buttonConfig.to}
+          to={buttonConfig.path}
           className={`big-action-button big-action-button--${buttonConfig.variant} ${sizeClasses[size]}`}
-          aria-label={buttonConfig.ariaLabel}
-          title={buttonConfig.ariaLabel}
+          aria-label={buttonConfig.text}
+          title={buttonConfig.text}
         >
           {/* Main button circle */}
           <div className="big-action-button__circle">
@@ -164,15 +151,10 @@ function BigActionButton({
             <div className="big-action-button__logo-bg">
               <img
                 src={DWLogo}
-                alt=""
+                alt="DreamWeaver"
                 className="big-action-button__logo"
                 loading="lazy"
               />
-            </div>
-            
-            {/* Action icon overlay */}
-            <div className="big-action-button__icon">
-              {buttonConfig.icon}
             </div>
             
             {/* Pulse animation rings */}
@@ -185,10 +167,7 @@ function BigActionButton({
           {showLabel && (
             <div className="big-action-button__text">
               <div className="big-action-button__label">
-                {buttonConfig.label}
-              </div>
-              <div className="big-action-button__subtext">
-                {buttonConfig.subtext}
+                {buttonConfig.text}
               </div>
             </div>
           )}

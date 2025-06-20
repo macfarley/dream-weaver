@@ -3,8 +3,8 @@ import { DashboardContext } from '../../contexts/DashboardContext';
 import * as bedroomService from '../../services/bedroomService';
 import { getToken } from '../../services/authService';
 import { Link, useNavigate } from 'react-router-dom';
-import BedroomForm from '../forms/BedroomForm';
-import { sanitizeBedroomNameForUrl } from '../../utils/urlSafeNames';
+import BedroomForm from '../../components/sleep/BedroomForm';
+import { sanitizeBedroomNameForUrl } from '../../utils/format/urlSafeNames';
 
 const BedroomIndex = () => {
   const { dashboardData, loading, error, refreshDashboard } = useContext(DashboardContext);

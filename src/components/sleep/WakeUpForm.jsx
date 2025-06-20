@@ -3,7 +3,7 @@ import { UserContext } from '../../contexts/UserContext';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import sleepSessionService from '../../services/sleepSessionService';
 import { useNavigate } from 'react-router-dom';
-import { hasActiveSleepSession, getActiveSleepSession } from '../../utils/sleepStateUtils';
+import { hasActiveSleepSession, getActiveSleepSession } from '../../utils/sleep/sleepStateUtils';
 
 function WakeUpForm() {
     // Get the current user from context

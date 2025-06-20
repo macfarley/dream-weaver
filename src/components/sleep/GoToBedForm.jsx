@@ -5,7 +5,6 @@ import { DashboardContext } from '../../contexts/DashboardContext';
 import * as bedroomService from '../../services/bedroomService';
 import sleepSessionService from '../../services/sleepSessionService';
 import { useNavigate } from 'react-router-dom';
-import { hasActiveSleepSession } from '../../utils/sleepStateUtils';
 
 /**
  * GoToBed component allows a user to start a new sleep session.
@@ -49,7 +48,6 @@ function GoToBed() {
     useEffect(() => {
         if (user?._id) {
             loadBedrooms();
-            checkForActiveSession();
         }
         // eslint-disable-next-line
     }, [user]);
@@ -64,45 +62,16 @@ function GoToBed() {
     }, [dashboardData, navigate]);
 
     /**
-     * Check for active sleep sessions using the backend endpoint.
-     * If an active session is found, redirect to wake up page.
-     */
-    const checkForActiveSession = async () => {
-        try {
-            const result = await sleepSessionService.checkActiveSleepSession();
-            if (result?.hasActiveSession && result?.redirectTo) {
-                // Redirect to the recommended path (likely /gotobed/wakeup)
-                navigate(result.redirectTo);
-            }
-        } catch (err) {
-            // Log error but don't block the form - let user proceed
-            console.error('Failed to check for active session:', err);
-        }
-    };
-
-    /**
-     * Check if user has an active sleep session based on dashboard data and redirect to wake up if so.
-     * This is a fallback check in addition to the backend endpoint check.
+     * Check if user has an active sleep session and redirect to wake up if so.
      */
     const checkForActiveSleepSession = () => {
-        // Use centralized utility for consistent sleep state checking
-        if (hasActiveSleepSession(dashboardData)) {
+        // Check dashboard data for active sleep session (same logic as Footer)
+        const hasActiveSleep = dashboardData?.latestSleepData?.wakeUps?.length === 0;
+        
+        if (hasActiveSleep) {
             // Redirect to wake up form if there's an active sleep session
             navigate('/gotobed/wakeup');
         }
-    };
-
-    /**
-     * Helper function to check if a sleep session should be considered finished
-     * based on the wakeUps array and finishedSleeping flag.
-     */
-    const isSessionActuallyFinished = (sleepData) => {
-        if (!sleepData?.wakeUps || !Array.isArray(sleepData.wakeUps) || sleepData.wakeUps.length === 0) {
-            return false;
-        }
-        // Check if the last wake-up event has finishedSleeping: true
-        const lastWakeUp = sleepData.wakeUps[sleepData.wakeUps.length - 1];
-        return lastWakeUp?.finishedSleeping === true;
     };
 
     /**
@@ -110,8 +79,15 @@ function GoToBed() {
      */
     const loadBedrooms = async () => {
         try {
-            // Fetch bedrooms using the bedroom service (token handled automatically)
-            const res = await bedroomService.getBedrooms();
+            // Get token for authentication
+            const token = getToken();
+            if (!token) {
+                console.error('No token available for loading bedrooms');
+                return;
+            }
+
+            // Fetch bedrooms using the bedroom service
+            const res = await bedroomService.getBedrooms(token);
             setBedrooms(res);
         } catch (err) {
             // Log error and optionally show a message
@@ -159,31 +135,9 @@ function GoToBed() {
             // Navigate back to dashboard
             navigate('/users/dashboard');
         } catch (err) {
-            // Log error for debugging
+            // Log and show error
             console.error('Error starting sleep session:', err);
-            
-            // Check if this is an active session error (409 status with ACTIVE_SESSION_EXISTS)
-            if (err.response?.status === 409 && err.response?.data?.code === 'ACTIVE_SESSION_EXISTS') {
-                // Use the redirect path provided by the backend
-                const redirectTo = err.response.data.redirectTo || '/gotobed/wakeup';
-                navigate(redirectTo);
-                return; // Don't show error message, just redirect
-            }
-            
-            // Check if this is the "active session" error and our frontend thinks it's finished
-            if (err.message?.includes('active sleep session') && 
-                dashboardData?.latestSleepData && 
-                isSessionActuallyFinished(dashboardData.latestSleepData)) {
-                
-                // Show a more helpful error message with options for sync issues
-                setError(
-                    'SYNC_ISSUE: Backend detected an active sleep session, but your last session appears to be finished. ' +
-                    'This might be a synchronization issue. Try refreshing the page or go to the Wake Up page ' +
-                    'to properly finish your session.'
-                );
-            } else {
-                setError(err.message || 'Could not start sleep session.');
-            }
+            setError(err.message || 'Could not start sleep session.');
         } finally {
             setSubmitting(false); // Reset submitting state
         }
@@ -194,33 +148,7 @@ function GoToBed() {
             <h2>Go To Bed</h2>
 
             {/* Show error message if any */}
-            {error && (
-                <div className="alert alert-danger">
-                    {error}
-                    {/* Show action buttons if this is a session sync issue */}
-                    {(error.includes('synchronization issue') || error.includes('SYNC_ISSUE:')) && (
-                        <div className="mt-3">
-                            <button 
-                                type="button" 
-                                className="btn btn-outline-primary btn-sm me-2"
-                                onClick={() => {
-                                    refreshDashboard?.();
-                                    setError('');
-                                }}
-                            >
-                                Refresh Data
-                            </button>
-                            <button 
-                                type="button" 
-                                className="btn btn-outline-secondary btn-sm"
-                                onClick={() => navigate('/gotobed/wakeup')}
-                            >
-                                Go to Wake Up Page
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
+            {error && <div className="alert alert-danger">{error}</div>}
 
             <form onSubmit={handleSubmit}>
                 {/* Bedroom Selection Section */}

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { getAllUsers } from "../../services/adminService";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
-import Loading from "../shared/Loading";
+import Loading from "../ui/Loading";
 
 /**
  * AdminDashboard component displays a list of all users for admin management.

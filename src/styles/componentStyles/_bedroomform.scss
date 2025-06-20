@@ -1,0 +1,257 @@
+/* src/styles/componentStyles/_bedroomform.scss */
+
+/* ==========================================
+   BEDROOM FORM STYLES
+   WCAG AA Compliant with App Theme System
+   ========================================== */
+
+.bedroom-form-container {
+  /* Responsive width: narrow on desktop, full on mobile */
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+}
+
+.bedroom-form {
+  /* Form container - use surface color for proper contrast */
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-border);
+  
+  /* Dark mode shadow adjustment */
+  [data-theme="dark"] & {
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Form title */
+  h5 {
+    margin-bottom: 1.5rem;
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  /* Form labels */
+  .form-label {
+    color: var(--color-text);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Form controls - ensure they inherit theme colors */
+  .form-control,
+  .form-select {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    
+    &:focus {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 0.2rem rgba(74, 57, 87, 0.25);
+      
+      [data-theme="dark"] & {
+        box-shadow: 0 0 0 0.2rem rgba(184, 163, 204, 0.25);
+      }
+    }
+    
+    &::placeholder {
+      color: var(--color-secondary);
+      opacity: 0.7;
+    }
+    
+    /* Auto-width controls */
+    &.auto-width {
+      width: auto;
+      min-width: 120px;
+      max-width: 100%;
+    }
+  }
+  
+  /* Specific sizing for different controls */
+  .bed-type-select {
+    width: auto;
+    min-width: 140px;
+  }
+  
+  .pillows-select {
+    width: auto;
+    min-width: 160px;
+  }
+  
+  .mattress-type-input {
+    width: auto;
+    min-width: 200px;
+    max-width: 100%;
+  }
+  
+  .bed-size-input {
+    width: auto;
+    min-width: 180px;
+    max-width: 100%;
+  }
+  
+  /* Form validation styles */
+  .is-invalid {
+    border-color: var(--color-error);
+    
+    &:focus {
+      border-color: var(--color-error);
+      box-shadow: 0 0 0 0.2rem rgba(169, 30, 58, 0.25);
+    }
+  }
+  
+  .invalid-feedback {
+    color: var(--color-error);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+  
+  /* Form text and help text */
+  .form-text {
+    color: var(--color-secondary);
+    font-size: 0.825rem;
+    margin-top: 0.25rem;
+    
+    small {
+      font-size: 0.775rem;
+      opacity: 0.8;
+    }
+  }
+  
+  /* Error alert */
+  .alert-danger {
+    background-color: rgba(169, 30, 58, 0.1);
+    color: var(--color-error);
+    border-color: rgba(169, 30, 58, 0.2);
+    
+    [data-theme="dark"] & {
+      background-color: rgba(248, 81, 73, 0.1);
+      color: #f85149;
+      border-color: rgba(248, 81, 73, 0.2);
+    }
+  }
+  
+  /* Action buttons */
+  .form-actions {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+    
+    .btn {
+      min-width: 100px;
+      font-weight: 500;
+    }
+    
+    .btn-primary {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-bg);
+      
+      &:hover:not(:disabled) {
+        background-color: var(--color-accent-hover);
+        border-color: var(--color-accent-hover);
+      }
+      
+      &:focus {
+        box-shadow: 0 0 0 0.2rem rgba(74, 57, 87, 0.25);
+        
+        [data-theme="dark"] & {
+          box-shadow: 0 0 0 0.2rem rgba(184, 163, 204, 0.25);
+        }
+      }
+    }
+    
+    .btn-outline-secondary {
+      color: var(--color-text);
+      border-color: var(--color-border);
+      
+      &:hover:not(:disabled) {
+        background-color: var(--color-accent-light);
+        border-color: var(--color-accent-light);
+        color: var(--color-text);
+      }
+    }
+  }
+}
+
+/* Temperature slider specific adjustments for bedroom form */
+.bedroom-form .temperature-slider {
+  .d-flex {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    
+    @media (max-width: 576px) {
+      flex-direction: column;
+      align-items: stretch;
+      
+      .form-control {
+        width: 100px;
+      }
+    }
+  }
+  
+  /* Ensure temperature input follows theme */
+  .form-control {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    border-color: var(--color-border);
+  }
+  
+  /* Range slider theming */
+  .form-range {
+    &::-webkit-slider-thumb {
+      background-color: var(--color-primary);
+    }
+    
+    &::-moz-range-thumb {
+      background-color: var(--color-primary);
+      border: none;
+    }
+    
+    &::-webkit-slider-track {
+      background-color: var(--color-accent-light);
+    }
+    
+    &::-moz-range-track {
+      background-color: var(--color-accent-light);
+    }
+  }
+}
+
+/* Semantic slider theming within bedroom form */
+.bedroom-form .semantic-slider {
+  .form-label {
+    color: var(--color-text);
+  }
+  
+  .form-range {
+    &::-webkit-slider-thumb {
+      background-color: var(--color-primary);
+    }
+    
+    &::-moz-range-thumb {
+      background-color: var(--color-primary);
+      border: none;
+    }
+    
+    &::-webkit-slider-track {
+      background-color: var(--color-accent-light);
+    }
+    
+    &::-moz-range-track {
+      background-color: var(--color-accent-light);
+    }
+  }
+}

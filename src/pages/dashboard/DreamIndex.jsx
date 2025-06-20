@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardContext } from '../../contexts/DashboardContext';
-import sleepDataService from '../../services/sleepDataService';
+import * as sleepDataService from '../../services/sleepDataService';
 import { usePreferenceSync } from '../../hooks/usePreferenceSync';
-import { formatDate as formatDateWithPrefs } from '../../utils/userPreferences';
+import { formatDate as formatDateWithPrefs } from '../../utils/format/userPreferences';
 
 /**
  * Helper to format ISO date string to YYYYMMDD.
@@ -31,7 +31,7 @@ function DreamIndex() {
     } else {
       // Otherwise, fetch from service as fallback
       sleepDataService
-        .getUserSleepData()
+        .getAll()
         .then(setSleepData)
         .catch(console.error);
     }
@@ -41,7 +41,7 @@ function DreamIndex() {
   function renderSleepEntry(entry) {
     // Format date for display and for URL key
     const dateKey = formatYYYYMMDD(entry.createdAt);
-    const displayDate = formatDate(entry.createdAt);
+    const displayDate = formatDateWithPrefs(entry.createdAt, dateFormat);
 
     // Get the last wake event (if any)
     const lastWake = entry.wakeUps[entry.wakeUps.length - 1] || {};

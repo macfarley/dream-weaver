@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
-import BigActionButton from './shared/BigActionButton';
+import BigActionButton from '../components/ui/BigActionButton';
 
 /**
  * About component displays information about the DreamWeaver app,

@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import sleepDataService from '../../services/sleepDataService';
+import * as sleepDataService from '../../services/sleepDataService';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import { usePreferenceSync } from '../../hooks/usePreferenceSync';
-import { formatDate, formatTime } from '../../utils/userPreferences';
+import { formatDate, formatTime } from '../../utils/format/userPreferences';
 
 function SleepSession() {
   // Get the id param from the URL (could be date for dreamjournal route or id for sleepdata route)

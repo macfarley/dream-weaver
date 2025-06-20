@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
-import Loading from '../shared/Loading';
+import Loading from '../ui/Loading';
 
 /**
  * AdminOnlyRoute is a wrapper component that restricts access

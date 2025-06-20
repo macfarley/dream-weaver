@@ -1,0 +1,57 @@
+/* Sleep Streak Styling */
+.streak-info {
+  padding: 8px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.streak-info p {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.streak-info .text-muted {
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+/* Sleep Data Index Streak Card Styling */
+.sleep-streak-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sleep-streak-card .card-title {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.sleep-streak-card .streak-stat {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.7);
+  margin: 0 0.25rem;
+}
+
+.sleep-streak-card .streak-stat h6 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sleep-streak-card .streak-stat .fw-bold {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.sleep-streak-card .motivational-text {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  display: inline-block;
+  margin-top: 0.5rem;
+}

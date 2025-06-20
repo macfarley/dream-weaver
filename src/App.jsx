@@ -1,26 +1,26 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 
 import NavBar from './components/layout/NavBar';
 import Footer from './components/layout/Footer';
-import PreferenceSync from './components/shared/PreferenceSync';
-import LandingPage from './components/LandingPage';
-import Dashboard from './components/dashboard/Dashboard';
-import BedroomIndex from './components/dashboard/BedroomIndex';
-import BedroomDetails from './components/dashboard/BedroomDetails';
-import DreamIndex from './components/dashboard/DreamIndex';
-import SleepDataIndex from './components/dashboard/SleepDataIndex';
-import SleepSession from './components/dashboard/SleepSession';
-import UserProfile from './components/forms/UserProfile';
-import GoToBedForm from './components/forms/GoToBedForm';
-import WakeUpForm from './components/forms/WakeUpForm';
-import JoinUs from './components/JoinUs';
-import About from './components/About';
+import PreferenceSync from './components/system/PreferenceSync';
+import LandingPage from './pages/LandingPage';
+import Dashboard from './pages/dashboard/Dashboard';
+import BedroomIndex from './pages/dashboard/BedroomIndex';
+import BedroomDetails from './pages/dashboard/BedroomDetails';
+import DreamIndex from './pages/dashboard/DreamIndex';
+import SleepDataIndex from './pages/dashboard/SleepDataIndex';
+import SleepSession from './pages/dashboard/SleepSession';
+import UserProfile from './components/auth/UserProfile';
+import GoToBedForm from './components/sleep/GoToBedForm';
+import WakeUpForm from './components/sleep/WakeUpForm';
+import JoinUs from './pages/JoinUs';
+import About from './pages/About';
 
-// Admin Components
+// Admin Components - Lazy loaded since most users won't need them
 import AdminOnlyRoute from './components/admin/AdminOnlyRoute';
-import AdminDashboard from './components/admin/AdminDashboard';
-import AdminUserProfile from './components/admin/AdminUserProfile';
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+const AdminUserProfile = lazy(() => import('./components/admin/AdminUserProfile'));
 
 function App() {
   return (
@@ -52,12 +52,16 @@ function App() {
           {/* Admin Routes - Protected by AdminOnlyRoute */}
           <Route path="/admin/dashboard" element={
             <AdminOnlyRoute>
-              <AdminDashboard />
+              <Suspense fallback={<div>Loading admin dashboard...</div>}>
+                <AdminDashboard />
+              </Suspense>
             </AdminOnlyRoute>
           } />
           <Route path="/admin/userprofile/:userId" element={
             <AdminOnlyRoute>
-              <AdminUserProfile />
+              <Suspense fallback={<div>Loading admin profile...</div>}>
+                <AdminUserProfile />
+              </Suspense>
             </AdminOnlyRoute>
           } />
           

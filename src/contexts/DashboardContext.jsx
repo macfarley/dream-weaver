@@ -1,8 +1,7 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { UserContext } from './UserContext';
-import * as userService from '../services/userService';
 import * as bedroomService from '../services/bedroomService';
-import sleepDataService from '../services/sleepDataService';
+import * as sleepDataService from '../services/sleepDataService';
 
 // Create context
 const DashboardContext = createContext();
@@ -15,12 +14,14 @@ const DashboardProvider = ({ children }) => {
         bedrooms: [],
         latestSleepData: null,
         latestDreamLog: null,
+        allSleepSessions: [], // Add this for streak calculations
     });
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const fetchDashboardData = async () => {
+    // Create a refresh function that can be called from outside
+    const refreshDashboard = useCallback(async () => {
         if (!user || !user._id) return;
 
         setLoading(true);
@@ -95,6 +96,7 @@ const DashboardProvider = ({ children }) => {
                 bedrooms: bedroomsData || [],
                 latestSleepData,
                 latestDreamLog,
+                allSleepSessions: sleepArray, // Store all sleep sessions for streak calculations
             });
         } catch (err) {
             console.error('Failed to fetch dashboard data:', err);
@@ -102,7 +104,7 @@ const DashboardProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
 
     // Add these functions:
     const updateSleepData = (updatedSleep) => {
@@ -144,21 +146,22 @@ const DashboardProvider = ({ children }) => {
         });
     };
 
-useEffect(() => {
-  if (user && user._id) {
-    fetchDashboardData();
-  } else {
-    // Clear dashboard data when user logs out
-    setDashboardData({
-      profile: null,
-      bedrooms: [],
-      latestSleepData: null,
-      latestDreamLog: null,
-    });
-    setError(null);
-    setLoading(false); // Prevents infinite spinner if no user
-  }
-}, [user]);
+    useEffect(() => {
+        if (user && user._id) {
+            refreshDashboard();
+        } else {
+            // Clear dashboard data when user logs out
+            setDashboardData({
+                profile: null,
+                bedrooms: [],
+                latestSleepData: null,
+                latestDreamLog: null,
+                allSleepSessions: [],
+            });
+            setError(null);
+            setLoading(false); // Prevents infinite spinner if no user
+        }
+    }, [user, refreshDashboard]);
 
     return (
         <DashboardContext.Provider
@@ -166,7 +169,7 @@ useEffect(() => {
                 dashboardData,
                 loading,
                 error,
-                refreshDashboard: fetchDashboardData,
+                refreshDashboard,
                 updateSleepData,
                 removeSleepData,
             }}

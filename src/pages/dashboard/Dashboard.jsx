@@ -1,11 +1,12 @@
-import React, { useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import { UserContext } from '../../contexts/UserContext';
-import DashboardBox from './DashboardBox';
-import BigActionButton from '../shared/BigActionButton';
+import DashboardBox from '../../components/ui/DashboardBox';
+import BigActionButton from '../../components/ui/BigActionButton';
 import { useNavigate } from 'react-router-dom';
 import { usePreferenceSync } from '../../hooks/usePreferenceSync';
-import { formatTemperature, formatDate, formatTime } from '../../utils/userPreferences';
+import { formatTemperature, formatDate, formatTime } from '../../utils/format/userPreferences';
+import { calculateSleepStreaks, formatStreakDisplay } from '../../utils/sleep/sleepStreaks';
 
 /**
  * Dashboard component displays user profile, bedroom info,
@@ -46,7 +47,7 @@ function Dashboard() {
   }
 
   // Destructure data for easier access
-  const { profile, bedrooms, latestSleepData, latestDreamLog } = dashboardData;
+  const { profile, bedrooms, latestSleepData, latestDreamLog, allSleepSessions } = dashboardData;
 
   // Helper: Render profile summary
   function renderProfile(profile) {
@@ -77,10 +78,21 @@ function Dashboard() {
     if (!sleep) return <p>No sleep data.</p>;
     const started = sleep.createdAt ? formatDate(new Date(sleep.createdAt), dateFormat) + ' ' + formatTime(new Date(sleep.createdAt), timeFormat) : 'Unknown';
     const status = sleep.wakeUps?.length ? 'Completed' : 'Ongoing';
+    
+    // Calculate streak information
+    const streakStats = calculateSleepStreaks(allSleepSessions || []);
+    const { currentStreakText, longestStreakText, motivationalMessage } = formatStreakDisplay(streakStats);
+    
     return (
       <div>
         <p><strong>Started:</strong> {started}</p>
         <p><strong>Status:</strong> {status}</p>
+        <hr className="my-2" />
+        <div className="streak-info">
+          <p className="mb-1"><strong>Current Streak:</strong> {currentStreakText}</p>
+          <p className="mb-1"><strong>Best Streak:</strong> {longestStreakText}</p>
+          <small className="text-muted">{motivationalMessage}</small>
+        </div>
       </div>
     );
   }

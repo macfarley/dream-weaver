@@ -1,5 +1,4 @@
 import api from './apiConfig.js';
-import axios from 'axios';
 
 /**
  * User Service Module
@@ -67,8 +66,23 @@ async function updateProfile(profileData) {
     throw new Error('Profile data is required and must be an object.');
   }
 
+  // Get authentication token from localStorage
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error('No authentication token found. Please log in.');
+  }
+
   try {
-    const response = await api.put('/users/profile', profileData);
+    const response = await axios.put(
+      `${import.meta.env.VITE_BACK_END_SERVER_URL}/users/profile`,
+      profileData,
+      { 
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true 
+      }
+    );
+    
     return response.data;
   } catch (error) {
     // Provide specific error messages based on response
@@ -182,10 +196,11 @@ function getUserById(userId, token) {
  * 
  * @param {string} userId - The unique ID of the user to update
  * @param {Object} updateData - Object containing fields to update
+ * @param {string} token - Authentication token
  * @returns {Promise<Object>} Promise that resolves to updated user data
  * @throws {Error} Throws error if update fails or insufficient privileges
  */
-function updateUserById(userId, updateData) {
+function updateUserById(userId, updateData, token) {
   if (!userId || typeof userId !== 'string') {
     throw new Error('User ID is required and must be a string.');
   }
@@ -194,7 +209,13 @@ function updateUserById(userId, updateData) {
     throw new Error('Update data is required and must be an object.');
   }
 
-  return api.put(`/admin/users/${userId}`, updateData)
+  if (!token) {
+    throw new Error('Authentication token is required.');
+  }
+
+  return api.put(`/admin/users/${userId}`, updateData, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
     .then(response => response.data)
     .catch(error => {
       if (error.response?.status === 403) {
@@ -214,10 +235,11 @@ function updateUserById(userId, updateData) {
  * 
  * @param {string} userId - The unique ID of the user to delete
  * @param {string} password - Admin password for confirmation
+ * @param {string} token - Authentication token
  * @returns {Promise<Object>} Promise that resolves to deletion confirmation
  * @throws {Error} Throws error if deletion fails or insufficient privileges
  */
-function deleteUserById(userId, password) {
+function deleteUserById(userId, password, token) {
   if (!userId || typeof userId !== 'string') {
     throw new Error('User ID is required and must be a string.');
   }
@@ -226,8 +248,13 @@ function deleteUserById(userId, password) {
     throw new Error('Admin password confirmation is required.');
   }
 
+  if (!token) {
+    throw new Error('Authentication token is required.');
+  }
+
   return api.delete(`/admin/users/${userId}`, {
     headers: { 
+      Authorization: `Bearer ${token}`,
       'x-admin-password': password // Send password in header as expected by backend
     }
   })

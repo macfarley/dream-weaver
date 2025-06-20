@@ -98,5 +98,3 @@ export const mockAuthFailure = async () => {
   await new Promise(resolve => setTimeout(resolve, 200));
   throw new Error('Authentication failed - invalid credentials');
 };
-
-/**

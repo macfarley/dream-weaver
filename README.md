@@ -94,27 +94,90 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
 
 ```
 src/
-├── components/           # Reusable UI components
-│   ├── dashboard/       # Dashboard-specific components
-│   ├── forms/           # Form components (Login, Signup, UserProfile, etc.)
-│   ├── layout/          # Layout components (NavBar, Footer)
-│   ├── admin/           # Admin-only components (AdminDashboard, AdminUserProfile, AdminOnlyRoute)
-│   └── shared/          # Shared utility components (Loading, ThemeToggle, BigActionButton, etc.)
-├── contexts/            # React Context providers (User, Dashboard, Theme)
+├── components/           # Organized by domain and functionality
+│   ├── ui/              # Reusable interface elements
+│   │   ├── uiComponents.js     # Barrel export for UI components
+│   │   ├── BigActionButton.jsx # Main action button with smart states
+│   │   ├── DashboardBox.jsx    # Reusable dashboard card component
+│   │   ├── Loading.jsx         # Loading spinner component
+│   │   ├── ThemeToggle.jsx     # Dark/light mode toggle
+│   │   └── ...                 # Sliders, form controls, etc.
+│   ├── auth/            # Authentication components
+│   │   ├── authComponents.js   # Barrel export for auth components
+│   │   ├── LoginForm.jsx       # User login form
+│   │   ├── SignupForm.jsx      # User registration form
+│   │   └── UserProfile.jsx     # User profile management
+│   ├── sleep/           # Sleep-related components
+│   │   ├── sleepComponents.js  # Barrel export for sleep components
+│   │   ├── BedroomForm.jsx     # Bedroom environment setup
+│   │   ├── GoToBedForm.jsx     # Pre-sleep logging form
+│   │   ├── WakeUpForm.jsx      # Wake-up logging form
+│   │   └── SleepDebugger.jsx   # Sleep state debugging
+│   ├── system/          # System utility components
+│   │   ├── systemComponents.js # Barrel export for system components
+│   │   ├── PreferenceSync.jsx  # Preference synchronization
+│   │   └── UserRedirect.jsx    # Smart user routing
+│   ├── layout/          # Layout components
+│   │   ├── NavBar.jsx          # Navigation with auth state
+│   │   └── Footer.jsx          # Application footer
+│   └── admin/           # Admin-only components (lazy loaded)
+│       ├── AdminDashboard.jsx      # Admin control panel
+│       ├── AdminUserProfile.jsx    # Admin user management
+│       └── AdminOnlyRoute.jsx      # Admin route protection
+├── pages/               # Page-level components
+│   ├── dashboard/       # Dashboard pages
+│   │   ├── Dashboard.jsx       # Main dashboard page
+│   │   ├── BedroomIndex.jsx    # Bedroom listing page
+│   │   ├── BedroomDetails.jsx  # Individual bedroom details
+│   │   ├── SleepDataIndex.jsx  # Sleep history listing
+│   │   ├── SleepSession.jsx    # Individual session details
+│   │   └── DreamIndex.jsx      # Dream journal listing
+│   ├── LandingPage.jsx  # Home/landing page
+│   ├── About.jsx        # About page
+│   ├── JoinUs.jsx       # Auth page (login/signup)
+│   └── Unauthorized.jsx # 403 error page
+├── contexts/            # React Context providers
+│   ├── UserContext.jsx      # User authentication state
+│   ├── DashboardContext.jsx # Dashboard data management
+│   └── ThemeContext.jsx     # Theme preferences
 ├── hooks/               # Custom React hooks
-├── services/            # **Fully standardized** API service modules with centralized axios configuration
-│   ├── apiConfig.js     # Centralized axios instance with automatic token injection
-│   ├── authService.js   # Authentication and token management
-│   ├── userService.js   # User profile and preferences (converted to axios)
-│   ├── adminService.js  # Admin user management (converted to axios)
-│   ├── sleepSessionService.js  # Sleep session tracking (converted to axios)
-│   ├── sleepDataService.js     # Sleep history and analytics (converted to axios)
-│   └── bedroomService.js       # Bedroom environment management (converted to axios)
-├── styles/              # Sass stylesheets and component-specific styles
+│   └── usePreferenceSync.js # Preference synchronization hook
+├── services/            # **Fully standardized** API modules with axios
+│   ├── apiConfig.js         # Centralized axios with auth injection
+│   ├── authService.js       # Authentication & token management
+│   ├── userService.js       # User profile & preferences
+│   ├── adminService.js      # Admin user management
+│   ├── sleepSessionService.js # Sleep session tracking
+│   ├── sleepDataService.js   # Sleep history & analytics
+│   └── bedroomService.js     # Bedroom environment management
+├── utils/               # Utility functions organized by domain
+│   ├── format/          # Data formatting utilities
+│   │   ├── formatUtils.js      # Barrel export for format utils
+│   │   ├── userPreferences.js  # Preference-aware formatting
+│   │   └── urlSafeNames.js     # URL sanitization
+│   └── sleep/           # Sleep-specific utilities
+│       ├── sleepUtils.js       # Barrel export for sleep utils
+│       ├── sleepStateUtils.js  # Sleep state management
+│       ├── sleepStreaks.js     # Streak calculations
+│       └── sleepDataUtils.js   # Sleep data processing
+├── styles/              # Sass stylesheets
+│   ├── custom.scss          # Main stylesheet
+│   ├── _variables.scss      # Sass variables
+│   └── componentStyles/     # Component-specific styles
 ├── assets/              # Static assets (images, logos, wireframes)
-├── App.jsx              # Main application component with routing
+├── App.jsx              # Main app with routing & lazy loading
 └── main.jsx             # Application entry point
 ```
+
+### 🎯 Key Organizational Principles:
+
+- **Domain-based grouping** - Components organized by functionality (ui, auth, sleep)
+- **Descriptive naming** - No generic `index.js` files, all names describe contents
+- **Barrel exports** - Clean imports via `*Components.js` files
+- **Page separation** - Page-level components in dedicated `pages/` directory
+- **Utility organization** - Utils grouped by domain (format, sleep)
+- **Lazy loading** - Admin components loaded only when needed
+- **Consistent patterns** - All services use named exports, consistent import style
 
 ---
 

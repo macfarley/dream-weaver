@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
 import { DashboardContext } from "../../contexts/DashboardContext";
-import ThemeToggle from "../shared/ThemeToggle";
-import Loading from "../shared/Loading";
+import ThemeToggle from "../ui/ThemeToggle";
+import Loading from "../ui/Loading";
 import DWLogo from "../../assets/DW-Logo.png";
 
 /**

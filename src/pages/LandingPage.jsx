@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
 import logo from "../assets/dream-weaver-logo.png";
 import { Bed, BarChart2, PenTool } from "lucide-react";
-import SignupForm from "../components/forms/SignupForm.jsx";
-import LoginForm from "../components/forms/LoginForm.jsx";
-import BigActionButton from "./shared/BigActionButton";
+import SignupForm from "../components/auth/SignupForm.jsx";
+import LoginForm from "../components/auth/LoginForm.jsx";
+import BigActionButton from "../components/ui/BigActionButton";
 
 /**
  * LandingPage component serves as the main entry point for new and returning users.
