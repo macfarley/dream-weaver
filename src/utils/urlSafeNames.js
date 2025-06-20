@@ -57,10 +57,10 @@ export function validateBedroomName(name) {
 
 /**
  * Sanitizes a bedroom name for safe URL usage.
- * This is used when encoding for URLs.
+ * Creates clean, readable URLs by converting to slug format.
  * 
  * @param {string} name - The bedroom name to sanitize
- * @returns {string} - URL-safe version of the name
+ * @returns {string} - URL-safe slug version of the name
  */
 export function sanitizeBedroomNameForUrl(name) {
   if (!name || typeof name !== 'string') {
@@ -70,15 +70,31 @@ export function sanitizeBedroomNameForUrl(name) {
   // Trim and normalize whitespace
   const cleaned = name.trim().replace(/\s+/g, ' ');
   
-  // Use encodeURIComponent for proper URL encoding
-  return encodeURIComponent(cleaned);
+  // Convert to URL-friendly slug:
+  // 1. Convert to lowercase
+  // 2. Replace spaces with hyphens
+  // 3. Remove apostrophes
+  // 4. Replace other special characters with hyphens
+  // 5. Remove multiple consecutive hyphens
+  // 6. Remove leading/trailing hyphens
+  const slug = cleaned
+    .toLowerCase()
+    .replace(/\s+/g, '-')           // Replace spaces with hyphens
+    .replace(/'/g, '')              // Remove apostrophes
+    .replace(/[&().,!?]+/g, '-')    // Replace other special chars with hyphens
+    .replace(/-+/g, '-')            // Replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, '');       // Remove leading/trailing hyphens
+  
+  return slug;
 }
 
 /**
  * Decodes a bedroom name from URL parameters safely.
+ * Since we now use slugs, this primarily handles URL decoding and normalization.
+ * The actual bedroom lookup should be done by comparing slugified versions.
  * 
- * @param {string} encodedName - The URL-encoded bedroom name
- * @returns {string} - Decoded bedroom name
+ * @param {string} encodedName - The URL slug of the bedroom name
+ * @returns {string} - The URL slug (for use in comparisons)
  */
 export function decodeBedroomNameFromUrl(encodedName) {
   if (!encodedName || typeof encodedName !== 'string') {
@@ -86,11 +102,15 @@ export function decodeBedroomNameFromUrl(encodedName) {
   }
 
   try {
-    return decodeURIComponent(encodedName);
+    // URL decode first (in case there are any encoded characters)
+    const decoded = decodeURIComponent(encodedName);
+    
+    // Return the slug as-is for comparison purposes
+    return decoded.toLowerCase().trim();
   } catch (error) {
     console.warn('Failed to decode bedroom name from URL:', encodedName, error);
     // Return the original string if decoding fails
-    return encodedName;
+    return encodedName.toLowerCase().trim();
   }
 }
 
@@ -110,12 +130,19 @@ export function normalizeBedroomName(name) {
 }
 
 /**
- * Checks if two bedroom names are equivalent (case-insensitive).
+ * Checks if two bedroom names are equivalent.
+ * Can compare original name with slug, or two original names.
  * 
- * @param {string} name1 - First bedroom name
- * @param {string} name2 - Second bedroom name
+ * @param {string} name1 - First bedroom name (could be original or slug)
+ * @param {string} name2 - Second bedroom name (could be original or slug)  
  * @returns {boolean} - True if names are equivalent
  */
 export function bedroomNamesMatch(name1, name2) {
-  return normalizeBedroomName(name1) === normalizeBedroomName(name2);
+  if (!name1 || !name2) return false;
+  
+  // Convert both to slugs for comparison
+  const slug1 = sanitizeBedroomNameForUrl(name1);
+  const slug2 = sanitizeBedroomNameForUrl(name2);
+  
+  return slug1 === slug2;
 }

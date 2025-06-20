@@ -4,8 +4,8 @@ import { DashboardContext } from '../../contexts/DashboardContext';
 import { getToken } from '../../services/authService';
 import * as bedroomService from '../../services/bedroomService';
 import sleepDataService from '../../services/sleepDataService';
-import { format } from 'date-fns';
-import { decodeBedroomNameFromUrl, bedroomNamesMatch } from '../../utils/urlSafeNames';
+import { format, parseISO } from 'date-fns';
+import { decodeBedroomNameFromUrl, bedroomNamesMatch, sanitizeBedroomNameForUrl } from '../../utils/urlSafeNames';
 
 // Main BedroomDetails component
 function BedroomDetails() {
@@ -35,17 +35,25 @@ function BedroomDetails() {
                     return;
                 }
 
-                // Safely decode the bedroom name from URL
-                const decodedBedroomName = decodeBedroomNameFromUrl(bedroomname);
+                // Safely decode the bedroom name from URL (this gives us the slug)
+                const urlSlug = decodeBedroomNameFromUrl(bedroomname);
 
-                // Try to find the bedroom in dashboard context first using safe comparison
+                // Try to find the bedroom in dashboard context first using slug comparison
                 let room = dashboardData?.bedrooms?.find(
-                    b => bedroomNamesMatch(b.bedroomName, decodedBedroomName)
+                    b => bedroomNamesMatch(b.bedroomName, urlSlug)
                 );
 
-                // If not found, fetch from API
+                // If not found, fetch from API and try to match by slug
                 if (!room) {
-                    room = await bedroomService.getBedroomByName(decodedBedroomName);
+                    // We need to get all bedrooms and find the one that matches the slug
+                    const allBedrooms = await bedroomService.getBedrooms();
+                    room = allBedrooms.find(b => bedroomNamesMatch(b.bedroomName, urlSlug));
+                    
+                    if (!room) {
+                        console.error('Bedroom not found for slug:', urlSlug);
+                        navigate('/users/dashboard');
+                        return;
+                    }
                 }
 
                 setBedroom(room);

@@ -105,7 +105,7 @@
   border: 2px solid var(--color-accent);
   opacity: 0;
   z-index: 0;
-  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse-ring 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .big-action-button__pulse-ring--1 {
@@ -113,11 +113,11 @@
 }
 
 .big-action-button__pulse-ring--2 {
-  animation-delay: 0.7s;
+  animation-delay: 1.4s;
 }
 
 .big-action-button__pulse-ring--3 {
-  animation-delay: 1.4s;
+  animation-delay: 2.8s;
 }
 
 @keyframes pulse-ring {
@@ -295,7 +295,7 @@
   
   .big-action-button__pulse-ring {
     border-color: #9ca3af;
-    animation-duration: 1s;
+    animation-duration: 2s; // Half speed: doubled from 1s to 2s
   }
   
   .big-action-button__icon {

@@ -165,11 +165,11 @@ function Navbar() {
           </button>
         )}
         
-        {/* Brand logo that links to dashboard (if logged in) or home (if not) */}
+        {/* Brand logo that links to landing page */}
         <Link
-          to={user ? "/dashboard" : "/"}
+          to="/"
           className="navbar-brand d-flex align-items-center custom-navbar-logo"
-          title="DreamWeaver Home"
+          title="DreamWeaver Landing Page"
           tabIndex={0}
         >
           <img
@@ -249,24 +249,56 @@ function Navbar() {
                 {hasActiveSleep ? (
                   /* User is currently sleeping - show Wake Up action */
                   <Link
-                    className="nav-link fw-bold text-success"
+                    className="nav-link fw-bold"
                     to="/gotobed/wakeup"
                     title="Wake up from current sleep session"
                     aria-label="Wake up - you have an active sleep session"
                     onClick={closeMobileMenu}
+                    style={{
+                      backgroundColor: 'rgba(255, 193, 7, 0.1)', // Much more transparent yellow
+                      color: '#ffc107',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      textDecoration: 'none',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'rgba(255, 193, 7, 0.2)'; // Still very transparent on hover
+                      e.target.style.textDecoration = 'none';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'rgba(255, 193, 7, 0.1)';
+                      e.target.style.textDecoration = 'none';
+                    }}
                   >
-                    ⏰ Wake Up
+                    <span style={{ textDecoration: 'none !important' }}>⏰</span> Wake Up
                   </Link>
                 ) : (
                   /* User is not sleeping - show Go To Bed action */
                   <Link
-                    className="nav-link fw-bold text-primary"
+                    className="nav-link fw-bold"
                     to="/gotobed"
                     title="Start a new sleep session"
                     aria-label="Go to bed - start tracking your sleep"
                     onClick={closeMobileMenu}
+                    style={{
+                      backgroundColor: 'rgba(13, 110, 253, 0.1)', // Much more transparent blue
+                      color: '#0d6efd',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      textDecoration: 'none',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'rgba(13, 110, 253, 0.2)'; // Still very transparent on hover
+                      e.target.style.textDecoration = 'none';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                      e.target.style.textDecoration = 'none';
+                    }}
                   >
-                    🌙 Go To Bed
+                    <span style={{ textDecoration: 'none !important' }}>🌙</span> Go To Bed
                   </Link>
                 )}
               </li>
