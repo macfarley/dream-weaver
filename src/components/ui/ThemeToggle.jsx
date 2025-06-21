@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { UserContext } from '../../contexts/UserContext';
 import { updateProfile } from '../../services/userService';
@@ -40,7 +40,7 @@ function ThemeToggle() {
    * Process:
    * 1. Toggle theme in ThemeContext (immediate UI update)
    * 2. If user is logged in, sync new theme to backend
-   * 3. Update UserContext with new theme preference
+   * 3. Update UserContext with new theme preference (only if different)
    * 4. Handle any errors gracefully without disrupting user experience
    */
   const handleThemeToggle = async () => {
@@ -56,8 +56,11 @@ function ThemeToggle() {
           theme: newThemeValue
         });
         
-        // Update UserContext with the response from backend
-        setUser(updatedUserProfile);
+        // Only update UserContext if the theme actually changed
+        // This prevents unnecessary re-renders and context updates
+        if (user.theme !== updatedUserProfile.theme) {
+          setUser(updatedUserProfile);
+        }
         
       } catch (error) {
         console.error('Failed to sync theme preference to backend:', error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import { UserContext } from "../../contexts/UserContext";
 import { signUp, getToken } from "../../services/authService";
 import * as bedroomService from "../../services/bedroomService";
@@ -30,7 +30,7 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
   const [isValid, setIsValid] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  function validateField(name, value) {
+  const validateField = useCallback((name, value) => {
     switch (name) {
       case "username":
         return value.length >= 3 ? null : "Username must be at least 3 characters";
@@ -38,12 +38,13 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
         return value.trim().length >= 1 ? null : "First name is required";
       case "lastName":
         return value.trim().length >= 1 ? null : "Last name is required";
-      case "dateOfBirth":
+      case "dateOfBirth": {
         if (!value) return "Date of birth is required";
         const birthDate = new Date(value);
         const today = new Date();
         const age = today.getFullYear() - birthDate.getFullYear();
         return age >= 13 ? null : "Must be at least 13 years old";
+      }
       case "email":
         return /\S+@\S+\.\S+/.test(value) ? null : "Invalid email address";
       case "password":
@@ -53,7 +54,7 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
       default:
         return null;
     }
-  }
+  }, [formData.password]);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
@@ -83,7 +84,7 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
     });
     
     setIsValid(allFieldsValid);
-  }, [formData]);
+  }, [formData, validateField]);
 
   // Update your handleSubmit function:
   const handleSubmit = async (e) => {
@@ -275,7 +276,7 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
       <hr className="signup-divider" />
 
       <div className="signup-form-field">
-        {/* Use Metric System */}
+        {/* Temperature Units */}
         <div className="signup-checkbox-field">
           <input
             type="checkbox"
@@ -286,9 +287,9 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
             onChange={handleChange}
           />
           <label htmlFor={`useMetric-${formId}`} className="signup-checkbox-label">
-            Use Metric System
+            Use Celsius (°C)
             <span className="signup-checkbox-explainer">
-              Temperature in Celsius, weight in kilograms, height in centimeters
+              Temperature displayed in Celsius instead of Fahrenheit
             </span>
           </label>
         </div>

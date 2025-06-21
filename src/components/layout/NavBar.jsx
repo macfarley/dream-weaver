@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
 import { DashboardContext } from "../../contexts/DashboardContext";
@@ -92,11 +92,7 @@ function Navbar() {
   }
 
   // Destructure dashboard data with fallback defaults
-  const { 
-    dashboardData, 
-    theme = "light", 
-    toggleTheme = () => console.warn("toggleTheme not available") 
-  } = dashboardCtx;
+  const { dashboardData } = dashboardCtx;
 
   // Extract username from dashboard data, with fallback to user context or "Guest"
   const username = dashboardData?.profile?.username || user?.username || "Guest";
@@ -185,8 +181,8 @@ function Navbar() {
         </Link>
       </div>
 
-      {/* Center section: Welcome message with username */}
-      <span className="navbar-text me-3 custom-navbar-welcome" aria-live="polite">
+      {/* Center section: Welcome message with username - hidden on larger screens */}
+      <span className="navbar-text me-3 custom-navbar-welcome d-lg-none" aria-live="polite">
         Welcome, {username}
       </span>
 
@@ -212,8 +208,9 @@ function Navbar() {
         className={`collapse navbar-collapse ${isMobileMenuOpen ? 'show' : ''}`} 
         id="navbarContent"
         ref={collapseRef}
+        role="menu"
       >
-        <ul className="navbar-nav ms-auto custom-navbar-nav">
+        <ul className="navbar-nav ms-auto custom-navbar-nav" role="menubar">
           
           {/* Navigation for unauthenticated users */}
           {!user && (
@@ -224,6 +221,8 @@ function Navbar() {
                   to="/about" 
                   title="Learn about DreamWeaver"
                   onClick={closeMobileMenu}
+                  tabIndex={0}
+                  role="menuitem"
                 >
                   About
                 </Link>
@@ -234,6 +233,8 @@ function Navbar() {
                   to="/join" 
                   title="Sign up or log in"
                   onClick={closeMobileMenu}
+                  tabIndex={0}
+                  role="menuitem"
                 >
                   Join Us
                 </Link>
@@ -257,10 +258,11 @@ function Navbar() {
                     style={{
                       backgroundColor: 'rgba(255, 193, 7, 0.1)', // Much more transparent yellow
                       color: '#ffc107',
-                      borderRadius: '8px',
-                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      padding: '6px 10px', /* More compact padding */
                       textDecoration: 'none',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      fontSize: '0.85rem' /* Slightly smaller text */
                     }}
                     onMouseEnter={(e) => {
                       e.target.style.backgroundColor = 'rgba(255, 193, 7, 0.2)'; // Still very transparent on hover
@@ -284,10 +286,11 @@ function Navbar() {
                     style={{
                       backgroundColor: 'rgba(13, 110, 253, 0.1)', // Much more transparent blue
                       color: '#0d6efd',
-                      borderRadius: '8px',
-                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      padding: '6px 10px', /* More compact padding */
                       textDecoration: 'none',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      fontSize: '0.85rem' /* Slightly smaller text */
                     }}
                     onMouseEnter={(e) => {
                       e.target.style.backgroundColor = 'rgba(13, 110, 253, 0.2)'; // Still very transparent on hover
@@ -310,6 +313,8 @@ function Navbar() {
                   to="/dashboard" 
                   title="View your dashboard"
                   onClick={closeMobileMenu}
+                  tabIndex={0}
+                  role="menuitem"
                 >
                   Dashboard
                 </Link>
@@ -320,6 +325,8 @@ function Navbar() {
                   to="/journal" 
                   title="View your dream journal"
                   onClick={closeMobileMenu}
+                  tabIndex={0}
+                  role="menuitem"
                 >
                   Dream Journal
                 </Link>
@@ -330,6 +337,8 @@ function Navbar() {
                   to="/sleep" 
                   title="View your sleep history"
                   onClick={closeMobileMenu}
+                  tabIndex={0}
+                  role="menuitem"
                 >
                   Sleep History
                 </Link>
@@ -340,6 +349,8 @@ function Navbar() {
                   to="/bedrooms" 
                   title="Manage your bedrooms"
                   onClick={closeMobileMenu}
+                  tabIndex={0}
+                  role="menuitem"
                 >
                   Bedrooms
                 </Link>
@@ -350,6 +361,8 @@ function Navbar() {
                   to="/profile" 
                   title="Edit your profile"
                   onClick={closeMobileMenu}
+                  tabIndex={0}
+                  role="menuitem"
                 >
                   Profile
                 </Link>
@@ -364,6 +377,8 @@ function Navbar() {
                     title="Admin dashboard"
                     aria-label="Admin dashboard - administrative functions"
                     onClick={closeMobileMenu}
+                    tabIndex={0}
+                    role="menuitem"
                   >
                     <i className="fas fa-cog me-1"></i>
                     Admin Dashboard
@@ -378,6 +393,8 @@ function Navbar() {
                   to="/" 
                   title="Go to home page"
                   onClick={closeMobileMenu}
+                  tabIndex={0}
+                  role="menuitem"
                 >
                   Home
                 </Link>
@@ -393,6 +410,9 @@ function Navbar() {
                   }}
                   title="Log out of your account"
                   aria-label="Log out"
+                  tabIndex={0}
+                  role="menuitem"
+                  type="button"
                 >
                   Logout
                 </button>

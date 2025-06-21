@@ -24,7 +24,6 @@ export function usePreferenceSync() {
     prefersImperial: user?.prefersImperial ?? true,
     dateFormat: user?.dateFormat || 'MM/DD/YYYY',
     timeFormat: user?.timeFormat || '12-hour',
-    preferredTimezone: user?.preferredTimezone || '',
     // Sleep reminder preferences
     sleepReminderEnabled: user?.sleepReminderEnabled ?? true,
     sleepReminderHours: user?.sleepReminderHours || 12, // Hours after sleep start to remind

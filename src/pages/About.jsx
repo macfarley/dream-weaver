@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
 import BigActionButton from '../components/ui/BigActionButton';
@@ -51,7 +51,12 @@ function About() {
                     <strong>What if I forget to wake up?</strong> No worries! You can set a retroactive wake-up time when you return, use the "Quick Wake-Up" button for instant closure, or check out our reminder tips below.
                 </li>
                 <li>
-                    <strong>Are my preferences saved?</strong> Yes. You can adjust theme, units, and date/time format anytime in your Profile settings.
+                    <strong>Are my preferences saved?</strong> Yes. You can adjust theme, temperature units, and date/time format anytime in your Profile settings.
+                </li>
+                <li>
+                    <strong>How does timezone handling work?</strong> All sleep session times are automatically displayed in your current browser's timezone. 
+                    This means if you travel or move to a new timezone, your sleep data will show relative to where you are now—perfect for understanding 
+                    your sleep patterns in your current context. No timezone settings needed!
                 </li>
             </ul>
 

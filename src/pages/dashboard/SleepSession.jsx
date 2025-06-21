@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import * as sleepDataService from '../../services/sleepDataService';
 import { DashboardContext } from '../../contexts/DashboardContext';
@@ -10,9 +10,6 @@ function SleepSession() {
   const { date, id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Check if this is being accessed via dreamjournal route
-  const isDreamJournalFocus = location.pathname.includes('/dreamjournal/');
 
   // Get dashboard data and refresh function from context
   const { dashboardData, refreshDashboard } = useContext(DashboardContext);
@@ -39,8 +36,6 @@ function SleepSession() {
     }
 
     // Determine what we're looking for (date or id)
-    const searchParam = id || date;
-    
     let entry;
     if (id) {
       // Looking for specific ID (from sleepdata route)
@@ -237,7 +232,7 @@ function SleepSession() {
   }
 
   // Destructure relevant fields from sleepData
-  const { bedroom, cuddleBuddy, sleepyThoughts, wakeUps, createdAt } = sleepData;
+  const { wakeUps, createdAt } = sleepData;
 
   // Parse start time
   const start = new Date(createdAt);
@@ -255,16 +250,8 @@ function SleepSession() {
   // Render the sleep session details
   return (
     <div className="container my-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="mb-4">
         <h2>Sleep Session - {formatDate(start, dateFormat)}</h2>
-        {!isEditing && (
-          <button 
-            className="btn btn-primary"
-            onClick={() => setIsEditing(true)}
-          >
-            Edit Session
-          </button>
-        )}
       </div>
 
       <div className="row">
@@ -274,10 +261,7 @@ function SleepSession() {
             <SleepSessionInfo 
               sleepData={sleepData}
               start={start}
-              latestWake={latestWake}
               totalSleepDuration={totalSleepDuration}
-              isDreamJournalFocus={isDreamJournalFocus}
-              dateFormat={dateFormat}
               timeFormat={timeFormat}
             />
           ) : (
@@ -299,6 +283,17 @@ function SleepSession() {
           <div className="card">
             <div className="card-body">
               <h5 className="card-title">Actions</h5>
+              
+              {/* Edit Session Button */}
+              {!isEditing && (
+                <button 
+                  className="btn btn-primary btn-sm mb-2 w-100"
+                  onClick={() => setIsEditing(true)}
+                >
+                  Edit Session
+                </button>
+              )}
+              
               <button 
                 className="btn btn-outline-primary btn-sm mb-2 w-100"
                 onClick={() => navigate('/users/dashboard/sleepdata')}
@@ -345,7 +340,7 @@ function SleepSession() {
 }
 
 // Subcomponent: Display sleep session info (view mode)
-function SleepSessionInfo({ sleepData, start, latestWake, totalSleepDuration, isDreamJournalFocus, dateFormat, timeFormat }) {
+function SleepSessionInfo({ sleepData, start, totalSleepDuration, timeFormat }) {
   const { bedroom, cuddleBuddy, sleepyThoughts, wakeUps } = sleepData;
 
   return (
@@ -363,29 +358,40 @@ function SleepSessionInfo({ sleepData, start, latestWake, totalSleepDuration, is
         </div>
       </div>
 
-      {/* Sleepy Thoughts Section */}
-      <section id="sleepyThoughts" className="mb-4">
-        <div className="card">
-          <div className="card-body">
-            <h5 className="card-title">Sleepy Thoughts</h5>
-            <p>{sleepyThoughts || 'None recorded.'}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Dream Journal Section */}
+      {/* Combined Dream Journal Section */}
       <section id="dreamJournal" className="mb-4">
         <div className="card">
           <div className="card-body">
             <h5 className="card-title">Dream Journal</h5>
-            {latestWake?.dreamJournal ? (
-              <p>{latestWake.dreamJournal}</p>
-            ) : (
-              <p className="text-muted">No dream journal entry.</p>
+            
+            {/* Sleepy Thoughts */}
+            {sleepyThoughts && (
+              <div className="mb-3">
+                <h6 className="text-muted">🧠 Sleepy Thoughts:</h6>
+                <p className="border-start border-primary border-3 ps-3 mb-3" style={{backgroundColor: 'rgba(13, 110, 253, 0.05)'}}>
+                  {sleepyThoughts}
+                </p>
+              </div>
             )}
-            {latestWake?.restfulness && (
-              <p><strong>Restfulness:</strong> {latestWake.restfulness}/10</p>
-            )}
+            
+            {/* Dreams from all wake-ups */}
+            {wakeUps.some(wake => wake.dreamJournal) ? (
+              <div className="mb-3">
+                <h6 className="text-muted">💭 Dreams:</h6>
+                {wakeUps.map((wake, index) => 
+                  wake.dreamJournal && (
+                    <div key={index} className="border-start border-success border-3 ps-3 mb-3" style={{backgroundColor: 'rgba(25, 135, 84, 0.05)'}}>
+                      <p className="mb-1">{wake.dreamJournal}</p>
+                      {wake.restfulness && (
+                        <small className="text-muted">Restfulness: {wake.restfulness}/10</small>
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
+            ) : !sleepyThoughts ? (
+              <p className="text-muted">No dreams or sleepy thoughts recorded.</p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -398,32 +404,41 @@ function SleepSessionInfo({ sleepData, start, latestWake, totalSleepDuration, is
             {wakeUps.length === 0 ? (
               <p className="text-muted">No wake-up events recorded yet.</p>
             ) : (
-              wakeUps.map((wake, index) => {
-                const awakenAt = wake.awakenAt
-                  ? formatTime(new Date(wake.awakenAt), timeFormat)
-                  : 'N/A';
-                const backToBedAt = wake.backToBedAt
-                  ? formatTime(new Date(wake.backToBedAt), timeFormat)
-                  : null;
+              <div className="row g-2">
+                {wakeUps.map((wake, index) => {
+                  const awakenAt = wake.awakenAt
+                    ? formatTime(new Date(wake.awakenAt), timeFormat)
+                    : 'N/A';
+                  const backToBedAt = wake.backToBedAt
+                    ? formatTime(new Date(wake.backToBedAt), timeFormat)
+                    : null;
 
-                return (
-                  <div key={index} className="border-bottom mb-3 pb-3">
-                    <h6>Wake Up #{index + 1}</h6>
-                    <p><strong>Awaken At:</strong> {awakenAt}</p>
-                    <p><strong>Sleep Quality:</strong> {wake.sleepQuality}</p>
-                    {wake.finishedSleeping && <p><em>Final wake-up</em></p>}
-                    {backToBedAt && (
-                      <p><strong>Back to Bed At:</strong> {backToBedAt}</p>
-                    )}
-                    {wake.dreamJournal && (
-                      <p><strong>Dream:</strong> {wake.dreamJournal}</p>
-                    )}
-                    {wake.restfulness && (
-                      <p><strong>Restfulness:</strong> {wake.restfulness}/10</p>
-                    )}
-                  </div>
-                );
-              })
+                  return (
+                    <div key={index} className="col-md-6 col-lg-4">
+                      <div className="card border-secondary" style={{fontSize: '0.9rem'}}>
+                        <div className="card-body p-3">
+                          <div className="mb-2">
+                            <strong>Awaken:</strong> {awakenAt}
+                          </div>
+                          <div className="mb-2">
+                            <strong>Quality:</strong> {wake.sleepQuality}
+                          </div>
+                          {backToBedAt && (
+                            <div className="mb-2">
+                              <strong>Back to bed:</strong> {backToBedAt}
+                            </div>
+                          )}
+                          {wake.finishedSleeping && (
+                            <div className="text-success">
+                              <small><em>Final wake-up</em></small>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>

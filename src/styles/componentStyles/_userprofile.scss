@@ -1,0 +1,483 @@
+/* src/styles/componentStyles/_userprofile.scss */
+
+/* =============================
+   USER PROFILE STYLES — DreamWeaver
+   Clean profile view and edit form
+   ============================= */
+
+.user-profile {
+  /* Profile view container */
+  .profile-view {
+    .profile-header {
+      background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-bg-secondary) 100%);
+      border-radius: 0.5rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      border: 1px solid var(--color-border);
+
+      .profile-avatar {
+        width: 80px;
+        height: 80px;
+        background: var(--color-accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+        color: white;
+        font-weight: bold;
+      }
+
+      .profile-name {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--color-text);
+        margin-bottom: 0.5rem;
+      }
+
+      .profile-username {
+        color: var(--color-text-muted);
+        font-size: 1rem;
+        margin-bottom: 0;
+      }
+
+      .profile-role-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+
+        &.admin {
+          background-color: rgba(255, 193, 7, 0.2);
+          color: #ffc107;
+          border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        &.user {
+          background-color: rgba(13, 110, 253, 0.2);
+          color: #0d6efd;
+          border: 1px solid rgba(13, 110, 253, 0.3);
+        }
+      }
+    }
+
+    .profile-details {
+      .detail-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--color-bg-secondary);
+        border-radius: 0.5rem;
+        border: 1px solid var(--color-border);
+
+        .section-title {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--color-text);
+          margin-bottom: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          .section-icon {
+            color: var(--color-accent);
+          }
+        }
+
+        .detail-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1rem;
+        }
+
+        .detail-item {
+          .detail-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            margin-bottom: 0.25rem;
+          }
+
+          .detail-value {
+            font-size: 1rem;
+            color: var(--color-text);
+            padding: 0.5rem 0.75rem;
+            background: var(--color-bg-primary);
+            border-radius: 0.375rem;
+            border: 1px solid var(--color-border);
+            min-height: 2.5rem;
+            display: flex;
+            align-items: center;
+
+            &.not-set {
+              color: var(--color-text-muted);
+              font-style: italic;
+            }
+
+            .status-icon {
+              margin-right: 0.5rem;
+            }
+          }
+        }
+      }
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--color-border);
+
+      .btn {
+        min-width: 120px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  /* Edit form overlay */
+  .profile-edit-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9); /* Much darker backdrop */
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    backdrop-filter: blur(10px); /* Stronger blur */
+
+    .edit-form-container {
+      background: var(--color-bg-primary);
+      border-radius: 0.75rem;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7); /* Much stronger shadow */
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 3px solid var(--color-border); /* Even thicker border */
+      opacity: 1; /* Ensure container is fully opaque */
+
+      .edit-form-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+        display: flex;
+        justify-content: between;
+        align-items: center;
+
+        .edit-form-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: var(--color-text);
+          margin: 0;
+        }
+
+        .close-button {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          color: var(--color-text-muted);
+          cursor: pointer;
+          padding: 0.25rem;
+          border-radius: 0.25rem;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: var(--color-bg-secondary);
+            color: var(--color-text);
+          }
+        }
+      }
+
+      .edit-form-body {
+        padding: 1.5rem;
+
+        .form-section {
+          margin-bottom: 2rem;
+
+          .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+          }
+
+          .form-row {
+            margin-bottom: 1.5rem;
+
+            .form-label {
+              font-weight: 500;
+              color: var(--color-text);
+              margin-bottom: 0.5rem;
+            }
+
+            .form-control,
+            .form-select {
+              border: 1px solid var(--color-border);
+              background: var(--color-bg-primary);
+              color: var(--color-text);
+              border-radius: 0.375rem;
+              padding: 0.75rem;
+              transition: all 0.2s ease;
+
+              &:focus {
+                border-color: var(--color-accent);
+                box-shadow: 0 0 0 0.2rem rgba(var(--color-accent-rgb), 0.25);
+                background: var(--color-bg-primary);
+                color: var(--color-text);
+              }
+
+              &:disabled {
+                background: var(--color-bg-secondary);
+                color: var(--color-text-muted);
+                cursor: not-allowed;
+              }
+            }
+
+            .form-check {
+              padding-left: 0;
+
+              .form-check-input {
+                margin-right: 0.5rem;
+                
+                &:checked {
+                  background-color: var(--color-accent);
+                  border-color: var(--color-accent);
+                }
+
+                &:focus {
+                  box-shadow: 0 0 0 0.2rem rgba(var(--color-accent-rgb), 0.25);
+                }
+              }
+
+              .form-check-label {
+                color: var(--color-text);
+                font-weight: 400;
+              }
+            }
+          }
+        }
+      }
+
+      .edit-form-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--color-border);
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+
+        .btn {
+          min-width: 100px;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  /* Admin-specific styling */
+  &.admin-mode {
+    .profile-header {
+      border-left: 4px solid #ffc107;
+    }
+
+    .admin-warning {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      color: #ffc107;
+      font-size: 0.875rem;
+
+      .warning-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  /* Delete confirmation modal */
+  .delete-confirmation {
+    .modal-content {
+      background: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .modal-footer {
+      border-top: 1px solid var(--color-border);
+    }
+
+    .alert {
+      border-radius: 0.375rem;
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .user-profile {
+    .profile-view {
+      .profile-header {
+        padding: 1.5rem;
+      }
+
+      .profile-details {
+        .detail-section {
+          padding: 1rem;
+        }
+
+        .detail-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .profile-actions {
+        flex-direction: column;
+        align-items: center;
+
+        .btn {
+          width: 100%;
+          max-width: 300px;
+        }
+      }
+    }
+
+    .profile-edit-overlay {
+      padding: 0.5rem;
+
+      .edit-form-container {
+        max-height: 95vh;
+        border-radius: 0.5rem;
+
+        .edit-form-header,
+        .edit-form-body,
+        .edit-form-footer {
+          padding: 1rem;
+        }
+      }
+    }
+  }
+}
+
+/* Theme-specific adjustments */
+[data-theme="light"] .user-profile {
+  .profile-view .profile-header {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(248, 249, 250, 1) 100%);
+  }
+
+  .profile-edit-overlay {
+    .edit-form-container {
+      background: #ffffff; /* Solid white background for light theme */
+      border-color: #dee2e6;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8); /* Darker shadow for light theme */
+
+      /* Form controls for light theme - ensure dark text on light backgrounds */
+      .form-control,
+      .form-select {
+        background: #f8f9fa !important; /* Light gray background to contrast with white container */
+        color: #212529 !important; /* Dark text for good contrast */
+        border-color: #ced4da !important;
+
+        &::placeholder {
+          color: #6c757d !important; /* Medium gray placeholder text */
+          opacity: 1 !important;
+        }
+
+        &:focus {
+          background: #ffffff !important; /* White when focused */
+          color: #212529 !important;
+          border-color: #0d6efd !important;
+          
+          &::placeholder {
+            color: #adb5bd !important; /* Lighter placeholder when focused */
+          }
+        }
+
+        &:disabled {
+          background: #e9ecef !important;
+          color: #6c757d !important;
+        }
+      }
+
+      /* Labels and text for light theme */
+      .form-label,
+      .section-title,
+      .edit-form-title {
+        color: #212529 !important;
+      }
+
+      /* Form check labels */
+      .form-check-label {
+        color: #212529 !important;
+      }
+    }
+  }
+}
+
+[data-theme="dark"] .user-profile {
+  .profile-view .profile-header {
+    background: linear-gradient(135deg, rgba(238, 221, 254, 0.1) 0%, rgba(44, 26, 61, 1) 100%);
+  }
+
+  .profile-edit-overlay {
+    .edit-form-container {
+      background: #2c1a3d; /* Solid dark background for dark theme */
+      border-color: #4a3c5a;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9); /* Even darker shadow for dark theme */
+
+      /* Form controls for dark theme - ensure light text on dark backgrounds */
+      .form-control,
+      .form-select {
+        background: #4a3c5a !important; /* Lighter purple background to contrast with dark container */
+        color: #eeddfe !important; /* Light text for good contrast */
+        border-color: #6c5f7a !important;
+
+        &::placeholder {
+          color: #a79bb0 !important; /* Medium purple placeholder text */
+          opacity: 1 !important;
+        }
+
+        &:focus {
+          background: #3d2a4d !important; /* Darker when focused */
+          color: #eeddfe !important;
+          border-color: #eeddfe !important;
+          
+          &::placeholder {
+            color: #8a7296 !important; /* Dimmer placeholder when focused */
+          }
+        }
+
+        &:disabled {
+          background: #2c1a3d !important;
+          color: #8a7296 !important;
+        }
+      }
+
+      /* Labels and text for dark theme */
+      .form-label,
+      .section-title,
+      .edit-form-title {
+        color: #eeddfe !important;
+      }
+
+      /* Form check labels */
+      .form-check-label {
+        color: #eeddfe !important;
+      }
+    }
+  }
+}

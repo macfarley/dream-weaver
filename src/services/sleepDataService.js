@@ -50,7 +50,7 @@ const get = async (id) => {
 // Get sleep session by date (for pretty URL support)
 const getByDate = async (date) => {
   try {
-    const response = await api.get(`/sleep-data/date/${date}`);
+    const response = await api.get(`/sleep-data/${date}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching sleep session by date:', error);

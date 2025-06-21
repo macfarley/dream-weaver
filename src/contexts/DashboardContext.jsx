@@ -84,11 +84,15 @@ const DashboardProvider = ({ children }) => {
             const latestSleepData = sortedSleep[0] || null;
 
             let latestDreamLog = null;
+            let latestDreamSessionId = null;
             if (latestSleepData?.wakeUps?.length) {
                 const wakeWithDream = [...latestSleepData.wakeUps]
                     .reverse()
                     .find((w) => w.dreamJournal);
-                latestDreamLog = wakeWithDream?.dreamJournal || null;
+                if (wakeWithDream) {
+                    latestDreamLog = wakeWithDream.dreamJournal;
+                    latestDreamSessionId = latestSleepData._id; // Store the sleep session ID
+                }
             }
 
             setDashboardData({
@@ -96,6 +100,7 @@ const DashboardProvider = ({ children }) => {
                 bedrooms: bedroomsData || [],
                 latestSleepData,
                 latestDreamLog,
+                latestDreamSessionId, // Add this to the context
                 allSleepSessions: sleepArray, // Store all sleep sessions for streak calculations
             });
         } catch (err) {

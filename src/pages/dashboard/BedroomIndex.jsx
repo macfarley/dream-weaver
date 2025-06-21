@@ -156,10 +156,10 @@ const BedroomIndex = () => {
           <div key={bedroom._id} className="list-group-item">
             <div className="d-flex justify-content-between align-items-center">
               <div>
-                <strong>{bedroom.bedroomName}</strong>{' '}
+                <strong className="bedroom-name">{bedroom.bedroomName}</strong>{' '}
                 {bedroom.favorite && <span className="badge bg-success">Favorite</span>}
                 <br />
-                <small>Total Nights Used: {bedroom.totalNights}</small>
+                <small className="nights-used">Total Nights Used: {bedroom.totalNights}</small>
               </div>
 
               <div>

@@ -31,7 +31,6 @@ export const mockUserProfile = {
   prefersImperial: true,
   dateFormat: "MM/DD/YYYY",
   timeFormat: "12-hour",
-  preferredTimezone: "America/New_York",
   
   // Timestamps (typically added by backend)
   createdAt: "2024-01-01T00:00:00.000Z",

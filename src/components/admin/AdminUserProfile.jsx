@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { getUserById, updateUserProfile, deleteUser } from '../../services/adminService';
@@ -31,7 +31,6 @@ function AdminUserProfile() {
     lastName: '',
     email: '',
     role: '',
-    preferredTimezone: '',
     prefersImperial: true,
     theme: 'dark',
     dateFormat: 'MM/DD/YYYY',
@@ -61,7 +60,6 @@ function AdminUserProfile() {
           lastName: userData.lastName || '',
           email: userData.email || '',
           role: userData.role || 'user',
-          preferredTimezone: userData.preferredTimezone || '',
           prefersImperial: userData.prefersImperial ?? true,
           theme: userData.theme || 'dark',
           dateFormat: userData.dateFormat || 'MM/DD/YYYY',
@@ -391,7 +389,7 @@ function AdminUserProfile() {
                         disabled={!canEdit}
                       />
                       <label className="form-check-label" htmlFor="prefersImperial">
-                        Use Imperial Units (vs Metric)
+                        Use Fahrenheit (°F) for temperature
                       </label>
                     </div>
                   </div>

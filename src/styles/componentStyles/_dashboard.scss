@@ -1,0 +1,417 @@
+/* src/styles/componentStyles/_dashboard.scss */
+
+/* =============================
+   DASHBOARD COMPONENT STYLES — DreamWeaver
+   Cloud-shaped dream bubbles and dashboard elements
+   ============================= */
+
+/* Dream Cloud Containers - Ultra Fluffy! */
+.dream-cloud {
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.98) 0%, 
+    rgba(248, 252, 255, 0.95) 50%,
+    rgba(240, 248, 255, 0.97) 100%
+  );
+  border: 2px solid rgba(173, 216, 230, 0.6);
+  border-radius: 60px;
+  padding: 1.8rem 2.5rem;
+  margin: 0.8rem 0;
+  backdrop-filter: blur(15px);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: visible;
+  
+  /* Cloud pseudo-elements for top bumps */
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    background: inherit;
+    border: inherit;
+    border-radius: 50%;
+    z-index: -1;
+  }
+  
+  /* Large left cloud bump */
+  &::before {
+    width: 3rem;
+    height: 2.5rem;
+    top: -1.2rem;
+    left: 1.5rem;
+  }
+  
+  /* Medium right cloud bump */
+  &::after {
+    width: 2.2rem;
+    height: 1.8rem;
+    top: -0.8rem;
+    right: 2rem;
+  }
+  
+  /* Bottom bumps using box-shadow on the main element */
+  box-shadow: 
+    /* Original shadows */
+    0 8px 32px rgba(173, 216, 230, 0.25),
+    0 4px 16px rgba(135, 206, 235, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 2px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(173, 216, 230, 0.3),
+    /* Bottom bumps as additional shadows */
+    0 1.5rem 0 -0.6rem rgba(240, 248, 255, 0.95),
+    2.2rem 1.3rem 0 -0.7rem rgba(248, 252, 255, 0.85),
+    -1.8rem 1.2rem 0 -0.5rem rgba(240, 248, 255, 0.9),
+    /* Side bumps */
+    -2.5rem -0.5rem 0 -0.3rem rgba(255, 255, 255, 0.9),
+    3.5rem 0.8rem 0 -0.8rem rgba(248, 252, 255, 0.8);
+  
+  /* Make it clickable - cursor and accessibility */
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  /* Focus styles for accessibility */
+  &:focus {
+    outline: 2px solid rgba(173, 216, 230, 0.8);
+    outline-offset: 2px;
+  }
+  
+  /* Magical hover effect with gentle float */
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+      /* Enhanced original shadows */
+      0 12px 40px rgba(173, 216, 230, 0.35),
+      0 6px 20px rgba(135, 206, 235, 0.25),
+      0 3px 12px rgba(0, 0, 0, 0.12),
+      inset 0 3px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -2px 0 rgba(173, 216, 230, 0.4),
+      /* Enhanced bottom bumps */
+      0 2rem 0 -0.6rem rgba(240, 248, 255, 0.98),
+      2.5rem 1.5rem 0 -0.7rem rgba(248, 252, 255, 0.9),
+      -2rem 1.4rem 0 -0.5rem rgba(240, 248, 255, 0.95),
+      /* Enhanced side bumps */
+      -2.8rem -0.3rem 0 -0.3rem rgba(255, 255, 255, 0.95),
+      3.8rem 1rem 0 -0.8rem rgba(248, 252, 255, 0.85);
+    border-color: rgba(173, 216, 230, 0.8);
+  }
+}
+
+/* Dark theme adjustments - Light relaxing clouds with dark text */
+[data-theme="dark"] .dream-cloud {
+  background: linear-gradient(135deg, 
+    rgba(240, 242, 245, 0.95) 0%, 
+    rgba(230, 235, 240, 0.9) 50%,
+    rgba(220, 228, 235, 0.92) 100%
+  );
+  border: 2px solid rgba(200, 210, 220, 0.6);
+  color: var(--color-text); /* This will be dark text in dark mode */
+  
+  /* Light cloud shadows with bottom bumps in dark theme */
+  box-shadow: 
+    /* Softer shadows for light clouds on dark background */
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(200, 210, 220, 0.4),
+    /* Light bottom bumps */
+    0 1.5rem 0 -0.6rem rgba(220, 228, 235, 0.95),
+    2.2rem 1.3rem 0 -0.7rem rgba(230, 235, 240, 0.85),
+    -1.8rem 1.2rem 0 -0.5rem rgba(220, 228, 235, 0.9),
+    /* Light side bumps */
+    -2.5rem -0.5rem 0 -0.3rem rgba(240, 242, 245, 0.9),
+    3.5rem 0.8rem 0 -0.8rem rgba(230, 235, 240, 0.8);
+  
+  /* Dark theme focus styles */
+  &:focus {
+    outline: 2px solid rgba(200, 210, 220, 0.8);
+    outline-offset: 2px;
+  }
+  
+  &:hover {
+    box-shadow: 
+      /* Enhanced shadows for hover */
+      0 12px 40px rgba(0, 0, 0, 0.2),
+      0 6px 20px rgba(0, 0, 0, 0.15),
+      0 3px 12px rgba(0, 0, 0, 0.12),
+      inset 0 2px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(200, 210, 220, 0.5),
+      /* Enhanced light bottom bumps */
+      0 2rem 0 -0.6rem rgba(220, 228, 235, 0.98),
+      2.5rem 1.5rem 0 -0.7rem rgba(230, 235, 240, 0.9),
+      -2rem 1.4rem 0 -0.5rem rgba(220, 228, 235, 0.95),
+      /* Enhanced light side bumps */
+      -2.8rem -0.3rem 0 -0.3rem rgba(240, 242, 245, 0.95),
+      3.8rem 1rem 0 -0.8rem rgba(230, 235, 240, 0.85);
+    border-color: rgba(200, 210, 220, 0.8);
+  }
+}
+
+/* Multiple cloud container for multiple dreams */
+.dream-clouds-container {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(173, 216, 230, 0.1);
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(173, 216, 230, 0.3);
+    border-radius: 2px;
+    
+    &:hover {
+      background: rgba(173, 216, 230, 0.5);
+    }
+  }
+}
+
+/* Dream text styling within clouds */
+.dream-cloud-text {
+  font-style: italic;
+  line-height: 1.4;
+  margin: 0;
+  color: #2c3e50; /* Darker text for better readability */
+  
+  /* Gentle text shadow for readability */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  
+  /* Dream content should be in quotes and italicized */
+  &.dream-content {
+    font-style: italic;
+    font-weight: 300;
+    
+    /* Add opening quote before dream text */
+    &::before {
+      content: '"...';
+      opacity: 0.7;
+      margin-right: 0.2em;
+    }
+    
+    /* Add closing quote after dream text */
+    &::after {
+      content: '..."';
+      opacity: 0.7;
+      margin-left: 0.2em;
+    }
+  }
+}
+
+[data-theme="dark"] .dream-cloud-text {
+  color: #2c3e50; /* Keep dark text even in dark theme for light clouds */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  
+  /* Ensure quotes are visible in dark theme */
+  &.dream-content {
+    &::before,
+    &::after {
+      opacity: 0.7;
+      color: #2c3e50;
+    }
+  }
+}
+
+/* Small clouds for shorter dreams - Extra fluffy */
+.dream-cloud.small {
+  padding: 1.2rem 1.8rem;
+  border-radius: 45px;
+  
+  &::before {
+    width: 2.2rem;
+    height: 1.8rem;
+    top: -0.8rem;
+    left: 1rem;
+  }
+  
+  &::after {
+    width: 1.6rem;
+    height: 1.3rem;
+    top: -0.5rem;
+    right: 1.2rem;
+  }
+  
+  /* Override box-shadow for small clouds */
+  box-shadow: 
+    /* Original shadows scaled for small */
+    0 6px 24px rgba(173, 216, 230, 0.2),
+    0 3px 12px rgba(135, 206, 235, 0.12),
+    0 1px 6px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(173, 216, 230, 0.25),
+    /* Small cloud bottom bumps */
+    0 1.1rem 0 -0.4rem rgba(240, 248, 255, 0.9),
+    1.6rem 0.9rem 0 -0.5rem rgba(248, 252, 255, 0.85),
+    -1.2rem 0.8rem 0 -0.3rem rgba(240, 248, 255, 0.9),
+    /* Small cloud side bumps */
+    -1.8rem -0.3rem 0 -0.2rem rgba(255, 255, 255, 0.9),
+    2.5rem 0.5rem 0 -0.6rem rgba(248, 252, 255, 0.8);
+}
+
+/* Large clouds for longer dreams - Maximum fluffiness */
+.dream-cloud.large {
+  padding: 2.2rem 3rem;
+  border-radius: 75px;
+  
+  &::before {
+    width: 3.5rem;
+    height: 3rem;
+    top: -1.5rem;
+    left: 2rem;
+  }
+  
+  &::after {
+    width: 2.8rem;
+    height: 2.3rem;
+    top: -1rem;
+    right: 2.5rem;
+  }
+  
+  /* Override box-shadow for large clouds */
+  box-shadow: 
+    /* Original shadows scaled for large */
+    0 10px 40px rgba(173, 216, 230, 0.3),
+    0 5px 20px rgba(135, 206, 235, 0.18),
+    0 3px 10px rgba(0, 0, 0, 0.1),
+    inset 0 3px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2px 0 rgba(173, 216, 230, 0.35),
+    /* Large cloud bottom bumps */
+    0 2rem 0 -0.8rem rgba(240, 248, 255, 0.95),
+    2.8rem 1.7rem 0 -0.9rem rgba(248, 252, 255, 0.85),
+    -2.8rem 1.9rem 0 -0.7rem rgba(240, 248, 255, 0.9),
+    /* Large cloud side bumps */
+    -3rem -0.8rem 0 -0.4rem rgba(255, 255, 255, 0.9),
+    4.2rem 1.2rem 0 -1rem rgba(248, 252, 255, 0.8),
+    -2.2rem 1.8rem 0 -0.6rem rgba(240, 248, 255, 0.9),
+    /* Extra large cloud gets more bumps */
+    1.5rem -1.2rem 0 -0.5rem rgba(255, 255, 255, 0.85),
+    -4rem 0.3rem 0 -0.8rem rgba(240, 248, 255, 0.8);
+}
+
+/* Sleepy thought clouds (for active sessions) - Ultra fluffy sleepy style */
+.sleepy-thought-cloud {
+  @extend .dream-cloud;
+  background: linear-gradient(135deg, 
+    rgba(230, 245, 255, 0.95) 0%, 
+    rgba(220, 240, 255, 0.9) 50%,
+    rgba(210, 235, 255, 0.92) 100%
+  );
+  border: 2px solid rgba(135, 206, 235, 0.6);
+  text-align: center;
+  
+  .sleepy-emoji {
+    font-size: 3rem;
+    margin-bottom: 0.8rem;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px rgba(135, 206, 235, 0.3));
+  }
+}
+
+[data-theme="dark"] .sleepy-thought-cloud {
+  background: linear-gradient(135deg, 
+    rgba(245, 248, 252, 0.95) 0%, 
+    rgba(235, 242, 250, 0.9) 50%,
+    rgba(225, 235, 245, 0.92) 100%
+  );
+  border: 2px solid rgba(180, 200, 220, 0.6);
+  
+  .sleepy-emoji {
+    filter: drop-shadow(0 2px 4px rgba(100, 150, 200, 0.4));
+  }
+}
+
+/* Floating animation for sleepy emoji */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+/* No dreams cloud styling - Soft and fluffy */
+.no-dreams-cloud {
+  @extend .dream-cloud;
+  background: linear-gradient(135deg, 
+    rgba(248, 249, 250, 0.95) 0%, 
+    rgba(233, 236, 239, 0.9) 50%,
+    rgba(220, 225, 230, 0.92) 100%
+  );
+  border: 2px solid rgba(173, 181, 189, 0.5);
+  text-align: center;
+  opacity: 0.9;
+}
+
+[data-theme="dark"] .no-dreams-cloud {
+  background: linear-gradient(135deg, 
+    rgba(248, 250, 252, 0.95) 0%, 
+    rgba(238, 242, 246, 0.9) 50%,
+    rgba(228, 234, 240, 0.92) 100%
+  );
+  border: 2px solid rgba(190, 200, 210, 0.5);
+}
+
+/* Dashboard Box Styling - Override global .card styles with stronger specificity */
+.card.dashboard-box,
+div.card.dashboard-box {
+  background: var(--color-bg-nav-footer) !important;
+  border: 2px solid rgba(0, 0, 0, 0.12) !important;
+  
+  /* Enhanced shadow for better depth */
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.08),
+    0 3px 8px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    
+  /* Ensure proper contrast for text */
+  color: var(--color-text) !important;
+  
+  .card-title {
+    color: var(--color-text) !important;
+    font-weight: 600;
+  }
+  
+  .card-body {
+    background: transparent !important;
+    color: inherit !important;
+  }
+  
+  /* Subtle border radius to match design */
+  border-radius: 12px !important;
+  
+  /* Smooth transitions */
+  transition: all 0.2s ease !important;
+  
+  /* Subtle hover effect */
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+      0 8px 25px rgba(0, 0, 0, 0.1),
+      0 4px 12px rgba(0, 0, 0, 0.06),
+      0 2px 4px rgba(0, 0, 0, 0.08) !important;
+  }
+}
+
+/* Dark theme dashboard boxes - use same nav/footer color with enhanced contrast */
+[data-theme="dark"] .card.dashboard-box,
+[data-theme="dark"] div.card.dashboard-box {
+  background: var(--color-bg-nav-footer) !important;
+  border: 2px solid rgba(255, 255, 255, 0.15) !important;
+  
+  box-shadow: 
+    0 6px 24px rgba(0, 0, 0, 0.4),
+    0 3px 12px rgba(0, 0, 0, 0.3),
+    0 1px 4px rgba(0, 0, 0, 0.2) !important;
+    
+  &:hover {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 4px 16px rgba(0, 0, 0, 0.4),
+      0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  }
+}
+
+/* ============================= */

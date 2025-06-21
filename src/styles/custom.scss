@@ -5,15 +5,19 @@
 @use './componentStyles/landing';
 @use './componentStyles/navbar';
 @use './componentStyles/dashboard';
+@use './componentStyles/dreamindex';
+@use './componentStyles/sleepindex';
 @use './componentStyles/signupform';
 @use './componentStyles/loginform';
 @use './componentStyles/bedroomform';
+@use './componentStyles/bedroomindex';
 @use './componentStyles/themeToggle';
 @use './componentStyles/footer';
 @use './componentStyles/loading';
 @use './componentStyles/bigActionButton';
 @use './componentStyles/sleepStreaks';
 @use './componentStyles/wakeup';
+@use './componentStyles/userprofile';
 
 // =============================
 // GLOBAL LAYOUT & CONTAINERS - WCAG Compliant
@@ -23,11 +27,15 @@
 main {
   background-color: var(--color-bg) !important;
   color: var(--color-text) !important;
-  min-height: calc(100vh - 80px - 60px); /* Account for navbar and fixed footer */
+  min-height: calc(100vh - 80px - 50px); /* Account for navbar (80px) and compact footer (50px) */
   flex: 1 0 auto;
   padding: 0;
   margin: 0;
-  padding-bottom: 0; /* Remove extra padding since body handles it */
+  
+  /* Account for fixed navbar on desktop */
+  @media (min-width: 768px) {
+    padding-top: 1rem; /* Extra space below fixed navbar */
+  }
 }
 
 /* Container styling */

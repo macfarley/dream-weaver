@@ -6,6 +6,7 @@ import { usePreferenceSync } from '../../hooks/usePreferenceSync';
 import { formatSessionLabel as formatSessionLabelWithPrefs } from '../../utils/format/userPreferences';
 import { calculateSleepStreaks, formatStreakDisplay } from '../../utils/sleep/sleepStreaks';
 import { formatDateKey, calculateSleepDuration } from '../../utils/sleep/sleepDataUtils';
+import BigActionButton from '../../components/ui/BigActionButton';
 
 /**
  * Displays a list of the user's sleep sessions.
@@ -46,11 +47,13 @@ function SleepDataIndex() {
   // Loading and error states
   if (dashLoading || loading) {
     return (
-      <div>
-        <h3>Your Sleep Sessions</h3>
-        <div className="alert alert-info">
-          <div className="spinner-border spinner-border-sm me-2" role="status"></div>
-          Loading sleep data...
+      <div className="sleep-data-index">
+        <div className="container">
+          <h3 className="page-title">Your Sleep Sessions</h3>
+          <div className="alert alert-info">
+            <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+            Loading sleep data...
+          </div>
         </div>
       </div>
     );
@@ -58,23 +61,25 @@ function SleepDataIndex() {
   
   if (error) {
     return (
-      <div>
-        <h3>Your Sleep Sessions</h3>
-        <div className="alert alert-danger">
-          <strong>Error:</strong> {error}
-          <br />
-          <button 
-            className="btn btn-outline-primary btn-sm mt-2 me-2"
-            onClick={() => window.location.reload()}
-          >
-            Retry
-          </button>
-          <button 
-            className="btn btn-outline-secondary btn-sm mt-2"
-            onClick={() => navigate('/users/dashboard')}
-          >
-            Back to Dashboard
-          </button>
+      <div className="sleep-data-index">
+        <div className="container">
+          <h3 className="page-title">Your Sleep Sessions</h3>
+          <div className="alert alert-danger">
+            <strong>Error:</strong> {error}
+            <br />
+            <button 
+              className="btn btn-outline-primary btn-sm mt-2 me-2"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </button>
+            <button 
+              className="btn btn-outline-secondary btn-sm mt-2"
+              onClick={() => navigate('/users/dashboard')}
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -82,17 +87,19 @@ function SleepDataIndex() {
   
   if (dashError) {
     return (
-      <div>
-        <h3>Your Sleep Sessions</h3>
-        <div className="alert alert-warning">
-          <strong>Dashboard Error:</strong> {dashError}
-          <br />
-          <button 
-            className="btn btn-outline-secondary btn-sm mt-2"
-            onClick={() => navigate('/users/dashboard')}
-          >
-            Back to Dashboard
-          </button>
+      <div className="sleep-data-index">
+        <div className="container">
+          <h3 className="page-title">Your Sleep Sessions</h3>
+          <div className="alert alert-warning">
+            <strong>Dashboard Error:</strong> {dashError}
+            <br />
+            <button 
+              className="btn btn-outline-secondary btn-sm mt-2"
+              onClick={() => navigate('/users/dashboard')}
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -100,28 +107,30 @@ function SleepDataIndex() {
   
   if (!sleepSessions.length) {
     return (
-      <div>
-        <h3>Your Sleep Sessions</h3>
-        <div className="alert alert-info">
-          <h5>No sleep sessions found!</h5>
-          <p>
-            {dashboardData?.latestSleepData 
-              ? "It looks like you have sleep data, but no sessions are showing here. Try refreshing the page or check your connection."
-              : "You haven't started tracking your sleep yet. Click the 'Go to Bed' button to start your first sleep session."
-            }
-          </p>
-          <button 
-            className="btn btn-primary me-2"
-            onClick={() => navigate('/gotobed')}
-          >
-            Start New Sleep Session
-          </button>
-          <button 
-            className="btn btn-outline-secondary"
-            onClick={() => navigate('/users/dashboard')}
-          >
-            Back to Dashboard
-          </button>
+      <div className="sleep-data-index">
+        <div className="container">
+          <h3 className="page-title">Your Sleep Sessions</h3>
+          <div className="alert alert-info">
+            <h5>No sleep sessions found!</h5>
+            <p>
+              {dashboardData?.latestSleepData 
+                ? "It looks like you have sleep data, but no sessions are showing here. Try refreshing the page or check your connection."
+                : "You haven't started tracking your sleep yet. Click the 'Go to Bed' button to start your first sleep session."
+              }
+            </p>
+            <button 
+              className="btn btn-primary me-2"
+              onClick={() => navigate('/gotobed')}
+            >
+              Start New Sleep Session
+            </button>
+            <button 
+              className="btn btn-outline-secondary"
+              onClick={() => navigate('/users/dashboard')}
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -129,76 +138,81 @@ function SleepDataIndex() {
 
   // Render sleep session cards
   return (
-    <div>
-      <h3>Your Sleep Sessions</h3>
-      
-      {/* Streak Statistics Card */}
-      {(() => {
-        const streakStats = calculateSleepStreaks(sleepSessions);
-        const { currentStreakText, longestStreakText, totalSessionsText, motivationalMessage } = formatStreakDisplay(streakStats);
-        
-        return (
-          <div className="card mb-4 sleep-streak-card">
-            <div className="card-body">
-              <h5 className="card-title">🏆 Your Sleep Tracking Progress</h5>
-              <div className="row text-center">
-                <div className="col-md-4">
-                  <div className="streak-stat">
-                    <h6 className="text-primary">Current Streak</h6>
-                    <p className="mb-0 fw-bold">{currentStreakText}</p>
-                  </div>
-                </div>
-                <div className="col-md-4">
-                  <div className="streak-stat">
-                    <h6 className="text-success">Best Streak</h6>
-                    <p className="mb-0 fw-bold">{longestStreakText}</p>
-                  </div>
-                </div>
-                <div className="col-md-4">
-                  <div className="streak-stat">
-                    <h6 className="text-info">Total Sessions</h6>
-                    <p className="mb-0 fw-bold">{totalSessionsText}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="text-center">
-                <span className="motivational-text text-muted fst-italic">{motivationalMessage}</span>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-      
-      {sleepSessions
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .map((session) => {
-          // Prepare display values
-          const label = formatSessionLabelWithPrefs(session.createdAt, dateFormat);
-          const dateKey = formatDateKey(session.createdAt);
-          const duration = calculateSleepDuration(session.createdAt, session.wakeUps);
-          const restfulness = session.wakeUps?.[session.wakeUps.length - 1]?.sleepQuality || 'Not rated';
-          const bedroomName = session.bedroom?.bedroomName || 'Unknown Bedroom';
-
+    <div className="sleep-data-index">
+      <div className="container">
+        <h3 className="page-title">Your Sleep Sessions</h3>
+        {/* Streak Statistics Card */}
+        {(() => {
+          const streakStats = calculateSleepStreaks(sleepSessions);
+          const { currentStreakText, longestStreakText, totalSessionsText, motivationalMessage } = formatStreakDisplay(streakStats);
           return (
-            <div key={session._id || dateKey} className="card mb-3">
-              <div className="card-body">
-                <h5 className="card-title">{label}</h5>
-                <p className="card-text"><strong>Bedroom:</strong> {bedroomName}</p>
-                <p className="card-text"><strong>Total Sleep:</strong> {duration || 'Incomplete session'}</p>
-                <p className="card-text"><strong>Restfulness:</strong> {restfulness}</p>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => navigate(`/users/dashboard/sleepdata/${session._id}`, { 
-                    state: { sessionData: session } 
-                  })}
-                  aria-label={`View details for ${label}`}
-                >
-                  View Session
-                </button>
+            <div className="card mb-3 sleep-streak-card">
+              <div className="card-body pb-2">
+                <h5 className="card-title">Your Sleep Tracking Progress</h5>
+                <div className="row text-center">
+                  <div className="col-md-4">
+                    <div className="streak-stat">
+                      <h6 className="text-primary">Current Streak</h6>
+                      <p className="mb-0 fw-bold">{currentStreakText}</p>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="streak-stat">
+                      <h6 className="text-success">Best Streak</h6>
+                      <p className="mb-0 fw-bold">{longestStreakText}</p>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="streak-stat">
+                      <h6 className="text-info">Total Sessions</h6>
+                      <p className="mb-0 fw-bold">{totalSessionsText}</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Motivational note inside the card, below the stats */}
+                {motivationalMessage && (
+                  <div className="motivational-note mt-2 mb-1" role="note">{motivationalMessage}</div>
+                )}
               </div>
             </div>
           );
-        })}
+        })()}
+        {/* Big Action Button */}
+        <div className="big-action-container">
+          <BigActionButton size="medium" />
+        </div>
+        
+        {sleepSessions
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .map((session) => {
+            // Prepare display values
+            const label = formatSessionLabelWithPrefs(session.createdAt, dateFormat);
+            const dateKey = formatDateKey(session.createdAt);
+            const duration = calculateSleepDuration(session.createdAt, session.wakeUps);
+            const restfulness = session.wakeUps?.[session.wakeUps.length - 1]?.sleepQuality || 'Not rated';
+            const bedroomName = session.bedroom?.bedroomName || 'Unknown Bedroom';
+
+            return (
+              <div key={session._id || dateKey} className="card mb-3 sleep-session-card">
+                <div className="card-body">
+                  <h5 className="card-title">{label}</h5>
+                  <p className="card-text"><strong>Bedroom:</strong> {bedroomName}</p>
+                  <p className="card-text"><strong>Total Sleep:</strong> {duration || 'Incomplete session'}</p>
+                  <p className="card-text"><strong>Restfulness:</strong> {restfulness}</p>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => navigate(`/users/dashboard/sleepdata/${session._id}`, { 
+                      state: { sessionData: session } 
+                    })}
+                    aria-label={`View details for ${label}`}
+                  >
+                    View Session
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+      </div>
     </div>
   );
 }

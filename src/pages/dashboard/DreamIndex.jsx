@@ -1,21 +1,16 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import * as sleepDataService from '../../services/sleepDataService';
 import { usePreferenceSync } from '../../hooks/usePreferenceSync';
 import { formatDate as formatDateWithPrefs } from '../../utils/format/userPreferences';
 
-/**
- * Helper to format ISO date string to YYYYMMDD.
- * Example: "2024-06-01T12:00:00Z" -> "20240601"
- */
-function formatYYYYMMDD(iso) {
-  return new Date(iso).toISOString().slice(0, 10).replace(/-/g, '');
-}
-
 function DreamIndex() {
   // Get dashboard data from context
   const { dashboardData } = useContext(DashboardContext);
+  
+  // Navigation hook for programmatic navigation with state
+  const navigate = useNavigate();
   
   // Get user preferences for date formatting
   const { dateFormat } = usePreferenceSync();
@@ -25,74 +20,82 @@ function DreamIndex() {
 
   // On mount or when dashboardData changes, update sleepData
   useEffect(() => {
-    // If context has sleep data, use it
-    if (dashboardData?.sleepData?.length) {
-      setSleepData(dashboardData.sleepData);
+    // If context has sleep data, use it (no backend call needed)
+    if (dashboardData?.allSleepSessions?.length) {
+      setSleepData(dashboardData.allSleepSessions);
     } else {
-      // Otherwise, fetch from service as fallback
+      // Otherwise, fetch from service as fallback (for users who haven't updated context)
       sleepDataService
-        .getAll()
+        .getSleepDataByUser()
         .then(setSleepData)
         .catch(console.error);
     }
   }, [dashboardData]);
 
-  // Render a single sleep entry card
-  function renderSleepEntry(entry) {
-    // Format date for display and for URL key
-    const dateKey = formatYYYYMMDD(entry.createdAt);
+  // Render a single dream entry card
+  function renderDreamEntry(entry) {
+    // Format date for display
     const displayDate = formatDateWithPrefs(entry.createdAt, dateFormat);
 
-    // Get the last wake event (if any)
-    const lastWake = entry.wakeUps[entry.wakeUps.length - 1] || {};
+    // Get bedroom name - check multiple possible locations for the bedroom data
+    let bedroomName = 'Unknown Bedroom';
+    if (entry.bedroom?.bedroomName) {
+      bedroomName = entry.bedroom.bedroomName;
+    } else if (entry.bedroomId && dashboardData?.bedrooms) {
+      // Try to find bedroom by ID in dashboard context
+      const bedroom = dashboardData.bedrooms.find(b => b._id === entry.bedroomId);
+      bedroomName = bedroom?.bedroomName || 'Unknown Bedroom';
+    }
 
-    // Bedroom name fallback
-    const bedroomName = entry.bedroom?.bedroomName || 'Unknown Bedroom';
+    // Get all dreams from all wake-ups
+    const allDreams = entry.wakeUps?.filter(wake => wake.dreamJournal) || [];
+    
+    // Check if this session has any dreams or sleepy thoughts
+    const hasDreams = allDreams.length > 0;
+    const hasSleepyThoughts = entry.sleepyThoughts?.trim();
+    
+    // Only show entries that have dreams or sleepy thoughts
+    if (!hasDreams && !hasSleepyThoughts) {
+      return null;
+    }
 
     return (
-      <div className="card mb-3" key={entry._id}>
-        <div className="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+      <div className="card mb-3 dream-journal-card" key={entry._id}>
+        <div className="card-header dream-journal-header d-flex justify-content-between align-items-center">
           <strong>{displayDate}</strong>
-          <span className="badge bg-info">{bedroomName}</span>
+          <span className="badge dream-journal-badge">{bedroomName}</span>
         </div>
         <div className="card-body">
           {/* Show sleepy thoughts if present */}
-          {entry.sleepyThoughts && (
-            <p>
-              <strong>🧠 Sleepy Thoughts:</strong>{' '}
-              {entry.sleepyThoughts.slice(0, 100)}...
-            </p>
+          {hasSleepyThoughts && (
+            <div className="mb-3">
+              <h6 className="text-muted">🧠 Sleepy Thoughts:</h6>
+              <p className="dream-content">{entry.sleepyThoughts}</p>
+            </div>
           )}
-          {/* Show dream journal if present */}
-          {lastWake.dreamJournal && (
-            <p>
-              <strong>💭 Dream:</strong> {lastWake.dreamJournal.slice(0, 100)}...
-            </p>
+          
+          {/* Show all dreams from all wake-ups */}
+          {hasDreams && (
+            <div className="mb-3">
+              <h6 className="text-muted">💭 Dreams:</h6>
+              {allDreams.map((wake, index) => (
+                <div key={index} className="dream-entry mb-2">
+                  <p className="dream-content mb-1">{wake.dreamJournal}</p>
+                </div>
+              ))}
+            </div>
           )}
-          {/* Action buttons */}
-          <div className="d-flex gap-2 mt-2">
-            {lastWake.dreamJournal && (
-              <Link
-                className="btn btn-outline-info btn-sm"
-                to={`/users/sleepdata/${dateKey}#dreamJournal`}
-              >
-                View Dream
-              </Link>
-            )}
-            {entry.sleepyThoughts && (
-              <Link
-                className="btn btn-outline-primary btn-sm"
-                to={`/users/sleepdata/${dateKey}#sleepyThoughts`}
-              >
-                Sleepy Thoughts
-              </Link>
-            )}
-            <Link
-              className="btn btn-outline-secondary btn-sm"
-              to={`/users/sleepdata/${dateKey}`}
+          
+          {/* Single action button to view full session */}
+          <div className="mt-3">
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => navigate(`/users/dashboard/sleepdata/${entry._id}`, {
+                state: { sessionData: entry }
+              })}
             >
-              Full Session
-            </Link>
+              View Full Session
+            </button>
           </div>
         </div>
       </div>
@@ -104,17 +107,22 @@ function DreamIndex() {
     <div className="container mt-4">
       <h2>Dream Journal</h2>
       <p className="text-muted">
-        Explore your dream entries and sleepy thoughts.
+        Explore your dreams and sleepy thoughts from all your sleep sessions.
       </p>
 
       {/* Show message if no data */}
       {sleepData.length === 0 ? (
-        <p>No sleep data found.</p>
+        <div className="dream-journal-empty">
+          <div className="dream-journal-empty-icon">🌙</div>
+          <p>No sleep sessions with dreams or sleepy thoughts found.</p>
+          <p className="text-muted">Start tracking your sleep to see your dream journal entries here!</p>
+        </div>
       ) : (
-        // Sort entries by date descending and render each
+        // Sort entries by date descending and render only entries with dreams
         sleepData
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .map(renderSleepEntry)
+          .map(renderDreamEntry)
+          .filter(Boolean) // Remove null entries (sessions without dreams)
       )}
     </div>
   );

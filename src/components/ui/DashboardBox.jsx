@@ -10,6 +10,7 @@ import React from 'react';
  * @param {string} props.title - The title displayed at the top of the card
  * @param {any} props.data - The data to be rendered in the content area (can be object, array, etc.)
  * @param {function} props.renderContent - Function that receives data and returns JSX content
+ * @param {React.ReactElement} [props.icon] - Optional Lucide icon to display in corner
  * @param {Array<Object>} [props.actions] - Optional array of action button configurations
  * @param {string} props.actions[].label - Button text
  * @param {function} props.actions[].onClick - Click handler function
@@ -34,7 +35,7 @@ import React from 'react';
  * />
  */
 const DashboardBox = (props) => {
-  const { title, data, renderContent, actions } = props;
+  const { title, data, renderContent, actions, icon } = props;
 
   /**
    * Renders the main content area of the dashboard box.
@@ -100,11 +101,18 @@ const DashboardBox = (props) => {
 
   return (
     <div 
-      className="card h-100 shadow-sm p-3 dashboard-box" 
+      className="card h-100 shadow-sm p-3 dashboard-box position-relative" 
       tabIndex="0"
       role="region"
       aria-labelledby={`dashboard-box-title-${title.replace(/\s+/g, '-').toLowerCase()}`}
     >
+      {/* Corner icon */}
+      {icon && (
+        <div className="position-absolute" style={{ top: '12px', right: '12px', opacity: 0.3 }}>
+          {React.cloneElement(icon, { size: 24, 'aria-hidden': 'true' })}
+        </div>
+      )}
+      
       <div className="card-body d-flex flex-column justify-content-between">
         {/* Content section - takes up available space */}
         <div className="flex-grow-1">
