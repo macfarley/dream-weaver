@@ -7,6 +7,8 @@ import { toast } from 'react-toastify';
 import Loading from '../ui/Loading';
 import { User, Mail, Clock, Thermometer, Calendar, Bell, Palette } from 'lucide-react';
 import { clearAllAuthTokens } from '../../utils/clearAllAuthTokens';
+import { useTheme } from '../../contexts/ThemeContext';
+import ThemeToggle from '../ui/ThemeToggle';
 
 /**
  * UserProfile component allows users to view and update their profile information.
@@ -23,6 +25,7 @@ import { clearAllAuthTokens } from '../../utils/clearAllAuthTokens';
 function UserProfile() {
   // Access user and refreshUserProfile from context
   const { user, refreshUserProfile, setUser } = useContext(UserContext);
+  const { setThemeFromPreferences, theme, updateTheme } = useTheme();
   const navigate = useNavigate();
   const { userId } = useParams(); // Get userId from URL params for admin mode
 
@@ -108,6 +111,33 @@ function UserProfile() {
       setLoading(false);
     }
   }, [user, userId, isAdminMode, navigate]);
+
+  // Sync theme with user preferences when profileUser changes (self mode only)
+  useEffect(() => {
+    if (profileUser && !isAdminMode && profileUser.theme) {
+      setThemeFromPreferences(profileUser.theme);
+    }
+  }, [profileUser, isAdminMode, setThemeFromPreferences]);
+
+  // Handler to update theme both in context and user profile
+  const handleThemeToggle = async () => {
+    // Toggle theme in context
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    updateTheme(newTheme);
+    setThemeFromPreferences(newTheme);
+    // If not admin mode, persist to user profile
+    if (!isAdminMode) {
+      try {
+        await updateProfile({ userPreferences: { theme: newTheme } });
+        setProfileUser(prev => ({ ...prev, theme: newTheme }));
+        setUser(prev => ({ ...prev, theme: newTheme }));
+        await refreshUserProfile();
+        toast.success(`Theme updated to ${newTheme}`);
+      } catch {
+        toast.error('Failed to update theme preference.');
+      }
+    }
+  };
 
   // Render the profile view
   if (loading) {
@@ -196,9 +226,12 @@ function UserProfile() {
           if (response.user) {
             setProfileUser(normalizeUser(response.user));
             setUser(normalizeUser(response.user));
+            // Sync theme immediately after update
+            setThemeFromPreferences(response.user.userPreferences?.theme || response.user.theme);
           } else {
             setProfileUser(prev => ({ ...prev, ...userEditableData }));
             setUser(prev => ({ ...prev, ...userEditableData }));
+            setThemeFromPreferences(userEditableData.userPreferences?.theme || userEditableData.theme);
           }
           await refreshUserProfile();
           toast.success('Profile updated!');
@@ -206,6 +239,7 @@ function UserProfile() {
           await refreshUserProfile();
           setProfileUser(prev => ({ ...prev, ...userEditableData }));
           setUser(prev => ({ ...prev, ...userEditableData }));
+          setThemeFromPreferences(userEditableData.userPreferences?.theme || userEditableData.theme);
           toast.success('Profile updated!');
         }
         setShowEditForm(false);
@@ -410,8 +444,12 @@ function UserProfile() {
                     </div>
                     <div className="detail-item">
                       <div className="detail-label">Theme</div>
-                      <div className="detail-value">
+                      <div className="detail-value d-flex align-items-center gap-2">
                         {profileUser.theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
+                        {/* Theme toggle button, only for self mode */}
+                        {!isAdminMode && (
+                          <ThemeToggle onToggle={handleThemeToggle} />
+                        )}
                       </div>
                     </div>
                     <div className="detail-item">

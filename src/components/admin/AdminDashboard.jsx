@@ -76,6 +76,30 @@ function AdminDashboard() {
     navigate(`/admin/userprofile/${userId}`);
   };
 
+  // Helper to format ISO date to readable string
+  function formatDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'N/A';
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
+  }
+
+  // Helper to get last active date (profile update or sleep session)
+  function getLastActive(user) {
+    // Use updatedAt, lastSleepSession, or fallback to createdAt
+    const profileUpdate = user.updatedAt || user.lastUpdated;
+    const sleepSession = user.lastSleepSession;
+    const joinDate = user.createdAt || user.joinedAt;
+    let lastActive = joinDate;
+    if (profileUpdate && (!lastActive || new Date(profileUpdate) > new Date(lastActive))) {
+      lastActive = profileUpdate;
+    }
+    if (sleepSession && (!lastActive || new Date(sleepSession) > new Date(lastActive))) {
+      lastActive = sleepSession;
+    }
+    return lastActive;
+  }
+
   // Render the list of users in cards, separated by role
   return (
     <div className="container py-4">
@@ -102,11 +126,10 @@ function AdminDashboard() {
                       <i className="fas fa-crown text-warning me-2"></i>
                       <h5 className="card-title mb-0">{user.username}</h5>
                     </div>
-                    <p className="card-text">
-                      <strong>Email:</strong> {user.email || 'Not provided'}<br />
+                    <p className="card-text mb-2">
                       <strong>Role:</strong> <span className="badge bg-primary">{user.role}</span><br />
-                      <strong>Theme:</strong> {user.userPreferences?.theme || 'Default'}<br />
-                      <strong>Date Format:</strong> {user.userPreferences?.dateFormat || 'Default'}
+                      <strong>Join Date:</strong> {formatDate(user.createdAt || user.joinedAt)}<br />
+                      <strong>Last Active:</strong> {formatDate(getLastActive(user))}
                     </p>
                     <div className="d-flex gap-2">
                       <button
@@ -141,11 +164,10 @@ function AdminDashboard() {
               <div className="card h-100 shadow-sm">
                 <div className="card-body">
                   <h5 className="card-title">{user.username}</h5>
-                  <p className="card-text">
-                    <strong>Email:</strong> {user.email || 'Not provided'}<br />
+                  <p className="card-text mb-2">
                     <strong>Role:</strong> <span className="badge bg-secondary">{user.role}</span><br />
-                    <strong>Theme:</strong> {user.userPreferences?.theme || 'Default'}<br />
-                    <strong>Date Format:</strong> {user.userPreferences?.dateFormat || 'Default'}
+                    <strong>Join Date:</strong> {formatDate(user.createdAt || user.joinedAt)}<br />
+                    <strong>Last Active:</strong> {formatDate(getLastActive(user))}
                   </p>
                   <button
                     className="btn btn-outline-primary btn-sm"

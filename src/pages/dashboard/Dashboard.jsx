@@ -40,7 +40,7 @@ function Dashboard() {
   const { profile, bedrooms, latestSleepData, latestDreamLog, allSleepSessions } = dashboardData;
 
   // Debug: Log dashboardData to help diagnose loading issues
-  console.log('DASHBOARD DATA:', dashboardData);
+  // console.log('DASHBOARD DATA:', dashboardData);
 
   // Helper: Render profile summary
   function renderProfile(profile) {
@@ -232,9 +232,18 @@ function Dashboard() {
     );
   }
 
+  // Helper: Get first name or username for greeting
+  const greetingName = profile?.firstName || profile?.username || 'Dreamer';
+
   // Main dashboard layout
   return (
     <div className="container py-4">
+      {/* Personal Greeting */}
+      <div className="row mb-4">
+        <div className="col-12 text-center">
+          <h2 className="fw-bold">This is your personal sleep dashboard, {greetingName}.</h2>
+        </div>
+      </div>
       {/* Big Action Button - Main CTA */}
       <div className="row mb-5">
         <div className="col-12 text-center">
@@ -305,6 +314,15 @@ function Dashboard() {
               title: 'See your dream journal'
             }]}
           />
+        </div>
+      </div>
+      {/* Help/Info Section at the bottom */}
+      <div className="row mt-5">
+        <div className="col-12 text-center">
+          <div className="alert alert-info d-inline-block" style={{ maxWidth: 500 }}>
+            Overwhelmed, not sure how everything works?{' '}
+            <a href="/about" className="alert-link">Check About</a>
+          </div>
         </div>
       </div>
     </div>

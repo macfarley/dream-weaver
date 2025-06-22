@@ -6,7 +6,10 @@
 
 ---
 
-![Screenshot of DreamWeaver App](./public/screenshot.pn---
+![Screenshot of DreamWeaver App](./public/screenshot.png)
+
+---
+
 ## 🏆 Development Methodology
 
 Visual assets included in this project were generated using AI technology provided by ImagePrompt.org.
@@ -55,11 +58,12 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
 - 🎨 **BigActionButton Component** - Reusable prominent action button with automatic sleep state detection and consistent theming
 - 🛡️ **Admin Dashboard** - Comprehensive administrative interface featuring:
   - Role-based user management (admins listed first, then users alphabetically)
-  - Individual user profile editing and management
+  - Individual user profile editing and management (admin profile now matches user profile visually and is non-editable by default)
   - Secure user deletion with admin password confirmation and cascade data removal
   - Mobile-friendly dual-mode user profile editing (self-edit vs admin-edit)
   - Permission-based restrictions (cannot edit other admins, delete admin accounts, or delete self)
   - Protected admin routes with proper authentication and authorization
+  - Professional logging and error handling throughout admin features
 - ♿ **Accessibility Features** - Screen reader support, ARIA labels, and keyboard navigation
 
 ---
@@ -76,7 +80,7 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
 - 🎨 **Bootstrap 5** + Custom Sass for responsive styling
 - 🧠 **React Context API** for state management (User, Dashboard, Theme contexts)
 - 🔄 **Axios** for **all** HTTP requests and API integration with:
-  - **100% standardized** - all services now use centralized API configuration
+  - 100% standardized - all services now use centralized API configuration
   - Automatic Bearer token injection via request interceptors
   - Consistent error handling and response patterns across all service modules
   - Complete elimination of fetch() usage and manual token handling
@@ -230,6 +234,10 @@ src/
 - **Security**: Input sanitization, token-based authentication, role-based access controls, and admin password confirmation for destructive operations
 - **Performance**: Optimized builds, lazy loading, and efficient state management
 - **Responsive Design**: Mobile-first approach with Bootstrap grid system and custom breakpoints
+- **SCSS Import Structure:** All styles are loaded via `custom.scss` only. No direct SCSS imports in React components. This ensures global style consistency and prevents duplicate/inconsistent styles.
+- **Logging:** All excessive/verbose console logs have been removed or commented out. Only errors and warnings are logged in production. No sensitive or verbose data is output in production builds. Logging best practices are followed throughout the codebase.
+- **Admin/User Profile:** Admin profile view is non-editable by default and visually matches the regular user profile. All user data extraction and field population is robust and consistent.
+- **Build Readiness:** All major code, UX, and logging improvements are complete and verified. The codebase is ready for production build.
 
 ---
 

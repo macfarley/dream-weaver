@@ -6,8 +6,9 @@ import { signIn } from "../../services/authService";
 /**
  * LoginForm component handles user login.
  * @param {function} onShowSignup - Callback to show the signup form.
+ * @param {function} onLoginSuccess - Callback after successful login (optional)
  */
-function LoginForm({ onShowSignup }) {
+function LoginForm({ onShowSignup, onLoginSuccess }) {
     const { setUser } = useContext(UserContext);
     const navigate = useNavigate();
 
@@ -85,8 +86,11 @@ function LoginForm({ onShowSignup }) {
             // Attempt to sign in with form data
             const user = await signIn(formData);
             setUser(user); // Update user context on success
-            navigate("/users/dashboard");
-
+            if (onLoginSuccess) {
+                onLoginSuccess(user);
+            } else {
+                navigate("/users/dashboard");
+            }
         } catch (err) {
             // Show error message if sign in fails
             setSubmitError(err.message || "Login failed. Please check your credentials.");

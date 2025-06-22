@@ -3,8 +3,29 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import * as bedroomService from '../../services/bedroomService';
 import * as sleepDataService from '../../services/sleepDataService';
-import { format, parseISO } from 'date-fns';
+import { parseISO, format as formatDate } from 'date-fns';
 
+
+// Local temperature formatting utility
+function formatTemperature(temp, prefersImperial, withUnit = false) {
+    if (typeof temp !== 'number') return temp;
+    let value = temp;
+    let unit = '°F';
+    if (!prefersImperial) {
+        value = Math.round(((temp - 32) * 5) / 9);
+        unit = '°C';
+    }
+    return withUnit ? `${value}${unit}` : value;
+}
+
+// Utility: Convert user date format to date-fns compatible format
+function toDateFnsFormat(fmt) {
+    if (!fmt) return 'PPP';
+    return fmt
+        .replace(/Y{2,4}/gi, 'yyyy')
+        .replace(/D{2}/g, 'dd')
+        .replace(/M{2}/g, 'MM');
+}
 
 // Main BedroomDetails component
 function BedroomDetails() {
@@ -23,6 +44,11 @@ function BedroomDetails() {
     const [usageDates, setUsageDates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Get user preferences for formatting
+    const preferences = dashboardData.profile?.userPreferences || {};
+    const prefersImperial = preferences.prefersImperial ?? false;
+    const dateFormat = toDateFnsFormat(preferences.dateFormat) || 'PPP';
 
     // Load bedroom data and usage dates on mount or when dependencies change
     useEffect(() => {
@@ -52,9 +78,9 @@ function BedroomDetails() {
                 setBedroom(room);
                 setFormData(room);
 
-                // Get all sleep data for the owner
-                let allSleepData = dashboardData?.latestSleepData;
-                if (!Array.isArray(allSleepData)) {
+                // Load all sleep sessions (prefer context, fallback to API)
+                let allSleepData = dashboardData?.allSleepSessions;
+                if (!Array.isArray(allSleepData) || allSleepData.length === 0) {
                     allSleepData = await sleepDataService.getSleepDataByUser();
                 }
                 if (!Array.isArray(allSleepData)) {
@@ -63,7 +89,7 @@ function BedroomDetails() {
 
                 // Filter sleep data for this bedroom and sort by date descending
                 const datesUsed = allSleepData
-                    .filter(entry => entry.bedroom && entry.bedroom === room._id)
+                    .filter(entry => entry.bedroom && (entry.bedroom._id === room._id || entry.bedroom === room._id))
                     .map(entry => ({
                         id: entry._id,
                         date: entry.createdAt,
@@ -153,6 +179,8 @@ function BedroomDetails() {
                         <BedroomInfo
                             bedroom={bedroom}
                             onEdit={() => setIsEditing(true)}
+                            prefersImperial={prefersImperial}
+                            dateFormat={dateFormat}
                         />
                     ) : (
                         <BedroomEditForm
@@ -169,6 +197,7 @@ function BedroomDetails() {
                     <BedroomUsageList
                         usageDates={usageDates}
                         navigate={navigate}
+                        dateFormat={dateFormat}
                     />
                     <BedroomDeleteSection
                         deletePassword={deletePassword}
@@ -182,7 +211,7 @@ function BedroomDetails() {
 }
 
 // Subcomponent: Display bedroom info
-function BedroomInfo({ bedroom, onEdit }) {
+function BedroomInfo({ bedroom, onEdit, prefersImperial, dateFormat }) {
     return (
         <div>
             <p><strong>Bed Type:</strong> {bedroom.bedType}</p>
@@ -192,12 +221,12 @@ function BedroomInfo({ bedroom, onEdit }) {
                     <p><strong>Size:</strong> {bedroom.bedSize}</p>
                 </>
             )}
-            <p><strong>Temp:</strong> {bedroom.temperature}°F</p>
+            <p><strong>Temp:</strong> {formatTemperature(bedroom.temperature, prefersImperial, true)}</p>
             <p><strong>Light:</strong> {bedroom.lightLevel}</p>
             <p><strong>Noise:</strong> {bedroom.noiseLevel}</p>
             <p><strong>Pillows:</strong> {bedroom.pillows}</p>
             <p><strong>Notes:</strong> {bedroom.notes || 'None'}</p>
-            <p><strong>Last Updated:</strong> {format(new Date(bedroom.lastUpdatedAt), 'PPP p')}</p>
+            <p><strong>Last Updated:</strong> {bedroom.lastUpdatedAt ? formatDate(new Date(bedroom.lastUpdatedAt), dateFormat + ' p') : 'N/A'}</p>
             <button className="btn btn-primary me-2" onClick={onEdit}>
                 Edit
             </button>
@@ -300,20 +329,21 @@ function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel }) {
 }
 
 // Subcomponent: List of sleep sessions in this bedroom
-function BedroomUsageList({ usageDates, navigate }) {
+function BedroomUsageList({ usageDates, navigate, dateFormat }) {
     return (
         <>
             <h5 className="mt-3">Sleep Sessions in this Bedroom</h5>
             <p>Total Nights: {usageDates.length}</p>
             <ul className="list-group">
                 {usageDates.map(entry => {
-                    const date = format(parseISO(entry.date), 'yyyyMMdd');
+                    const dateObj = parseISO(entry.date);
                     return (
                         <li key={entry.id} className="list-group-item d-flex justify-content-between align-items-center">
-                            <span>{format(parseISO(entry.date), 'EEEE, MMM d')}</span>
+                            <span>{formatDate(dateObj, dateFormat)}</span>
                             <button
                                 className="btn btn-outline-primary btn-sm"
-                                onClick={() => navigate(`/users/SleepData/${date}`)}
+                                onClick={() => navigate(`/sleep/${entry.id}`)}
+                                title="View this sleep session"
                             >
                                 View
                             </button>

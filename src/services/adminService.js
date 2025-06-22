@@ -46,10 +46,34 @@ async function getUserById(userId) {
   }
 }
 
-// Update user profile (admin can edit any user)
+// Check if a username is unique (admin only)
+async function checkUsernameUnique(username) {
+  try {
+    const response = await api.get(`/admin/users/check-username`, { params: { username } });
+    // Expect response: { unique: true } or { available: true }
+    const data = response.data;
+    return data.unique === true || data.available === true;
+  } catch (error) {
+    // If 409 or 400, username is not unique
+    if (error.response && (error.response.status === 409 || error.response.status === 400)) {
+      return false;
+    }
+    // Otherwise, treat as not unique (fail safe)
+    return false;
+  }
+}
+
+// Update user profile (admin can edit username, email, first/last name, password; not role, userId, or dateOfBirth)
+// Uses PATCH /users/:id as per backend
 async function updateUserProfile(userId, profileData) {
   try {
-    const response = await api.put(`/admin/users/${userId}`, profileData);
+    // Only send allowed fields
+    const allowedFields = ['username', 'firstName', 'lastName', 'email', 'password'];
+    const payload = {};
+    for (const key of allowedFields) {
+      if (profileData[key]) payload[key] = profileData[key];
+    }
+    const response = await api.patch(`/users/${userId}`, payload);
     const data = response.data;
     
     // Handle different response formats
@@ -125,5 +149,6 @@ export {
   getAllUsers, 
   getUserById, 
   updateUserProfile, 
-  deleteUser 
+  deleteUser, 
+  checkUsernameUnique
 };

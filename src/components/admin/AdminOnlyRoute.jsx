@@ -16,6 +16,9 @@ function AdminOnlyRoute({ children }) {
     return <Loading message="Verifying admin access..." />;
   }
   
+  // Debug log for user and role
+  console.debug('[AdminOnlyRoute] user:', user, 'role:', user?.role);
+
   // Check if user is logged in and has admin role
   const userIsAdmin = user?.role === 'admin';
 

@@ -102,9 +102,10 @@ const BedroomIndex = () => {
 
               <div>
                 <Link
-                  to={`/users/dashboard/bedrooms/${bedroom._id}`}
+                  to={`/bedrooms/${bedroom._id}`}
                   className="btn btn-primary btn-sm"
                   aria-label={`View details for ${bedroom.bedroomName}`}
+                  title={`View or edit details for ${bedroom.bedroomName}`}
                 >
                   View/Edit
                 </Link>

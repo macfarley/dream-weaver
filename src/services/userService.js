@@ -32,14 +32,13 @@ import api from './apiConfig.js';
 async function getProfile() {
   // Authentication token handled automatically by interceptor
   try {
-    console.debug('[userService] Fetching user profile via GET /users/profile');
     const response = await api.get('/users/profile', {
       headers: {
         'Cache-Control': 'no-cache',
       },
     });
-    console.debug('[userService] Profile response:', response.data);
-    return response.data;
+    // Return only the user object, not the wrapper
+    return response.data.data;
   } catch (error) {
     console.error('[userService] Error fetching profile:', error);
     // Provide more specific error messages based on response status
@@ -73,12 +72,13 @@ async function updateProfile(profileData) {
     throw new Error('Profile data is required and must be an object.');
   }
 
+  // Remove _id if present (never send _id in PATCH)
+  const safeProfileData = { ...profileData };
+  delete safeProfileData._id;
+
   try {
-    console.log('Making profile update request via api instance');
-    console.log('Request data:', profileData);
-    
-    const response = await api.patch('/users/profile', profileData);
-    
+    // Only log on error, not on every successful request
+    const response = await api.patch('/users/profile', safeProfileData);
     return response.data;
   } catch (error) {
     console.error('Profile update service error:', {

@@ -52,7 +52,7 @@ This file documents the key API endpoints, authentication flows, and data contra
     "theme": "dark"
   },
   "role": "admin",
-  "joinedAt": "2025-06-18T20:54:13.600Z",
+  "createdAt": "2025-06-18T20:54:13.600Z",
   "updatedAt": "2025-06-22T00:31:11.000Z"
 }
 ```
@@ -62,6 +62,20 @@ This file documents the key API endpoints, authentication flows, and data contra
   - Username and role cannot be changed here.
 
 > **Note:** These are the only two endpoints under `/users/`.
+
+---
+
+## User Object Fields (as returned by GET /admin/users/:id or /users/:id)
+- `_id`: MongoDB ObjectId
+- `username`: String
+- `firstName`: String
+- `lastName`: String
+- `dateOfBirth`: ISO 8601 date string
+- `email`: String
+- `role`: String ("user" or "admin")
+- `createdAt`: ISO 8601 date string (when the user joined)
+- `updatedAt`: ISO 8601 date string (last profile update)
+- `userPreferences`: Object (optional, not shown to admins by default)
 
 ---
 
@@ -111,11 +125,19 @@ This file documents the key API endpoints, authentication flows, and data contra
 - **GET /admin/users**
   - List all users.
 - **GET /admin/users/:id**
-  - Get user details.
-- **PUT /admin/users/:id**
-  - Update user (except role/username).
+  - Get user details. Returns all user fields above (except password hash).
+- **PATCH /users/:id**
+  - Update user (except role/username). Admins cannot update other admins.
 - **DELETE /admin/users/:id**
   - Delete user (requires admin password).
+
+---
+
+## How to Get Last Sleep Session for a User (Admin)
+
+- **GET /sleep-data?userId=USERID**
+  - (If supported for admins) Returns all sleep sessions for the specified user. Sort by `createdAt` descending to get the latest session.
+  - If not supported, a new admin endpoint may be needed.
 
 ---
 

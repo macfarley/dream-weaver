@@ -127,36 +127,36 @@ function Navbar() {
         <ul className="navbar-nav ms-auto custom-navbar-nav" role="menubar">
           {/* Always show all navigation links, relying on route protection for auth */}
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/about" onClick={closeMobileMenu} role="menuitem">About</Link>
+            <Link className="nav-link" to="/about" onClick={closeMobileMenu} role="menuitem" title="About DreamWeaver">About</Link>
           </li>
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/join" onClick={closeMobileMenu} role="menuitem">Join Us</Link>
+            <Link className="nav-link" to="/join" onClick={closeMobileMenu} role="menuitem" title="Join DreamWeaver">Join Us</Link>
           </li>
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/dashboard" onClick={closeMobileMenu} role="menuitem">Dashboard</Link>
+            <Link className="nav-link" to="/dashboard" onClick={closeMobileMenu} role="menuitem" title="Your Dashboard">Dashboard</Link>
           </li>
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/journal" onClick={closeMobileMenu} role="menuitem">Dream Journal</Link>
+            <Link className="nav-link" to="/dreams" onClick={closeMobileMenu} role="menuitem" title="Dream Journal">Dream Journal</Link>
           </li>
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/sleep" onClick={closeMobileMenu} role="menuitem">Sleep History</Link>
+            <Link className="nav-link" to="/sleep" onClick={closeMobileMenu} role="menuitem" title="Sleep History">Sleep History</Link>
           </li>
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/bedrooms" onClick={closeMobileMenu} role="menuitem">Bedrooms</Link>
+            <Link className="nav-link" to="/bedrooms" onClick={closeMobileMenu} role="menuitem" title="Your Bedrooms">Bedrooms</Link>
           </li>
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/profile" onClick={closeMobileMenu} role="menuitem">Profile</Link>
+            <Link className="nav-link" to="/profile" onClick={closeMobileMenu} role="menuitem" title="Your Profile">Profile</Link>
           </li>
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link text-warning" to="/admin/dashboard" onClick={closeMobileMenu} role="menuitem">Admin Dashboard</Link>
+            <Link className="nav-link text-warning" to="/admin/dashboard" onClick={closeMobileMenu} role="menuitem" title="Admin Dashboard">Admin Dashboard</Link>
           </li>
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/" onClick={closeMobileMenu} role="menuitem">Home</Link>
+            <Link className="nav-link" to="/" onClick={closeMobileMenu} role="menuitem" title="Home">Home</Link>
           </li>
           {/* Show logout if logged in */}
           {user && (
             <li className="nav-item custom-nav-item">
-              <button className="nav-link btn btn-link" onClick={logOut} role="menuitem">Logout</button>
+              <button className="nav-link btn btn-link text-danger" onClick={logOut} role="menuitem" title="Log out">Logout</button>
             </li>
           )}
         </ul>

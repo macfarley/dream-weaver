@@ -36,8 +36,8 @@ const DashboardProvider = ({ children }) => {
                 bedroomService.getBedrooms(),
                 sleepDataService.getSleepDataByUser(),
             ]);
-            console.log('refreshDashboard: bedrooms result', bedrooms);
-            console.log('refreshDashboard: sleepEntries result', sleepEntries);
+            // console.log('refreshDashboard: bedrooms result', bedrooms);
+            // console.log('refreshDashboard: sleepEntries result', sleepEntries);
 
             // Handle bedrooms result
             let bedroomsData = [];
@@ -108,14 +108,14 @@ const DashboardProvider = ({ children }) => {
                 latestDreamSessionId, // Add this to the context
                 allSleepSessions: sleepArray, // Store all sleep sessions for streak calculations
             });
-            console.log('refreshDashboard: setDashboardData', {
-                profile: realUser,
-                bedrooms: bedroomsData || [],
-                latestSleepData,
-                latestDreamLog,
-                latestDreamSessionId,
-                allSleepSessions: sleepArray,
-            });
+            // console.log('refreshDashboard: setDashboardData', {
+            //     profile: realUser,
+            //     bedrooms: bedroomsData || [],
+            //     latestSleepData,
+            //     latestDreamLog,
+            //     latestDreamSessionId,
+            //     allSleepSessions: sleepArray,
+            // });
         } catch (err) {
             console.error('Failed to fetch dashboard data:', err);
             setError('Unable to load dashboard data.');
@@ -167,14 +167,14 @@ const DashboardProvider = ({ children }) => {
     useEffect(() => {
         // Always extract the real user object from user.data if present
         const realUser = user?.data || user;
-        console.log('DashboardContext useEffect:', { user: realUser, userLoading });
-        console.log('DashboardContext: user object', realUser);
+        // console.log('DashboardContext useEffect:', { user: realUser, userLoading });
+        // console.log('DashboardContext: user object', realUser);
         const userId = realUser?._id || realUser?.id;
         if (!userLoading && realUser && userId) {
-            console.log('DashboardContext: Loading dashboard for user', realUser.username || realUser.email || userId);
+            // console.log('DashboardContext: Loading dashboard for user', realUser.username || realUser.email || userId);
             refreshDashboard(realUser);
         } else if (!userLoading && !realUser) {
-            console.log('DashboardContext: No user, clearing dashboard data');
+            // console.log('DashboardContext: No user, clearing dashboard data');
             setDashboardData({
                 profile: null,
                 bedrooms: [],

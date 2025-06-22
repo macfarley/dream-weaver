@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import LoginForm from "../components/auth/LoginForm";
 import SignupForm from "../components/auth/SignupForm";
 
@@ -19,6 +19,7 @@ import SignupForm from "../components/auth/SignupForm";
  */
 function JoinUs() {
   const location = useLocation();
+  const navigate = useNavigate();
   
   // State to control which form is displayed (true = login, false = signup)
   const [showLogin, setShowLogin] = useState(true);
@@ -61,13 +62,26 @@ function JoinUs() {
     console.info('User signup completed successfully');
   };
 
+  /**
+   * Handles successful user login.
+   * After successful login, redirect to personal dashboard.
+   */
+  const handleLoginSuccess = (user) => {
+    // If user is admin, you may want to redirect to admin dashboard instead
+    if (user && user.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <div className="container">
       <div className="row justify-content-center">
         <div className="col-md-6">
           {/* Conditionally render either LoginForm or SignupForm based on showLogin state */}
           {showLogin ? (
-            <LoginForm onShowSignup={handleShowSignup} />
+            <LoginForm onShowSignup={handleShowSignup} onLoginSuccess={handleLoginSuccess} />
           ) : (
             <SignupForm 
               onSignUpSuccess={handleSignUpSuccess}
