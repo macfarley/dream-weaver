@@ -17,9 +17,12 @@ import WakeUpForm from './components/sleep/WakeUpForm';
 import JoinUs from './pages/JoinUs';
 import About from './pages/About';
 import NotFound from './pages/NotFound';
+import Unauthorized from './pages/Unauthorized';
+import UserRedirect from './components/system/UserRedirect';
+import PrivateRoute from './components/auth/PrivateRoute';
+import AdminOnlyRoute from './components/admin/AdminOnlyRoute';
 
 // Admin Components - Lazy loaded since most users won't need them
-import AdminOnlyRoute from './components/admin/AdminOnlyRoute';
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminUserProfile = lazy(() => import('./components/admin/AdminUserProfile'));
 
@@ -30,27 +33,28 @@ function App() {
       <NavBar />
       <main>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<About />} />
-          
           <Route path="/auth/signup" element={<JoinUs />} />
           <Route path="/auth/login" element={<JoinUs />} />
           <Route path="/join" element={<JoinUs />} />
-          
-          <Route path="/users/dashboard" element={<Dashboard />} />
-          <Route path="/users/dashboard/bedrooms" element={<BedroomIndex />} />
-          <Route path="/users/dashboard/bedrooms/:bedroomname" element={<BedroomDetails />} />
-          <Route path="/users/dashboard/sleepdata" element={<SleepDataIndex />} />
-          <Route path="/users/dashboard/sleepdata/:id" element={<SleepSession />} />
-          <Route path="/users/dashboard/dreamjournal/:date" element={<SleepSession />} />
-          <Route path="/users/dashboard/dreams" element={<DreamIndex />} />
-          <Route path="/users/profile" element={<UserProfile />} />
-          
-          {/* Sleep Session Routes */}
-          <Route path="/gotobed" element={<GoToBedForm />} />
-          <Route path="/gotobed/wakeup" element={<WakeUpForm />} />
-          
-          {/* Admin Routes - Protected by AdminOnlyRoute */}
+
+          {/* User-specific redirect protection */}
+          <Route path="/users/:userId/*" element={<UserRedirect />} />
+
+          {/* Private (authenticated user) routes */}
+          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/bedrooms" element={<PrivateRoute><BedroomIndex /></PrivateRoute>} />
+          <Route path="/bedrooms/:bedroomid" element={<PrivateRoute><BedroomDetails /></PrivateRoute>} />
+          <Route path="/sleep" element={<PrivateRoute><SleepDataIndex /></PrivateRoute>} />
+          <Route path="/sleep/:id" element={<PrivateRoute><SleepSession /></PrivateRoute>} />
+          <Route path="/dreams" element={<PrivateRoute><DreamIndex /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+          <Route path="/gotobed" element={<PrivateRoute><GoToBedForm /></PrivateRoute>} />
+          <Route path="/gotobed/wakeup" element={<PrivateRoute><WakeUpForm /></PrivateRoute>} />
+
+          {/* Admin routes - protected by AdminOnlyRoute */}
           <Route path="/admin/dashboard" element={
             <AdminOnlyRoute>
               <Suspense fallback={<div>Loading admin dashboard...</div>}>
@@ -65,14 +69,10 @@ function App() {
               </Suspense>
             </AdminOnlyRoute>
           } />
-          
-          {/* Legacy Routes for Compatibility */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/bedrooms" element={<BedroomIndex />} />
-          <Route path="/dreams" element={<DreamIndex />} />
-          <Route path="/sleep" element={<SleepDataIndex />} />
-          <Route path="/profile" element={<UserProfile />} />
-          
+
+          {/* Unauthorized route for forbidden access */}
+          <Route path="/unauthorized" element={<Unauthorized />} />
+
           {/* 404 Catch-all Route - Must be last */}
           <Route path="*" element={<NotFound />} />
         </Routes>

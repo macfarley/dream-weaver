@@ -23,7 +23,7 @@ function Footer() {
   const location = useLocation();
 
   // Get user authentication state and dashboard data from contexts
-  const { user } = useContext(UserContext);
+  const { user, preferences } = useContext(UserContext);
   const { dashboardData } = useContext(DashboardContext);
 
   // Determine if user has an active sleep session
@@ -67,8 +67,11 @@ function Footer() {
         ariaLabel: 'Start a new sleep session'
       };
 
+  // Example: use preferences.theme for a dark/light footer class
+  const themeClass = preferences.theme === 'light' ? 'footer-light' : 'footer-dark';
+
   return (
-    <footer className="compact-footer" role="contentinfo" aria-label="Site footer">
+    <footer className={`compact-footer ${themeClass}`} role="contentinfo" aria-label="Site footer">
       <div className="container-fluid">
         {/* Top row - About link and action button */}
         <div className="row align-items-center justify-content-between footer-top">

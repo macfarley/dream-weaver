@@ -13,54 +13,117 @@ This document serves as a bridge between the frontend and backend, documenting t
 
 ---
 
-## 🧑‍💻 API Endpoints Overview
+# DreamWeaver Backend-to-Frontend Bridge Reference
+# Generated: 2025-06-21
 
-### 🔓 **Authentication Routes**
-| Route | Method | Description | Auth Required |
-|-------|---------|-------------|---------------|
-| `/auth/sign-up` | POST | Create new user account | No |
-| `/auth/sign-in` | POST | Login user and get JWT token | No |
+This file documents the key API endpoints, authentication flows, and data contracts for integrating the DreamWeaver backend with the frontend. Use this as a reference for frontend development and API consumption.
 
-### 👤 **User Routes**
-| Route | Method | Description | Auth Required |
-|-------|---------|-------------|---------------|
-| `/users/` | GET | Get user's sleep data (alternative endpoint) | Yes |
-| `/users/profile` | PATCH | Update current user profile (partial) | Yes |
+---
 
-### 🛏️ **Bedroom Routes**
-| Route | Method | Description | Auth Required |
-|-------|---------|-------------|---------------|
-| `/bedrooms` | GET | List user bedrooms | Yes |
-| `/bedrooms/new` | POST | Create new bedroom | Yes |
-| `/bedrooms/by-name/:bedroomName` | GET | Get bedroom by name | Yes |
-| `/bedrooms/:id` | GET | Get bedroom by ID | Yes |
-| `/bedrooms/:id` | PUT | Update bedroom | Yes |
-| `/bedrooms/:id` | DELETE | Delete bedroom | Yes |
+## Authentication
 
-### 🌙 **Sleep Data Routes** ⚠️ **IMPORTANT FOR FRONTEND**
-| Route | Method | Description | Auth Required |
-|-------|---------|-------------|---------------|
-| `/sleep-data` | GET | Get all sleep sessions for user | Yes |
-| `/sleep-data/:date` | GET | Get sleep session by date (YYYYMMDD) | Yes |
-| `/sleep-data/:id` | PUT | Update sleep session | Yes |
-| `/sleep-data/:id` | DELETE | Delete sleep session (requires password) | Yes |
+- **POST /auth/sign-up**
+  - Registers a new user. Returns `{ token, user }` on success.
+- **POST /auth/sign-in** or **POST /auth/login**
+  - Logs in a user. Returns `{ token, user }` on success.
+- **JWT Token**
+  - Must be sent as `Authorization: Bearer <token>` in all protected requests.
+  - Token is refreshed and returned after PATCH `/users/profile`.
 
-**⚠️ Date Format**: The `:date` parameter expects YYYYMMDD format (e.g., `20250621` for June 21, 2025)
+---
 
-### 🛌 **Go To Bed Routes**
-| Route | Method | Description | Auth Required |
-|-------|---------|-------------|---------------|
-| `/gotobed` | POST | Start new sleep session | Yes |
-| `/gotobed/active` | GET | Check for active session | Yes |
-| `/gotobed/wakeup` | POST | Add wakeup data to session | Yes |
+## User Profile
 
-### 🛠️ **Admin Routes**
-| Route | Method | Description | Auth Required |
-|-------|---------|-------------|---------------|
-| `/admin/users` | GET | List all users | Admin only |
-| `/admin/users/:id` | GET | Get specific user details | Admin only |
-| `/admin/users/:id` | PUT | Update user (except role/username) | Admin only |
-| `/admin/users/:id` | DELETE | Delete user (requires admin password) | Admin only |
+- **GET /users/profile**
+  - Returns the authenticated user's full profile (all fields except password hash). Example response:
+
+```json
+{
+  "_id": "6853277527f8af5c42c8b361",
+  "username": "dreamadmin",
+  "firstName": "Randy",
+  "lastName": "Quaid",
+  "dateOfBirth": "1990-01-01T00:00:00.000Z",
+  "email": "rquaid@hollywood.com",
+  "userPreferences": {
+    "useMetric": false,
+    "dateFormat": "YYYY-MM-DD",
+    "timeFormat": "24-hour",
+    "theme": "dark"
+  },
+  "role": "admin",
+  "joinedAt": "2025-06-18T20:54:13.600Z",
+  "updatedAt": "2025-06-22T00:31:11.000Z"
+}
+```
+
+- **PATCH /users/profile**
+  - Partial update. Returns `{ data: user, token }` (new JWT reflects changes).
+  - Username and role cannot be changed here.
+
+> **Note:** These are the only two endpoints under `/users/`.
+
+---
+
+## Sleep Data
+
+- **GET /users/**
+  - Returns all sleep data for the authenticated user.
+- **GET /sleep-data**
+  - Returns all sleep sessions for the user.
+- **GET /sleep-data/:date**
+  - Returns a specific sleep session by date (YYYYMMDD).
+- **PUT /sleep-data/:id**
+  - Updates a sleep session.
+- **DELETE /sleep-data/:id**
+  - Deletes a sleep session (requires password).
+
+---
+
+## Bedroom Management
+
+- **GET /bedrooms**
+  - List all bedrooms for the user.
+- **POST /bedrooms/new**
+  - Create a new bedroom.
+- **GET /bedrooms/:id**
+  - Get bedroom by ID.
+- **PUT /bedrooms/:id**
+  - Update bedroom.
+- **DELETE /bedrooms/:id**
+  - Delete bedroom.
+
+---
+
+## Sleep Session (Go To Bed)
+
+- **POST /gotobed**
+  - Start a new sleep session. Returns 409 with session info if already active.
+- **GET /gotobed/active**
+  - Check if a session is active.
+- **POST /gotobed/wakeup**
+  - Add wakeup data to the current session.
+
+---
+
+## Admin (for admin users only)
+
+- **GET /admin/users**
+  - List all users.
+- **GET /admin/users/:id**
+  - Get user details.
+- **PUT /admin/users/:id**
+  - Update user (except role/username).
+- **DELETE /admin/users/:id**
+  - Delete user (requires admin password).
+
+---
+
+## Notes
+- All dates are ISO 8601 strings unless otherwise noted.
+- All endpoints return JSON.
+- On profile update, always use the new JWT for subsequent requests.
+- For error handling, check for `error` or `message` fields in responses.
 
 ---
 
@@ -132,4 +195,4 @@ Username: sleepyuser    | Password: password123
 
 ---
 
-*This reference document should be updated when backend API changes.*
+# End of Bridge File

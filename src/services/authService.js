@@ -167,6 +167,31 @@ async function signIn(formData) {
 }
 
 /**
+ * Re-authenticates the user to get a fresh JWT token after profile changes.
+ *
+ * @param {string} username - User's username
+ * @param {string} password - User's password
+ * @returns {Promise<Object>} User data from decoded JWT token
+ * @throws {Error} With user-friendly error messages
+ */
+async function reAuthenticate(username, password) {
+  try {
+    const response = await api.post('/auth/sign-in', { username, password });
+    return await handleAuthResponse(response);
+  } catch (err) {
+    console.error('Re-authentication error:', err);
+    if (err.response) {
+      const errorMessage = err.response.data?.err || err.response.data?.message || `Server error (${err.response.status})`;
+      throw new Error(errorMessage);
+    } else if (err.request) {
+      throw new Error('Network error - please check your connection and try again');
+    } else {
+      throw new Error(err.message || 'An unexpected error occurred');
+    }
+  }
+}
+
+/**
  * Exported authentication functions for use throughout the application.
  * 
  * Available functions:
@@ -175,6 +200,7 @@ async function signIn(formData) {
  * - getToken: Retrieve stored JWT token
  * - decodeToken: Decode JWT payload safely
  * - logOut: Remove token and end session
+ * - reAuthenticate: Get a new JWT token after profile changes
  */
 export {
   signUp,
@@ -182,4 +208,5 @@ export {
   getToken,
   decodeToken,
   logOut,
+  reAuthenticate,
 };

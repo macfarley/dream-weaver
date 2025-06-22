@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import { UserContext } from '../../contexts/UserContext';
 import DashboardBox from '../../components/ui/DashboardBox';
@@ -9,6 +9,7 @@ import { formatTemperature, formatDate, formatTime } from '../../utils/format/us
 import { calculateSleepStreaks, formatStreakDisplay } from '../../utils/sleep/sleepStreaks';
 import { calculateSleepDuration } from '../../utils/sleep/sleepDataUtils';
 import { User, Bed, BarChart2, PenTool, Flame, Award } from 'lucide-react';
+import Loading from '../../components/ui/Loading';
 
 /**
  * Dashboard component displays user profile, bedroom info,
@@ -17,32 +18,19 @@ import { User, Bed, BarChart2, PenTool, Flame, Award } from 'lucide-react';
 function Dashboard() {
   // Get dashboard data and status from context
   const { dashboardData, loading, error } = useContext(DashboardContext);
-  const { user, loading: userLoading } = useContext(UserContext);
+  const { loading: userLoading } = useContext(UserContext);
   const navigate = useNavigate();
   
   // Get user preferences for formatting
-  const { prefersImperial, dateFormat, timeFormat } = usePreferenceSync();
+  // Use preferences from profile if available, else from usePreferenceSync
+  const preferences = dashboardData.profile?.userPreferences || {};
+  const prefersImperial = preferences.prefersImperial ?? false;
+  const dateFormat = preferences.dateFormat || 'yyyy-MM-dd';
+  const timeFormat = preferences.timeFormat || 'HH:mm';
 
-  // Handle authentication redirect in useEffect
-  useEffect(() => {
-    if (!userLoading && !user) {
-      navigate('/auth/login');
-    }
-  }, [user, userLoading, navigate]);
-
-  // Show loading while user context is loading
-  if (userLoading) {
-    return <p>Loading...</p>;
-  }
-
-  // Show loading screen if redirecting
-  if (!user) {
-    return <p>Redirecting to login...</p>;
-  }
-
-  // Show loading or error states
-  if (loading) {
-    return <p>Loading dashboard...</p>;
+  // Show loading while user context or dashboard data is loading
+  if (userLoading || loading) {
+    return <Loading message="Loading dashboard..." />;
   }
   if (error) {
     return <p className="text-danger">{error}</p>;
@@ -50,6 +38,9 @@ function Dashboard() {
 
   // Destructure data for easier access
   const { profile, bedrooms, latestSleepData, latestDreamLog, allSleepSessions } = dashboardData;
+
+  // Debug: Log dashboardData to help diagnose loading issues
+  console.log('DASHBOARD DATA:', dashboardData);
 
   // Helper: Render profile summary
   function renderProfile(profile) {
@@ -142,27 +133,20 @@ function Dashboard() {
 
   // Helper: Render latest dream log summary with context awareness and cloud navigation
   function renderDreamLog(log) {
-    // Check if user has an active sleep session (no wake-ups recorded)
     const hasActiveSleep = latestSleepData && (!latestSleepData.wakeUps || latestSleepData.wakeUps.length === 0);
-    
-    // Handler for clicking on dream clouds - navigate to specific sleep session by ID
     const handleDreamCloudClick = () => {
       if (latestSleepData && latestSleepData._id) {
-        // Pass the session data through navigation state to avoid backend call
         navigate(`/users/dashboard/sleepdata/${latestSleepData._id}`, {
           state: { sessionData: latestSleepData }
         });
       } else {
-        // Fallback to dreams index page  
         navigate('/users/dashboard/dreams');
       }
     };
-    
     if (hasActiveSleep) {
-      // User is currently sleeping - show encouraging message in a sleepy cloud
       return (
         <div className="py-2">
-          <div 
+          <div
             className="sleepy-thought-cloud"
             onClick={handleDreamCloudClick}
             role="button"
@@ -183,14 +167,11 @@ function Dashboard() {
         </div>
       );
     }
-    
-    // Check if latest sleep session has dreams or sleepy thoughts
-    const hasContent = latestSleepData && (
-      latestSleepData.sleepyThoughts?.trim() || 
+    // Only declare hasContent once
+    let hasContent = latestSleepData && (
+      latestSleepData.sleepyThoughts?.trim() ||
       latestSleepData.wakeUps?.some(wake => wake.dreamJournal?.trim())
     );
-    
-    // If no content in recent session, show simple text message (no cloud)
     if (!hasContent) {
       return (
         <div className="py-2">
@@ -198,7 +179,7 @@ function Dashboard() {
             No dreams or sleepy thoughts recorded yet
           </p>
           <div className="text-center mt-2">
-            <button 
+            <button
               className="btn btn-sm btn-outline-primary"
               onClick={() => navigate('/users/dashboard/dreams')}
             >
@@ -208,20 +189,13 @@ function Dashboard() {
         </div>
       );
     }
-    
-    // User has dream log - show the latest entry in a single, reasonably-sized cloud
     if (log) {
-      // Cap the text at 500 characters to avoid crowding the dashboard box
       const maxLength = 500;
       const displayText = log.length > maxLength ? log.slice(0, maxLength).trim() + '...' : log;
-      
-      // Determine cloud size based on actual display text length
       const cloudSize = displayText.length > 300 ? 'large' : displayText.length > 150 ? '' : 'small';
-      
-      // Single cloud - keep it simple and clean
       return (
         <div className="py-2">
-          <div 
+          <div
             className={`dream-cloud ${cloudSize}`}
             onClick={handleDreamCloudClick}
             role="button"
@@ -241,15 +215,13 @@ function Dashboard() {
         </div>
       );
     }
-    
-    // Fallback - no cloud, just simple text message
     return (
       <div className="py-2">
         <p className="text-muted text-center mb-0">
           No dream content available
         </p>
         <div className="text-center mt-2">
-          <button 
+          <button
             className="btn btn-sm btn-outline-primary"
             onClick={() => navigate('/users/dashboard/dreams')}
           >
@@ -278,7 +250,7 @@ function Dashboard() {
             icon={<User />}
             data={profile}
             renderContent={renderProfile}
-            actions={[{ label: 'View Profile', onClick: () => navigate('/users/profile') }]}
+            actions={[{ label: 'View Profile', onClick: () => navigate('/profile'), title: 'Go to your profile page' }]}
           />
         </div>
 
@@ -289,7 +261,7 @@ function Dashboard() {
             icon={<Bed />}
             data={bedrooms && bedrooms[0]}
             renderContent={renderBedroom}
-            actions={[{ label: 'View Bedrooms', onClick: () => navigate('/users/dashboard/bedrooms') }]}
+            actions={[{ label: 'View Bedrooms', onClick: () => navigate('/bedrooms'), title: 'See all your bedrooms' }]}
           />
         </div>
 
@@ -302,7 +274,8 @@ function Dashboard() {
             renderContent={renderSleepSession}
             actions={[{ 
               label: 'View Sleep Data', 
-              onClick: () => navigate('/users/dashboard/sleepdata')
+              onClick: () => navigate('/sleep'),
+              title: 'See all your sleep sessions'
             }]}
           />
         </div>
@@ -328,7 +301,8 @@ function Dashboard() {
                 if (latestSleepData && latestSleepData.wakeUps?.length > 0 && !latestDreamLog) return "View Dreams";
                 return "View Dreams";
               })(), 
-              onClick: () => navigate('/users/dashboard/dreams') 
+              onClick: () => navigate('/journal'),
+              title: 'See your dream journal'
             }]}
           />
         </div>

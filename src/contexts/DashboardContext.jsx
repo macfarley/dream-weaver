@@ -7,7 +7,7 @@ import * as sleepDataService from '../services/sleepDataService';
 const DashboardContext = createContext();
 
 const DashboardProvider = ({ children }) => {
-    const { user } = useContext(UserContext);
+    const { user, loading: userLoading } = useContext(UserContext);
 
     const [dashboardData, setDashboardData] = useState({
         profile: null,
@@ -21,18 +21,23 @@ const DashboardProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     // Create a refresh function that can be called from outside
-    const refreshDashboard = useCallback(async () => {
-        if (!user || !user._id) return;
-
+    const refreshDashboard = useCallback(async (realUserParam) => {
+        const realUser = realUserParam || user?.data || user;
+        const userId = realUser?._id || realUser?.id;
+        if (!realUser || !userId) {
+            console.warn('refreshDashboard: No user or userId, skipping fetch');
+            return;
+        }
         setLoading(true);
         setError(null);
-
         try {
             // Fetch data in parallel (using user data from context for profile)
             const [bedrooms, sleepEntries] = await Promise.allSettled([
                 bedroomService.getBedrooms(),
                 sleepDataService.getSleepDataByUser(),
             ]);
+            console.log('refreshDashboard: bedrooms result', bedrooms);
+            console.log('refreshDashboard: sleepEntries result', sleepEntries);
 
             // Handle bedrooms result
             let bedroomsData = [];
@@ -96,12 +101,20 @@ const DashboardProvider = ({ children }) => {
             }
 
             setDashboardData({
-                profile: user, // Use user data from context
+                profile: realUser,
                 bedrooms: bedroomsData || [],
                 latestSleepData,
                 latestDreamLog,
                 latestDreamSessionId, // Add this to the context
                 allSleepSessions: sleepArray, // Store all sleep sessions for streak calculations
+            });
+            console.log('refreshDashboard: setDashboardData', {
+                profile: realUser,
+                bedrooms: bedroomsData || [],
+                latestSleepData,
+                latestDreamLog,
+                latestDreamSessionId,
+                allSleepSessions: sleepArray,
             });
         } catch (err) {
             console.error('Failed to fetch dashboard data:', err);
@@ -152,10 +165,16 @@ const DashboardProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        if (user && user._id) {
-            refreshDashboard();
-        } else {
-            // Clear dashboard data when user logs out
+        // Always extract the real user object from user.data if present
+        const realUser = user?.data || user;
+        console.log('DashboardContext useEffect:', { user: realUser, userLoading });
+        console.log('DashboardContext: user object', realUser);
+        const userId = realUser?._id || realUser?.id;
+        if (!userLoading && realUser && userId) {
+            console.log('DashboardContext: Loading dashboard for user', realUser.username || realUser.email || userId);
+            refreshDashboard(realUser);
+        } else if (!userLoading && !realUser) {
+            console.log('DashboardContext: No user, clearing dashboard data');
             setDashboardData({
                 profile: null,
                 bedrooms: [],
@@ -166,7 +185,7 @@ const DashboardProvider = ({ children }) => {
             setError(null);
             setLoading(false); // Prevents infinite spinner if no user
         }
-    }, [user, refreshDashboard]);
+    }, [user, userLoading, refreshDashboard]);
 
     return (
         <DashboardContext.Provider
@@ -179,6 +198,7 @@ const DashboardProvider = ({ children }) => {
                 removeSleepData,
             }}
         >
+            {/* Always render children, even if loading, to avoid blocking public routes */}
             {children}
         </DashboardContext.Provider>
     );

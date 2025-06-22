@@ -32,9 +32,16 @@ import api from './apiConfig.js';
 async function getProfile() {
   // Authentication token handled automatically by interceptor
   try {
-    const response = await api.get('/users/profile');
+    console.debug('[userService] Fetching user profile via GET /users/profile');
+    const response = await api.get('/users/profile', {
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
+    console.debug('[userService] Profile response:', response.data);
     return response.data;
   } catch (error) {
+    console.error('[userService] Error fetching profile:', error);
     // Provide more specific error messages based on response status
     if (error.response?.status === 401) {
       throw new Error('Authentication failed. Please log in again.');
@@ -57,7 +64,7 @@ async function getProfile() {
  * @param {boolean} [profileData.prefersImperial] - Temperature unit preference
  * @param {string} [profileData.dateFormat] - Date format preference
  * @param {string} [profileData.timeFormat] - Time format preference
- * @returns {Promise<Object>} Promise that resolves to updated profile data
+ * @returns {Promise<Object} Promise that resolves to updated profile data
  * @throws {Error} Throws error if request fails or validation errors occur
  */
 async function updateProfile(profileData) {
@@ -97,38 +104,7 @@ async function updateProfile(profileData) {
     } else if (error.response?.status === 400) {
       throw new Error(error.response.data?.message || 'Invalid profile data provided.');
     } else if (error.response?.status === 404) {
-      // Temporary fallback for when backend endpoint isn't available
-      console.warn('⚠️  Profile endpoint not found - using mock response for UI testing');
-      console.warn('💡 This is expected if the backend server needs to be restarted after PATCH changes');
-      
-      // Get current user data from localStorage or return mock updated data
-      const currentUserData = JSON.parse(localStorage.getItem('user') || '{}');
-      
-      // Implement proper PATCH semantics for mock:
-      // Only update fields that have actual values (not empty strings)
-      const mockUpdatedUser = { ...currentUserData };
-      
-      // Update only non-empty fields (proper PATCH behavior)
-      Object.keys(profileData).forEach(key => {
-        const value = profileData[key];
-        // Only update if value is not an empty string (except for booleans and numbers)
-        if (value !== '' || typeof value === 'boolean' || typeof value === 'number') {
-          mockUpdatedUser[key] = value;
-        }
-      });
-      
-      // Ensure we maintain essential user properties
-      mockUpdatedUser.id = currentUserData.id || currentUserData._id;
-      mockUpdatedUser._id = currentUserData._id || currentUserData.id;
-      mockUpdatedUser.username = currentUserData.username;
-      mockUpdatedUser.role = currentUserData.role || 'user';
-      mockUpdatedUser.updatedAt = new Date().toISOString();
-      
-      // Update localStorage to persist the changes
-      localStorage.setItem('user', JSON.stringify(mockUpdatedUser));
-      
-      console.log('✅ Mock profile update successful (PATCH semantics):', mockUpdatedUser);
-      return mockUpdatedUser;
+      throw new Error('User profile not found.');
     } else if (error.response?.status === 409) {
       throw new Error('Email address is already in use by another account.');
     } else if (error.response?.status === 500) {

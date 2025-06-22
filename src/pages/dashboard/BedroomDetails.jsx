@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import * as bedroomService from '../../services/bedroomService';
@@ -8,42 +8,58 @@ import { format, parseISO } from 'date-fns';
 
 // Main BedroomDetails component
 function BedroomDetails() {
-    // Get bedroom name from URL params and navigation function
-    const { bedroomname } = useParams();
+    // Get bedroom id from URL params and navigation function
+    const { bedroomid } = useParams();
     const navigate = useNavigate();
 
     // Get dashboard data and refresh function from context
     const { dashboardData, refreshDashboard } = useContext(DashboardContext);
 
-    // Local state for bedroom details, edit mode, form data, delete password, usage dates, and loading
+    // Local state for bedroom details, edit mode, form data, delete password, usage dates, loading, and error
     const [bedroom, setBedroom] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({});
     const [deletePassword, setDeletePassword] = useState('');
     const [usageDates, setUsageDates] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // Load bedroom data and usage dates on mount or when dependencies change
     useEffect(() => {
+        // Debug: log current dashboardData and bedroomid
+        console.log('BedroomDetails useEffect:', {
+            bedroomid,
+            bedrooms: dashboardData?.bedrooms?.map(b => b._id)
+        });
+        if (!Array.isArray(dashboardData?.bedrooms)) {
+            // Wait for bedrooms to load
+            setLoading(true);
+            return;
+        }
         const loadData = async () => {
             try {
-                // Try to find the bedroom in dashboard context first
-                let room = dashboardData?.bedrooms?.find(
-                    b => b.bedroomName.toLowerCase() === bedroomname.toLowerCase()
+                // Find the bedroom in dashboard context by id
+                let room = dashboardData.bedrooms.find(
+                    b => b._id === bedroomid
                 );
 
-                // If not found, fetch from API
                 if (!room) {
-                    room = await bedroomService.getBedroomByName(bedroomname);
+                    setError('Bedroom not found or you do not have access.');
+                    setBedroom(null);
+                    return;
                 }
 
                 setBedroom(room);
                 setFormData(room);
 
                 // Get all sleep data for the owner
-                const allSleepData = dashboardData?.latestSleepData
-                    ? dashboardData.latestSleepData
-                    : await sleepDataService.getSleepDataByUser();
+                let allSleepData = dashboardData?.latestSleepData;
+                if (!Array.isArray(allSleepData)) {
+                    allSleepData = await sleepDataService.getSleepDataByUser();
+                }
+                if (!Array.isArray(allSleepData)) {
+                    allSleepData = [];
+                }
 
                 // Filter sleep data for this bedroom and sort by date descending
                 const datesUsed = allSleepData
@@ -55,15 +71,18 @@ function BedroomDetails() {
                     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 setUsageDates(datesUsed);
+                setError(null); // clear error if successful
             } catch (err) {
                 console.error('Failed to load bedroom details:', err);
+                setError('Failed to load bedroom details.');
+                setBedroom(null);
             } finally {
                 setLoading(false);
             }
         };
 
         loadData();
-    }, [bedroomname, dashboardData]);
+    }, [bedroomid, dashboardData]);
 
     // Handle form input changes
     const handleChange = e => {
@@ -102,8 +121,25 @@ function BedroomDetails() {
     };
 
     // Show loading state
-    if (loading || !bedroom) {
+    if (loading && !error) {
         return <div>Loading bedroom details...</div>;
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="container mt-4">
+                <div className="alert alert-danger" role="alert">
+                    {error}
+                </div>
+                <button className="btn btn-secondary" onClick={() => navigate('/dashboard/bedrooms')}>Back to Bedrooms</button>
+            </div>
+        );
+    }
+
+    if (!bedroom) {
+        // Defensive: should not happen, but just in case
+        return null;
     }
 
     // Render the component UI

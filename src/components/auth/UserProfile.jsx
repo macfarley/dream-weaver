@@ -1,12 +1,12 @@
 import { useState, useContext, useEffect } from 'react';
 import { UserContext } from '../../contexts/UserContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import { updateProfile } from '../../services/userService';
 import { getUserById, updateUserProfile, deleteUser } from '../../services/adminService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Loading from '../ui/Loading';
 import { User, Mail, Clock, Thermometer, Calendar, Bell, Palette } from 'lucide-react';
+import { clearAllAuthTokens } from '../../utils/clearAllAuthTokens';
 
 /**
  * UserProfile component allows users to view and update their profile information.
@@ -21,15 +21,13 @@ import { User, Mail, Clock, Thermometer, Calendar, Bell, Palette } from 'lucide-
  * - Cannot edit the MongoDB _id field
  */
 function UserProfile() {
-  // Access user and setUser from context
-  const { user, setUser } = useContext(UserContext);
-  const { setThemeFromPreferences } = useTheme();
+  // Access user and refreshUserProfile from context
+  const { user, refreshUserProfile, setUser } = useContext(UserContext);
   const navigate = useNavigate();
   const { userId } = useParams(); // Get userId from URL params for admin mode
 
   // Determine if this is admin mode (editing another user) or self mode
   const isAdminMode = userId && userId !== user?._id;
-  const isCurrentUserAdmin = user?.role === 'admin';
   
   // State for the profile being viewed/edited
   const [profileUser, setProfileUser] = useState(null);
@@ -42,7 +40,7 @@ function UserProfile() {
 
   // Local state for form data
   const [formData, setFormData] = useState({
-    username: '',
+    // username removed from formData
     firstName: '',
     lastName: '',
     email: '',
@@ -52,6 +50,7 @@ function UserProfile() {
     timeFormat: '12-hour',
     sleepReminderEnabled: true,
     sleepReminderHours: 12,
+    dateOfBirth: '',
   });
 
   // State for tracking related data counts for deletion warning
@@ -60,62 +59,73 @@ function UserProfile() {
     sleepSessions: 0
   });
 
-
-
-  // Load user data - either from context (self) or fetch from API (admin mode)
+  // Debug: Log profileUser before rendering
   useEffect(() => {
-    const loadUserData = async () => {
-      if (isAdminMode) {
-        // Admin mode - fetch the target user's data
-        setLoading(true);
-        try {
-          const userData = await getUserById(userId);
-          setProfileUser(userData);
-          setFormData({
-            username: userData.username || '',
-            firstName: userData.firstName || '',
-            lastName: userData.lastName || '',
-            email: userData.email || '',
-            prefersImperial: userData.prefersImperial ?? true,
-            theme: userData.theme || 'dark',
-            dateFormat: userData.dateFormat || 'MM/DD/YYYY',
-            timeFormat: userData.timeFormat || '12-hour',
-            sleepReminderEnabled: userData.sleepReminderEnabled ?? true,
-            sleepReminderHours: userData.sleepReminderHours || 12,
-          });
-        } catch (error) {
-          console.error('Failed to load user data:', error);
+    if (profileUser) {
+      // Only log to console, do not render debug UI
+      console.log('UserProfile: profileUser state:', profileUser);
+    }
+  }, [profileUser]);
+
+  // Helper to normalize user object from backend
+  function normalizeUser(raw) {
+    let userObj = raw;
+    if (raw && raw.data) userObj = raw.data;
+    const prefs = userObj.userPreferences || {};
+    return {
+      ...userObj,
+      prefersImperial: prefs.useMetric === undefined ? true : !prefs.useMetric,
+      dateFormat: prefs.dateFormat || 'MM/DD/YYYY',
+      timeFormat: prefs.timeFormat || '12-hour',
+      theme: prefs.theme || 'dark',
+      firstName: userObj.firstName || userObj.first_name || '',
+      lastName: userObj.lastName || userObj.last_name || '',
+      dateOfBirth: userObj.dateOfBirth || userObj.date_of_birth || '',
+      email: userObj.email || '',
+      role: userObj.role || '',
+      username: userObj.username || '',
+    };
+  }
+
+  // Loading state
+  useEffect(() => {
+    setLoading(true);
+    if (isAdminMode) {
+      // Admin mode: fetch the target user's data
+      getUserById(userId)
+        .then((userData) => {
+          setProfileUser(normalizeUser(userData));
+        })
+        .catch(() => {
           toast.error('Failed to load user profile');
           navigate('/admin/dashboard');
-        } finally {
-          setLoading(false);
-        }
-      } else if (user) {
-        // Self mode - use current user data
-        console.log('Loading user profile data:', user);
-        setProfileUser(user);
-        setFormData({
-          username: user.username || '',
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          email: user.email || '',
-          prefersImperial: user.prefersImperial ?? true,
-          theme: user.theme || 'dark',
-          dateFormat: user.dateFormat || 'MM/DD/YYYY',
-          timeFormat: user.timeFormat || '12-hour',
-          sleepReminderEnabled: user.sleepReminderEnabled ?? true,
-          sleepReminderHours: user.sleepReminderHours || 12,
-        });
-      }
-    };
-
-    loadUserData();
+        })
+        .finally(() => setLoading(false));
+    } else if (user) {
+      setProfileUser(normalizeUser(user));
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
   }, [user, userId, isAdminMode, navigate]);
 
-  /**
-   * Handles changes to form fields.
-   * Supports both text inputs and checkboxes.
-   */
+  // Render the profile view
+  if (loading) {
+    return <Loading message="Loading profile..." />;
+  }
+
+  if (!profileUser) {
+    // If loading is done and no profile, show an error or redirect
+    return (
+      <div className="alert alert-warning my-5 text-center">
+        No profile found. Please log in.
+      </div>
+    );
+  }
+
+  // Restore canEdit, canDelete, and handleChange definitions (needed for UI logic and form handling)
+  const canEdit = !isAdminMode || (user?.role === 'admin' && profileUser?.role !== 'admin');
+  const canDelete = user?.role === 'admin' && isAdminMode && profileUser?.role !== 'admin';
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -124,19 +134,19 @@ function UserProfile() {
     }));
   };
 
-  // Check if current user can edit this profile
-  const canEdit = !isAdminMode || (isCurrentUserAdmin && profileUser?.role !== 'admin');
-  const canDelete = isCurrentUserAdmin && isAdminMode && profileUser?.role !== 'admin';
-
-  // Loading state
-  if (loading) {
-    return <Loading message="Loading profile..." />;
-  }
-
-  // If no profile data available
-  if (!profileUser) {
-    return <Loading message="Loading profile..." />;
-  }
+  // Helper: Format month and day from date string
+  const getMonthDay = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+  };
+  // Helper: Check if today is birthday
+  const isBirthdayToday = (dateStr) => {
+    if (!dateStr) return false;
+    const today = new Date();
+    const d = new Date(dateStr);
+    return today.getMonth() === d.getMonth() && today.getDate() === d.getDate();
+  };
 
   /**
    * Handles form submission for updating profile.
@@ -144,58 +154,64 @@ function UserProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
     try {
       let updatedUser;
-      
+      // Build update payload with nested userPreferences
+      const userEditableData = {
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim(),
+        dateOfBirth: formData.dateOfBirth,
+        userPreferences: {
+          useMetric: !formData.prefersImperial, // store as useMetric in backend
+          theme: formData.theme,
+          dateFormat: formData.dateFormat,
+          timeFormat: formData.timeFormat,
+          sleepReminderEnabled: formData.sleepReminderEnabled,
+          sleepReminderHours: formData.sleepReminderHours,
+        }
+      };
+      // Remove empty fields (optional, for PATCH semantics)
+      Object.keys(userEditableData).forEach(key => {
+        if (userEditableData[key] === '' || userEditableData[key] === undefined) {
+          delete userEditableData[key];
+        }
+      });
+      // Remove empty fields from userPreferences
+      Object.keys(userEditableData.userPreferences).forEach(key => {
+        if (userEditableData.userPreferences[key] === '' || userEditableData.userPreferences[key] === undefined) {
+          delete userEditableData.userPreferences[key];
+        }
+      });
       if (isAdminMode) {
-        // Admin updating another user's profile
-        updatedUser = await updateUserProfile(userId, formData);
-        setProfileUser(updatedUser);
+        updatedUser = await updateUserProfile(userId, userEditableData);
+        setProfileUser(normalizeUser(updatedUser));
         toast.success(`Profile updated for ${updatedUser.username}`);
+        setShowEditForm(false);
       } else {
-        // User updating their own profile - only send fields with actual values (PATCH semantics)
-        const userEditableData = {};
-        
-        // Only include fields that have actual values (not empty strings)
-        if (formData.firstName.trim()) userEditableData.firstName = formData.firstName.trim();
-        if (formData.lastName.trim()) userEditableData.lastName = formData.lastName.trim();
-        if (formData.email.trim()) userEditableData.email = formData.email.trim();
-        
-        // Always include preferences and settings (these have defaults)
-        userEditableData.prefersImperial = formData.prefersImperial;
-        userEditableData.theme = formData.theme;
-        userEditableData.dateFormat = formData.dateFormat;
-        userEditableData.timeFormat = formData.timeFormat;
-        userEditableData.sleepReminderEnabled = formData.sleepReminderEnabled;
-        userEditableData.sleepReminderHours = formData.sleepReminderHours;
-        
-        console.log('Sending user profile update (filtered):', userEditableData);
-        updatedUser = await updateProfile(userEditableData);
-        setUser(updatedUser);
-        
-        // Sync theme change with ThemeContext if theme was updated
-        if (updatedUser.theme !== user?.theme) {
-          setThemeFromPreferences(updatedUser.theme);
-        }
-        
-        // Check if this was a mock update (when backend endpoint isn't available)
-        if (updatedUser.updatedAt && new Date(updatedUser.updatedAt).getTime() > Date.now() - 1000) {
-          toast.success('Profile updated successfully! (Using mock data - backend restart needed for full functionality)');
+        const response = await updateProfile(userEditableData);
+        if (response && response.token) {
+          clearAllAuthTokens();
+          localStorage.setItem('token', response.token);
+          if (response.user) {
+            setProfileUser(normalizeUser(response.user));
+            setUser(normalizeUser(response.user));
+          } else {
+            setProfileUser(prev => ({ ...prev, ...userEditableData }));
+            setUser(prev => ({ ...prev, ...userEditableData }));
+          }
+          await refreshUserProfile();
+          toast.success('Profile updated!');
         } else {
-          toast.success('Profile updated successfully!');
+          await refreshUserProfile();
+          setProfileUser(prev => ({ ...prev, ...userEditableData }));
+          setUser(prev => ({ ...prev, ...userEditableData }));
+          toast.success('Profile updated!');
         }
+        setShowEditForm(false);
       }
-      
-      // Close the edit form
-      setShowEditForm(false);
     } catch (err) {
       console.error('Profile update error:', err);
-      console.error('Error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
       toast.error('Failed to update profile. Please try again.');
     } finally {
       setLoading(false);
@@ -207,16 +223,17 @@ function UserProfile() {
    */
   const handleEditClick = () => {
     const newFormData = {
-      username: profileUser.username || '',
-      firstName: profileUser.firstName || '', // Pre-fill with current value, empty string if not set
-      lastName: profileUser.lastName || '',   // Pre-fill with current value, empty string if not set
-      email: profileUser.email || '',         // Pre-fill with current value, empty string if not set
+      // username removed from formData
+      firstName: profileUser.firstName || '',
+      lastName: profileUser.lastName || '',
+      email: profileUser.email || '',
       prefersImperial: profileUser.prefersImperial ?? true,
       theme: profileUser.theme || 'dark',
       dateFormat: profileUser.dateFormat || 'MM/DD/YYYY',
       timeFormat: profileUser.timeFormat || '12-hour',
       sleepReminderEnabled: profileUser.sleepReminderEnabled ?? true,
       sleepReminderHours: profileUser.sleepReminderHours || 12,
+      dateOfBirth: profileUser.dateOfBirth || '',
     };
     
     console.log('Setting form data from profile user:', {
@@ -308,7 +325,6 @@ function UserProfile() {
       <div className="container my-4">
         <div className="row">
           <div className="col-lg-8 mx-auto">
-            
             {/* Profile View */}
             <div className="profile-view">
               
@@ -364,6 +380,15 @@ function UserProfile() {
                       <div className={`detail-value ${!profileUser.email ? 'not-set' : ''}`}>
                         <Mail className="status-icon" size={16} />
                         {profileUser.email || 'Not set'}
+                      </div>
+                    </div>
+                    <div className="detail-item">
+                      <div className="detail-label">Date of Birth</div>
+                      <div className={`detail-value ${!profileUser.dateOfBirth ? 'not-set' : ''}`}>
+                        {profileUser.dateOfBirth ? getMonthDay(profileUser.dateOfBirth) : 'Not set'}
+                        {profileUser.dateOfBirth && isBirthdayToday(profileUser.dateOfBirth) && (
+                          <span className="ms-2 text-success fw-bold">🎉 Happy Birthday!</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -529,8 +554,9 @@ function UserProfile() {
                       <div className="form-section">
                         <div className="section-title">Preferences</div>
                         
-                        <div className="form-row">
-                          <div className="form-check">
+                        <div className="form-row d-flex align-items-center justify-content-between">
+                          <label className="form-label mb-0">Temperature Units</label>
+                          <div className="form-switch d-flex align-items-center">
                             <input
                               type="checkbox"
                               id="prefersImperial"
@@ -538,9 +564,10 @@ function UserProfile() {
                               checked={formData.prefersImperial}
                               onChange={handleChange}
                               className="form-check-input"
+                              style={{ width: '2.5em', height: '1.5em' }}
                             />
-                            <label htmlFor="prefersImperial" className="form-check-label">
-                              Use Fahrenheit (°F) for temperature
+                            <label htmlFor="prefersImperial" className="form-check-label ms-2 mb-0">
+                              {formData.prefersImperial ? 'Fahrenheit (°F)' : 'Celsius (°C)'}
                             </label>
                           </div>
                         </div>

@@ -101,22 +101,23 @@ function SleepSession() {
   // Initialize form data when sleepData changes
   useEffect(() => {
     if (sleepData) {
+      const latestWake = sleepData.wakeUps?.[sleepData.wakeUps.length - 1] || {};
       setFormData({
         cuddleBuddy: sleepData.cuddleBuddy || '',
         sleepyThoughts: sleepData.sleepyThoughts || '',
-        // Initialize latest wake-up data if it exists
-        dreamJournal: sleepData.wakeUps?.[sleepData.wakeUps.length - 1]?.dreamJournal || '',
-        restfulness: sleepData.wakeUps?.[sleepData.wakeUps.length - 1]?.restfulness || 5
+        dreamJournal: latestWake.dreamJournal || '',
+        restfulness: latestWake.restfulness || 5,
+        awakenAt: latestWake.awakenAt ? new Date(latestWake.awakenAt).toISOString().slice(0, 16) : ''
       });
     }
   }, [sleepData]);
 
   // Handle form input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'range' ? Number(value) : value
     }));
   };
 
@@ -130,33 +131,34 @@ function SleepSession() {
         sleepyThoughts: formData.sleepyThoughts,
       };
 
-      // If there are wake-ups, update the latest one with dream journal and restfulness
+      // If there are wake-ups, update the latest one with dream journal, restfulness, and awakenAt
       if (sleepData.wakeUps && sleepData.wakeUps.length > 0) {
         const updatedWakeUps = [...sleepData.wakeUps];
         const latestWakeIndex = updatedWakeUps.length - 1;
         updatedWakeUps[latestWakeIndex] = {
           ...updatedWakeUps[latestWakeIndex],
           dreamJournal: formData.dreamJournal,
-          restfulness: parseInt(formData.restfulness)
+          restfulness: parseInt(formData.restfulness),
+          awakenAt: formData.awakenAt ? new Date(formData.awakenAt).toISOString() : updatedWakeUps[latestWakeIndex].awakenAt
         };
         updatePayload.wakeUps = updatedWakeUps;
       }
 
       await sleepDataService.update(sleepData._id, updatePayload);
-      
-      // Update local state
-      setSleepData(prev => ({
-        ...prev,
-        ...updatePayload
-      }));
-      
-      setIsEditing(false);
-      
-      // Refresh dashboard context if available
+
+      // Refresh dashboard context and fetch latest data for this session
       if (refreshDashboard) {
-        refreshDashboard();
+        await refreshDashboard();
       }
-      
+      // Optionally, fetch the latest session data from context after refresh
+      let updatedSession = null;
+      if (id) {
+        updatedSession = dashboardData?.sleepSessions?.find(entry => entry._id === id);
+      } else if (date) {
+        updatedSession = dashboardData?.sleepSessions?.find(entry => new Date(entry.createdAt).toISOString().startsWith(date));
+      }
+      setSleepData(updatedSession || sleepData);
+      setIsEditing(false);
       alert('Sleep session updated successfully!');
     } catch (err) {
       console.error('Error updating sleep session:', err);
@@ -244,7 +246,12 @@ function SleepSession() {
   let totalSleepDuration = null;
   if (latestWake?.awakenAt) {
     const awakenTime = new Date(latestWake.awakenAt);
-    totalSleepDuration = ((awakenTime - start) / (1000 * 60 * 60)).toFixed(2);
+    // Calculate total sleep in minutes, round to nearest minute
+    const totalMinutes = Math.round((awakenTime - start) / (1000 * 60));
+    // Format as H:MM (e.g., 7:23 hours)
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    totalSleepDuration = `${hours}:${minutes.toString().padStart(2, '0')}`;
   }
 
   // Render the sleep session details
@@ -281,7 +288,7 @@ function SleepSession() {
         {/* Right column: Actions */}
         <div className="col-md-4">
           <div className="card">
-            <div className="card-body">
+            <div className="card-body bg-nav-footer">
               <h5 className="card-title">Actions</h5>
               
               {/* Edit Session Button */}
@@ -343,10 +350,11 @@ function SleepSession() {
 function SleepSessionInfo({ sleepData, start, totalSleepDuration, timeFormat }) {
   const { bedroom, cuddleBuddy, sleepyThoughts, wakeUps } = sleepData;
 
+  // In SleepSessionInfo, update accent classes and card body backgrounds
   return (
     <>
       <div className="card mb-4">
-        <div className="card-body">
+        <div className="card-body bg-nav-footer">
           <h5 className="card-title">Session Overview</h5>
           <p><strong>Started at:</strong> {formatTime(start, timeFormat)}</p>
           <p><strong>Bedroom:</strong> {bedroom?.bedroomName || 'N/A'}</p>
@@ -361,14 +369,14 @@ function SleepSessionInfo({ sleepData, start, totalSleepDuration, timeFormat }) 
       {/* Combined Dream Journal Section */}
       <section id="dreamJournal" className="mb-4">
         <div className="card">
-          <div className="card-body">
+          <div className="card-body bg-nav-footer">
             <h5 className="card-title">Dream Journal</h5>
             
             {/* Sleepy Thoughts */}
             {sleepyThoughts && (
-              <div className="mb-3">
+              <div className="mb-3 sleep-accent-lilac">
                 <h6 className="text-muted">🧠 Sleepy Thoughts:</h6>
-                <p className="border-start border-primary border-3 ps-3 mb-3" style={{backgroundColor: 'rgba(13, 110, 253, 0.05)'}}>
+                <p className="mb-3">
                   {sleepyThoughts}
                 </p>
               </div>
@@ -380,7 +388,7 @@ function SleepSessionInfo({ sleepData, start, totalSleepDuration, timeFormat }) 
                 <h6 className="text-muted">💭 Dreams:</h6>
                 {wakeUps.map((wake, index) => 
                   wake.dreamJournal && (
-                    <div key={index} className="border-start border-success border-3 ps-3 mb-3" style={{backgroundColor: 'rgba(25, 135, 84, 0.05)'}}>
+                    <div key={index} className="sleep-accent-lilac">
                       <p className="mb-1">{wake.dreamJournal}</p>
                       {wake.restfulness && (
                         <small className="text-muted">Restfulness: {wake.restfulness}/10</small>
@@ -399,7 +407,7 @@ function SleepSessionInfo({ sleepData, start, totalSleepDuration, timeFormat }) 
       {/* Wake Ups Section */}
       <section className="mb-4">
         <div className="card">
-          <div className="card-body">
+          <div className="card-body bg-nav-footer">
             <h5 className="card-title">Wake Ups</h5>
             {wakeUps.length === 0 ? (
               <p className="text-muted">No wake-up events recorded yet.</p>
@@ -415,8 +423,8 @@ function SleepSessionInfo({ sleepData, start, totalSleepDuration, timeFormat }) 
 
                   return (
                     <div key={index} className="col-md-6 col-lg-4">
-                      <div className="card border-secondary" style={{fontSize: '0.9rem'}}>
-                        <div className="card-body p-3">
+                      <div className="card border-secondary sleep-accent-lilac" style={{fontSize: '0.9rem'}}>
+                        <div className="card-body p-3 bg-nav-footer">
                           <div className="mb-2">
                             <strong>Awaken:</strong> {awakenAt}
                           </div>
@@ -449,14 +457,25 @@ function SleepSessionInfo({ sleepData, start, totalSleepDuration, timeFormat }) 
 
 // Subcomponent: Edit form for sleep session
 function SleepSessionEditForm({ formData, handleChange, handleSubmit, onCancel, sleepData, start, totalSleepDuration, timeFormat }) {
-  const { bedroom } = sleepData;
+  const { bedroom, wakeUps } = sleepData;
+
+  // Find the latest wake-up event
+  const latestWake = wakeUps?.[wakeUps.length - 1] || {};
+
+  // Helper to format datetime-local value
+  const formatDateTimeLocal = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    // Pad with zeros for month, day, hour, minute
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
 
   return (
     <form onSubmit={handleSubmit}>
       <div className="card mb-4">
         <div className="card-body">
           <h5 className="card-title">Edit Sleep Session</h5>
-          
           {/* Read-only session info */}
           <div className="mb-3">
             <p><strong>Started at:</strong> {formatTime(start, timeFormat)}</p>
@@ -470,15 +489,19 @@ function SleepSessionEditForm({ formData, handleChange, handleSubmit, onCancel, 
           {/* Editable fields */}
           <div className="mb-3">
             <label htmlFor="cuddleBuddy" className="form-label">Cuddle Buddy</label>
-            <input
-              type="text"
+            <select
               id="cuddleBuddy"
               name="cuddleBuddy"
-              className="form-control"
+              className="form-select"
               value={formData.cuddleBuddy}
               onChange={handleChange}
-              placeholder="Enter cuddle buddy name"
-            />
+            >
+              <option value="none">None</option>
+              <option value="pillow">Pillow</option>
+              <option value="stuffed animal">Stuffed Animal</option>
+              <option value="pet">Pet</option>
+              <option value="person">Person</option>
+            </select>
           </div>
 
           <div className="mb-3">
@@ -525,6 +548,19 @@ function SleepSessionEditForm({ formData, handleChange, handleSubmit, onCancel, 
               <small>1 - Terrible</small>
               <small>10 - Perfect</small>
             </div>
+          </div>
+
+          {/* New: Ending timestamp (awakenAt) for latest wake-up */}
+          <div className="mb-3">
+            <label htmlFor="awakenAt" className="form-label">Ending Time (Awaken At)</label>
+            <input
+              type="datetime-local"
+              id="awakenAt"
+              name="awakenAt"
+              className="form-control"
+              value={formData.awakenAt || formatDateTimeLocal(latestWake.awakenAt)}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="d-flex gap-2">

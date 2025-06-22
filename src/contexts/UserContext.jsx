@@ -11,16 +11,17 @@
  * a dedicated GET /users/profile endpoint.
  */
 
-import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { getToken, decodeToken, logOut } from '../services/authService';
+import { createContext, useState, useEffect, useCallback } from 'react';
+import { getToken, logOut } from '../services/authService';
+import { getProfile } from '../services/userService';
 
 // Create the context with default values for better TypeScript support
 const UserContext = createContext({
   user: null,
   loading: true,
-  error: null,
-  refreshUser: () => {},
-  logout: () => {},
+  setUser: () => {},
+  refreshUserProfile: () => {},
+  logOut: () => {},
 });
 
 /**
@@ -35,110 +36,53 @@ function UserProvider({ children }) {
   
   // Loading state: true while checking authentication status
   const [loading, setLoading] = useState(true);
-  
-  // Error state: contains any authentication-related errors
-  const [error, setError] = useState(null);
 
-  /**
-   * Loads user profile from JWT token stored in localStorage.
-   * This function is memoized to prevent unnecessary re-renders.
-   */
+  // Loads user profile from backend using GET /users/profile
   const loadUserProfile = useCallback(async () => {
     try {
-      // Clear any previous errors
-      setError(null);
-      
       // Get token from localStorage
       const token = getToken();
-      
-      // If no token exists, user is not logged in
       if (!token) {
-        console.info('No authentication token found - user not logged in');
+        console.debug('[UserContext] No token found, not fetching profile. Setting user to null.');
         setUser(null);
-        setLoading(false); // Set loading to false when no token
+        setLoading(false);
         return;
       }
-
-      // Attempt to decode the JWT token
-      const decodedUser = decodeToken(token);
-      
-      // If token is invalid or expired, clear it and log out
-      if (!decodedUser) {
-        console.warn('Invalid or expired token found, logging out');
-        logOut(); // Remove invalid token from localStorage
-        setUser(null);
-        setError('Your session has expired. Please log in again.');
-        setLoading(false); // Set loading to false on invalid token
-        return;
-      }
-
-      // Check if token has required user information
-      if (!decodedUser._id || !decodedUser.username) {
-        console.error('Token missing required user information:', decodedUser);
-        logOut();
-        setUser(null);
-        setError('Invalid user session. Please log in again.');
-        setLoading(false); // Set loading to false on invalid user data
-        return;
-      }
-
-      // Token is valid - set user data
-      console.info('Successfully loaded user from token:', decodedUser.username);
-      setUser(decodedUser);
-      
-      // Development mode: handle mock user data for testing
-      if (import.meta.env.DEV && token === 'mock-jwt-token') {
-        try {
-          const mockUser = localStorage.getItem('user');
-          if (mockUser) {
-            const parsedMockUser = JSON.parse(mockUser);
-            console.info('🧪 Using mock user data for development:', parsedMockUser.username);
-            setUser(parsedMockUser);
-          }
-        } catch (parseError) {
-          console.warn('Failed to parse mock user data:', parseError);
-          // Continue with decoded token data
-        }
-      }
-      
-      // Set loading to false after successful user load
+      console.debug('[UserContext] Token found, fetching profile...');
+      // Always fetch the full user profile from backend
+      const profile = await getProfile();
+      console.debug('[UserContext] Profile loaded:', profile);
+      setUser(profile);
       setLoading(false);
-      
     } catch (error) {
-      console.error('Error loading user profile:', error);
-      setError('Failed to load user session. Please try logging in again.');
+      console.error('[UserContext] Error loading user profile:', error);
       setUser(null);
-      setLoading(false); // Set loading to false even on error
-      
-      // If there's a critical error, clear potentially corrupted token
-      if (error.name === 'SyntaxError') {
-        console.warn('Corrupted token detected, clearing localStorage');
-        logOut();
-      }
+      setLoading(false);
+      if (error.name === 'SyntaxError') logOut();
+      // Debug log for user being set to null due to error
+      console.debug('[UserContext] Setting user to null due to error:', error);
     }
-  }, []); // No dependencies needed since we only use imported functions
+  }, []);
 
   useEffect(() => {
     loadUserProfile();
-    
-    // Add listener for mock user updates in development
-    if (import.meta.env.DEV) {
-      const handleMockUserUpdate = (event) => {
-        console.info('🔄 Mock user update received:', event.detail.user);
-        setUser(event.detail.user);
-      };
-      
-      window.addEventListener('mockUserUpdate', handleMockUserUpdate);
-      
-      return () => {
-        window.removeEventListener('mockUserUpdate', handleMockUserUpdate);
-      };
-    }
   }, [loadUserProfile]);
 
   const handleLogout = () => {
     logOut();
     setUser(null);
+    console.debug('[UserContext] handleLogout called, user set to null.');
+  };
+
+  // After login or profile update, set user from API response
+  const setUserFromApi = (userObj) => {
+    if (userObj && userObj._id) {
+      setUser(userObj);
+      console.debug('[UserContext] setUserFromApi called, user set:', userObj);
+    } else {
+      setUser(null);
+      console.debug('[UserContext] setUserFromApi called with invalid user, user set to null.');
+    }
   };
 
   // This method can be called after user profile/preferences updates to refresh context
@@ -147,9 +91,13 @@ function UserProvider({ children }) {
     await loadUserProfile();
   };
 
+  // Expose preferences directly for convenience
+  const preferences = user?.userPreferences || {};
+
   const contextValue = {
     user,
-    setUser,
+    preferences, // <-- add this line
+    setUser: setUserFromApi,
     logOut: handleLogout,
     loading,
     refreshUserProfile,

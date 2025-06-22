@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { isSelf } from "../../services/userService";
-import Loading from "./Loading";
+import Loading from "../ui/Loading";
 
 /**
  * UserRedirect component handles automatic redirection based on user authentication state.

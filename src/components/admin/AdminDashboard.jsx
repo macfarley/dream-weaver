@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import { getAllUsers } from "../../services/adminService";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
@@ -15,7 +15,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Get current user from context for admin verification
+  // Get current user and preferences from context for admin verification
   const { user: currentUser } = useContext(UserContext);
 
   // React Router navigation hook

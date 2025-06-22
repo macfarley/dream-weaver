@@ -414,4 +414,18 @@ div.card.dashboard-box {
   }
 }
 
+/* Lilac accent for dream journal and sleepy thoughts */
+.sleep-accent-lilac {
+  background-color: var(--color-lilac-accent) !important;
+  border-left: 4px solid var(--color-accent);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Card body background to match nav/footer in light mode */
+.card-body.bg-nav-footer {
+  background-color: var(--color-bg-nav-footer) !important;
+}
+
 /* ============================= */

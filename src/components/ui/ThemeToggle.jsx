@@ -28,7 +28,7 @@ function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
   
   // Get user context for backend synchronization
-  const { user, setUser } = useContext(UserContext);
+  const { setUser, preferences } = useContext(UserContext);
 
   // Determine current theme state for visual indicators
   const isDarkTheme = theme === 'dark';
@@ -48,17 +48,17 @@ function ThemeToggle() {
     const newThemeValue = toggleTheme();
     
     // If user is authenticated, persist theme change to backend
-    if (user) {
+    if (preferences) {
       try {
         // Update user profile with new theme preference
         const updatedUserProfile = await updateProfile({
-          ...user,
+          ...preferences,
           theme: newThemeValue
         });
         
         // Only update UserContext if the theme actually changed
         // This prevents unnecessary re-renders and context updates
-        if (user.theme !== updatedUserProfile.theme) {
+        if (preferences.theme !== updatedUserProfile.theme) {
           setUser(updatedUserProfile);
         }
         

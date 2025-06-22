@@ -1,9 +1,7 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useRef, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
-import { DashboardContext } from "../../contexts/DashboardContext";
 import ThemeToggle from "../ui/ThemeToggle";
-import Loading from "../ui/Loading";
 import DWLogo from "../../assets/DW-Logo.png";
 
 /**
@@ -35,12 +33,6 @@ import DWLogo from "../../assets/DW-Logo.png";
  * - No active sleep: Emphasizes go to bed action
  */
 function Navbar() {
-  // Get user authentication state and logout function from UserContext
-  const { user, logOut } = useContext(UserContext);
-
-  // Get dashboard context which provides loading state, data, and theme functions
-  const dashboardCtx = useContext(DashboardContext);
-
   // Hook for programmatic navigation (redirects, back button, etc.)
   const navigate = useNavigate();
 
@@ -49,93 +41,15 @@ function Navbar() {
   const navbarRef = useRef(null);
   const collapseRef = useRef(null);
 
-  // Handle click outside to close mobile menu
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        isMobileMenuOpen &&
-        navbarRef.current &&
-        !navbarRef.current.contains(event.target)
-      ) {
-        setIsMobileMenuOpen(false);
-      }
-    }
+  // User context for authentication state
+  const { user, logOut } = useContext(UserContext);
 
-    // Handle escape key to close mobile menu
-    function handleEscapeKey(event) {
-      if (event.key === 'Escape' && isMobileMenuOpen) {
-        setIsMobileMenuOpen(false);
-      }
-    }
-
-    // Add event listeners
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
-    document.addEventListener('keydown', handleEscapeKey);
-
-    // Cleanup
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [isMobileMenuOpen]);
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [navigate]);
-
-  // Show loading spinner while dashboard data is being fetched or context is not ready
-  if (!dashboardCtx || dashboardCtx.loading) {
-    return <Loading message="Loading navigation..." />;
-  }
-
-  // Destructure dashboard data with fallback defaults
-  const { dashboardData } = dashboardCtx;
-
-  // Extract username from dashboard data, with fallback to user context or "Guest"
-  const username = dashboardData?.profile?.username || user?.username || "Guest";
-
-  // Determine if user has an active sleep session by checking if latest session has no wake-ups
-  const hasActiveSleep = 
-    dashboardData?.latestSleepData && 
-    Array.isArray(dashboardData.latestSleepData.wakeUps) &&
-    dashboardData.latestSleepData.wakeUps.length === 0;
-
-  /**
-   * Handles user logout process.
-   * Calls the logout function from UserContext and redirects to home page.
-   */
-  const handleLogout = () => {
-    try {
-      logOut(); // Clear user session and localStorage
-      navigate("/"); // Redirect to home page
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Still try to navigate even if logout has issues
-      navigate("/");
-    }
-  };
-
-  /**
-   * Navigates back to the previous page in browser history.
-   * Uses React Router's navigate function with -1 to go back.
-   */
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  /**
-   * Toggles the mobile menu open/closed state
-   */
+  // Toggle the mobile menu open/closed state
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  /**
-   * Closes the mobile menu (used when clicking nav links)
-   */
+  // Close mobile menu (used when clicking nav links)
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
@@ -143,7 +57,7 @@ function Navbar() {
   return (
     <nav
       ref={navbarRef}
-      className="navbar navbar-expand-lg px-3 custom-navbar"
+      className="navbar navbar-expand-lg px-3 custom-navbar navbar-light"
       role="navigation"
       aria-label="Main navigation"
     >
@@ -153,7 +67,7 @@ function Navbar() {
         {window.location.pathname !== '/' && (
           <button
             className="btn btn-outline-light me-2 custom-back-button"
-            onClick={handleBack}
+            onClick={() => navigate(-1)}
             title="Go back to previous page"
             aria-label="Go back to previous page"
           >
@@ -181,9 +95,9 @@ function Navbar() {
         </Link>
       </div>
 
-      {/* Center section: Welcome message with username - hidden on larger screens */}
+      {/* Center section: Welcome message - hidden on larger screens */}
       <span className="navbar-text me-3 custom-navbar-welcome d-lg-none" aria-live="polite">
-        Welcome, {username}
+        Welcome to DreamWeaver
       </span>
 
       {/* Theme toggle section */}
@@ -211,213 +125,39 @@ function Navbar() {
         role="menu"
       >
         <ul className="navbar-nav ms-auto custom-navbar-nav" role="menubar">
-          
-          {/* Navigation for unauthenticated users */}
-          {!user && (
-            <>
-              <li className="nav-item custom-nav-item">
-                <Link 
-                  className="nav-link" 
-                  to="/about" 
-                  title="Learn about DreamWeaver"
-                  onClick={closeMobileMenu}
-                  tabIndex={0}
-                  role="menuitem"
-                >
-                  About
-                </Link>
-              </li>
-              <li className="nav-item custom-nav-item">
-                <Link 
-                  className="nav-link" 
-                  to="/join" 
-                  title="Sign up or log in"
-                  onClick={closeMobileMenu}
-                  tabIndex={0}
-                  role="menuitem"
-                >
-                  Join Us
-                </Link>
-              </li>
-            </>
-          )}
-
-          {/* Navigation for authenticated users */}
+          {/* Always show all navigation links, relying on route protection for auth */}
+          <li className="nav-item custom-nav-item">
+            <Link className="nav-link" to="/about" onClick={closeMobileMenu} role="menuitem">About</Link>
+          </li>
+          <li className="nav-item custom-nav-item">
+            <Link className="nav-link" to="/join" onClick={closeMobileMenu} role="menuitem">Join Us</Link>
+          </li>
+          <li className="nav-item custom-nav-item">
+            <Link className="nav-link" to="/dashboard" onClick={closeMobileMenu} role="menuitem">Dashboard</Link>
+          </li>
+          <li className="nav-item custom-nav-item">
+            <Link className="nav-link" to="/journal" onClick={closeMobileMenu} role="menuitem">Dream Journal</Link>
+          </li>
+          <li className="nav-item custom-nav-item">
+            <Link className="nav-link" to="/sleep" onClick={closeMobileMenu} role="menuitem">Sleep History</Link>
+          </li>
+          <li className="nav-item custom-nav-item">
+            <Link className="nav-link" to="/bedrooms" onClick={closeMobileMenu} role="menuitem">Bedrooms</Link>
+          </li>
+          <li className="nav-item custom-nav-item">
+            <Link className="nav-link" to="/profile" onClick={closeMobileMenu} role="menuitem">Profile</Link>
+          </li>
+          <li className="nav-item custom-nav-item">
+            <Link className="nav-link text-warning" to="/admin/dashboard" onClick={closeMobileMenu} role="menuitem">Admin Dashboard</Link>
+          </li>
+          <li className="nav-item custom-nav-item">
+            <Link className="nav-link" to="/" onClick={closeMobileMenu} role="menuitem">Home</Link>
+          </li>
+          {/* Show logout if logged in */}
           {user && (
-            <>
-              {/* Primary sleep action based on current sleep state */}
-              <li className="nav-item custom-nav-item">
-                {hasActiveSleep ? (
-                  /* User is currently sleeping - show Wake Up action */
-                  <Link
-                    className="nav-link fw-bold"
-                    to="/gotobed/wakeup"
-                    title="Wake up from current sleep session"
-                    aria-label="Wake up - you have an active sleep session"
-                    onClick={closeMobileMenu}
-                    style={{
-                      backgroundColor: 'rgba(255, 193, 7, 0.1)', // Much more transparent yellow
-                      color: '#ffc107',
-                      borderRadius: '6px',
-                      padding: '6px 10px', /* More compact padding */
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease',
-                      fontSize: '0.85rem' /* Slightly smaller text */
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = 'rgba(255, 193, 7, 0.2)'; // Still very transparent on hover
-                      e.target.style.textDecoration = 'none';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'rgba(255, 193, 7, 0.1)';
-                      e.target.style.textDecoration = 'none';
-                    }}
-                  >
-                    <span style={{ textDecoration: 'none !important' }}>⏰</span> Wake Up
-                  </Link>
-                ) : (
-                  /* User is not sleeping - show Go To Bed action */
-                  <Link
-                    className="nav-link fw-bold"
-                    to="/gotobed"
-                    title="Start a new sleep session"
-                    aria-label="Go to bed - start tracking your sleep"
-                    onClick={closeMobileMenu}
-                    style={{
-                      backgroundColor: 'rgba(13, 110, 253, 0.1)', // Much more transparent blue
-                      color: '#0d6efd',
-                      borderRadius: '6px',
-                      padding: '6px 10px', /* More compact padding */
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease',
-                      fontSize: '0.85rem' /* Slightly smaller text */
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = 'rgba(13, 110, 253, 0.2)'; // Still very transparent on hover
-                      e.target.style.textDecoration = 'none';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
-                      e.target.style.textDecoration = 'none';
-                    }}
-                  >
-                    <span style={{ textDecoration: 'none !important' }}>🌙</span> Go To Bed
-                  </Link>
-                )}
-              </li>
-
-              {/* Main dashboard navigation links */}
-              <li className="nav-item custom-nav-item">
-                <Link 
-                  className="nav-link" 
-                  to="/dashboard" 
-                  title="View your dashboard"
-                  onClick={closeMobileMenu}
-                  tabIndex={0}
-                  role="menuitem"
-                >
-                  Dashboard
-                </Link>
-              </li>
-              <li className="nav-item custom-nav-item">
-                <Link 
-                  className="nav-link" 
-                  to="/journal" 
-                  title="View your dream journal"
-                  onClick={closeMobileMenu}
-                  tabIndex={0}
-                  role="menuitem"
-                >
-                  Dream Journal
-                </Link>
-              </li>
-              <li className="nav-item custom-nav-item">
-                <Link 
-                  className="nav-link" 
-                  to="/sleep" 
-                  title="View your sleep history"
-                  onClick={closeMobileMenu}
-                  tabIndex={0}
-                  role="menuitem"
-                >
-                  Sleep History
-                </Link>
-              </li>
-              <li className="nav-item custom-nav-item">
-                <Link 
-                  className="nav-link" 
-                  to="/bedrooms" 
-                  title="Manage your bedrooms"
-                  onClick={closeMobileMenu}
-                  tabIndex={0}
-                  role="menuitem"
-                >
-                  Bedrooms
-                </Link>
-              </li>
-              <li className="nav-item custom-nav-item">
-                <Link 
-                  className="nav-link" 
-                  to="/profile" 
-                  title="Edit your profile"
-                  onClick={closeMobileMenu}
-                  tabIndex={0}
-                  role="menuitem"
-                >
-                  Profile
-                </Link>
-              </li>
-
-              {/* Admin dashboard link - only visible to admin users */}
-              {user.role === "admin" && (
-                <li className="nav-item custom-nav-item">
-                  <Link
-                    className="nav-link text-warning"
-                    to="/admin/dashboard"
-                    title="Admin dashboard"
-                    aria-label="Admin dashboard - administrative functions"
-                    onClick={closeMobileMenu}
-                    tabIndex={0}
-                    role="menuitem"
-                  >
-                    <i className="fas fa-cog me-1"></i>
-                    Admin Dashboard
-                  </Link>
-                </li>
-              )}
-
-              {/* Home link */}
-              <li className="nav-item custom-nav-item">
-                <Link 
-                  className="nav-link" 
-                  to="/" 
-                  title="Go to home page"
-                  onClick={closeMobileMenu}
-                  tabIndex={0}
-                  role="menuitem"
-                >
-                  Home
-                </Link>
-              </li>
-
-              {/* Logout action */}
-              <li className="nav-item custom-nav-item">
-                <button
-                  className="nav-link btn btn-link text-danger"
-                  onClick={() => {
-                    closeMobileMenu();
-                    handleLogout();
-                  }}
-                  title="Log out of your account"
-                  aria-label="Log out"
-                  tabIndex={0}
-                  role="menuitem"
-                  type="button"
-                >
-                  Logout
-                </button>
-              </li>
-            </>
+            <li className="nav-item custom-nav-item">
+              <button className="nav-link btn btn-link" onClick={logOut} role="menuitem">Logout</button>
+            </li>
           )}
         </ul>
       </div>
