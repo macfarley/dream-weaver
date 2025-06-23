@@ -6,7 +6,7 @@
 
 ---
 
-![Screenshot of DreamWeaver App](./public/screenshot.png)
+![Screenshot of DreamWeaver App](./src/assets/DW-Live-Screenshot-2025-06-23.png)
 
 ---
 
@@ -65,32 +65,51 @@ This is the **frontend** repository, built using **React**, **Vite**, and **Boot
   - Protected admin routes with proper authentication and authorization
   - Professional logging and error handling throughout admin features
 - ♿ **Accessibility Features** - Screen reader support, ARIA labels, and keyboard navigation
+- 📝 **Production-Ready Logging** - Only errors and warnings are logged in production; all debug logs are removed or commented out
+- 🧹 **Dev/Test File Isolation** - All development, test, and scratch files are organized in `_dev_local/` and excluded from production builds
+- 🏁 **Verified Build Readiness** - All features and tweaks are build-verified and ready for deployment
 
 ---
 
 ## 🖼️ Screenshots
 
-> Replace with your actual hosted image or drop a screenshot here.
+![Live DreamWeaver Screenshot](./src/assets/DW-Live-Screenshot-2025-06-23.png)
+
+[🌐 View the Live Site](https://dream-weaver-rho.vercel.app/)
 
 ---
 
 ## 🛠️ Tech Stack
 
-- ⚛️ **React 18** with Vite for fast development and building
-- 🎨 **Bootstrap 5** + Custom Sass for responsive styling
-- 🧠 **React Context API** for state management (User, Dashboard, Theme contexts)
-- 🔄 **Axios** for **all** HTTP requests and API integration with:
-  - 100% standardized - all services now use centralized API configuration
-  - Automatic Bearer token injection via request interceptors
-  - Consistent error handling and response patterns across all service modules
-  - Complete elimination of fetch() usage and manual token handling
-  - Unified service method signatures (no token parameters required)
-- 🗺️ **React Router v6** for client-side routing and navigation
-- 📅 **date-fns** for robust date formatting and manipulation
-- 🎯 **Lucide React** for consistent iconography
-- 🍞 **React Toastify** for user notifications
-- 🌍 **Theme System** with user preference synchronization
-- 🧪 **Modern Development Tools** - ESLint, Vite HMR, and modular architecture
+- ⚛️ **React 18** (Hooks, Context API, Suspense, Lazy Loading)
+- ⚡ **Vite** (blazing-fast dev server, HMR, optimized builds)
+- 🎨 **Bootstrap 5** (responsive grid, utility classes, custom Sass, theming)
+- 💅 **Sass/SCSS** (custom variables, modular component styles)
+- 🧠 **React Context API** (User, Dashboard, Theme, global state management)
+- 🔄 **Axios** (RESTful API integration, interceptors, error handling, JWT auth)
+- 🗺️ **React Router v6** (nested routes, protected routes, semantic navigation)
+- 📅 **date-fns** (date parsing, formatting, manipulation)
+- 🎯 **Lucide React** (SVG icon system, consistent iconography)
+- 🍞 **React Toastify** (user notifications, toasts)
+- 🌍 **Theme System** (dark/light mode, user preference sync, CSS variables)
+- 🧪 **ESLint** (linting, code quality, Airbnb/React rules)
+- 🧰 **VS Code** (settings, tasks, devcontainer support)
+- 🧩 **Modular Architecture** (domain-based folders, barrel exports, lazy loading)
+- 🧬 **JSDoc** (inline documentation, type hints)
+- 🧹 **Prettier** (code formatting, style consistency)
+- 🧪 **Jest** (unit testing, test-driven development)
+- 🧑‍💻 **Git & GitHub** (version control, CI/CD, project management)
+- 🏗️ **Vercel/Netlify** (cloud deployment, static hosting)
+- 🛡️ **JWT Authentication** (secure login, protected routes)
+- 🔒 **Security Best Practices** (input sanitization, role-based access, CORS)
+- 📦 **npm** (package management, scripts)
+- 🧭 **Modern JavaScript (ES2022+)** (arrow functions, async/await, destructuring)
+- 🧑‍🔬 **OpenAI/GitHub Copilot** (AI-assisted development, code review)
+- 🧩 **Third-Party Integrations** (RedKetchup Favicon Generator, ImagePrompt.org)
+- 🧑‍🎨 **Figma/Draw.io** (wireframes, UI/UX design assets)
+- 📱 **Mobile-First Design** (responsive, touch-friendly, accessibility)
+- ♿ **Accessibility** (ARIA labels, keyboard navigation, screen reader support)
+- 🏁 **Production-Ready Build** (npm run build, optimized assets, code splitting)
 
 ---
 
@@ -257,15 +276,24 @@ To deploy the frontend (e.g., Netlify, Vercel):
 
 ## 🔗 Links
 
-- 🧠 [Backend GitHub Repository](#)
-- 💻 [Frontend GitHub Repository](#)
-- 📖 [Live Site – Coming Soon](#)
+- 🧠 [Backend GitHub Repository](https://github.com/macfarley/dream-weaver-backend)
+- 💻 [Frontend GitHub Repository](https://github.com/macfarley/dream-weaver-frontend)
+- 📖 [Live Site – https://dream-weaver-rho.vercel.app/](https://dream-weaver-rho.vercel.app/)
 
 ---
 
-## 📄 License
+## 📄 License & Legal Notices
 
 This project is licensed under the MIT License. See the LICENSE file for details.
+
+**Medical Disclaimer:**
+DreamWeaver is not a medical device or a substitute for professional medical advice, diagnosis, or treatment. All features and content are for informational and self-reflective purposes only. Users should consult a qualified healthcare provider for any questions regarding sleep, mental health, or medical conditions.
+
+**User Content & Privacy:**
+DreamWeaver is a private, non-social journaling and self-accountability tool. Any notes, dreams, or journal entries users create are for their own private use and are not shared publicly or with other users. We do not monitor, endorse, or take responsibility for the content of private notes or journals. However, we reserve the right to remove or delete any user profile or data if we become aware of content that is illegal, promotes hate, violence, or discrimination, or otherwise violates our inclusive and respectful community standards. This includes, but is not limited to, content that explores or glorifies Nazi ideology, serial killer fantasies, or other forms of hate speech or criminal activity. DreamWeaver is not a social media platform and does not support or condone the use of the app for such purposes.
+
+**Inclusivity Statement:**
+DreamWeaver is committed to providing a safe, inclusive, and respectful environment for all users, regardless of background, identity, or beliefs. We do not tolerate hate speech, discrimination, or the use of the platform for harmful or illegal activities.
 
 ---
 
@@ -277,24 +305,28 @@ Created as a final project for the General Assembly Software Engineering Bootcam
 
 ## 🧙‍♂️ Author
 
-Built by Macfarley (Mac McCoy)  
-[LinkedIn](https://www.linkedin.com/in/travis-mccoy-630775b9/)
+Built by Macfarley (Travis McCoy)  
+[LinkedIn](https://www.linkedin.com/in/travis-mccoy-630775b9/)  
+[Download Resume (PDF)](./Resume-Travis-McCoy.pdf)
 
 ---
-Acknowledgments
-Visual assets included in this project were generated using AI technology provided by ImagePrompt.org.
 
-Favicons were produced by converting images with the assistance of RedKetchup's Favicon Generator.
+### Professional Summary
 
-I would like to express my appreciation to OpenAI’s ChatGPT for serving as an invaluable resource for problem-solving, debugging, and providing guidance throughout the development process.
+Full-stack software engineer with a passion for building accessible, user-focused web applications. Experienced in modern JavaScript (ES2022+), React, Vite, Node.js, Express, MongoDB, RESTful APIs, and cloud deployment. Adept at rapid prototyping, UI/UX design, and collaborating with cross-functional teams. Committed to inclusive, ethical, and maintainable software development.
 
-This project is a student portfolio piece intended for educational and demonstrative purposes.
+- **Core Skills:** React, Vite, Node.js, Express, MongoDB, REST APIs, Bootstrap, Sass, Git, GitHub, CI/CD, JWT Auth, Accessibility, Testing (Jest), Agile, Figma, Draw.io, VS Code, Linux, Cloud Deployment (Vercel/Netlify)
+- **Soft Skills:** Communication, teamwork, problem-solving, adaptability, attention to detail, empathy, and a growth mindset
+- **Certifications:** General Assembly Software Engineering Immersive (2025)
+- **Portfolio:** [dream-weaver-rho.vercel.app](https://dream-weaver-rho.vercel.app/)
+
+For a full work history, education, and project list, see the attached resume.
 
 ---
 
 ## ❓ Support
 
- Run into issues? Head to [GitHub repo](https://github.com/macfarley/dream-weaver) and open an issue.
+Run into issues? Head to [GitHub repo](https://github.com/macfarley/dream-weaver) and open an issue.
 For feature requests, please create a new issue and label it as a feature request.
 For bugs, please create a new issue and label it as a bug.
 For general inquiries, please reach out via [LinkedIn](https://www.linkedin.com/in/travis-mccoy-630775b9/).
