@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
 import logo from "../assets/dream-weaver-logo.png";
@@ -37,10 +37,8 @@ function LandingPage() {
   /**
    * Handles successful user signup by hiding forms and navigating to dashboard.
    * Called by SignupForm component when registration is completed successfully.
-   *
-   * @param {Object} newUser - The newly created user object (not used here)
    */
-  const handleSignUpSuccess = (newUser) => {
+  const handleSignUpSuccess = () => {
     // Hide both authentication forms
     setShowSignup(false);
     setShowLogin(false);

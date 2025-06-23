@@ -1,5 +1,4 @@
 // src/components/Loading.jsx
-import React from "react";
 
 /**
  * Loading component displays a themed animated spinner with an optional message.

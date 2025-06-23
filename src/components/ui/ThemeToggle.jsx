@@ -58,7 +58,7 @@ function ThemeToggle() {
           setUser({ ...user, userPreferences: { ...user.userPreferences, theme: newThemeValue } });
           // console.warn('[ThemeToggle] updateProfile response missing _id and token:', response);
         }
-      } catch (error) {
+      } catch {
         // console.error('Failed to sync theme preference to backend:', error);
         // The theme still works locally even if backend sync fails
       }

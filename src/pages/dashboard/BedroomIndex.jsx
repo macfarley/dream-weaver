@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import * as bedroomService from '../../services/bedroomService';
 import { getToken } from '../../services/authService';
 import { Link } from 'react-router-dom';
 import BedroomForm from '../../components/sleep/BedroomForm';
-import { sanitizeBedroomNameForUrl } from '../../utils/format/urlSafeNames';
 
 const BedroomIndex = () => {
   const { dashboardData, loading, error, refreshDashboard } = useContext(DashboardContext);

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import { hasActiveSleepSession } from '../../utils/sleep/sleepStateUtils';
 

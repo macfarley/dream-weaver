@@ -4,7 +4,6 @@ import { UserContext } from '../../contexts/UserContext';
 import DashboardBox from '../../components/ui/DashboardBox';
 import BigActionButton from '../../components/ui/BigActionButton';
 import { useNavigate } from 'react-router-dom';
-import { usePreferenceSync } from '../../hooks/usePreferenceSync';
 import { formatTemperature, formatDate, formatTime } from '../../utils/format/userPreferences';
 import { calculateSleepStreaks, formatStreakDisplay } from '../../utils/sleep/sleepStreaks';
 import { calculateSleepDuration } from '../../utils/sleep/sleepDataUtils';

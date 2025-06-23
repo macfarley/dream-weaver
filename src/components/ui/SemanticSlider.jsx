@@ -1,5 +1,3 @@
-import React from 'react';
-
 function SemanticSlider({ 
   label,          // string: field label e.g. "Light Level"
   options,        // array of strings: enum options e.g. ['pitch black', 'dim', ...]

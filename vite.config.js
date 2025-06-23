@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { visualizer } from 'rollup-plugin-visualizer';
 
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(() => {
   const originalWarn = console.warn;
 
   // Patch console.warn to filter specific Sass deprecation warnings

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import * as bedroomService from '../../services/bedroomService';
 
 /**
