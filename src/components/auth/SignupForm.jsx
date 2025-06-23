@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import { UserContext } from "../../contexts/UserContext";
 import { signUp, getToken } from "../../services/authService";
 import * as bedroomService from "../../services/bedroomService";
+import { getProfile } from "../../services/userService";
 
 // Define allowed options for preferences
 const dateFormats = ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'];
@@ -112,7 +113,6 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
       };
 
       const user = await signUp(signupData);
-      
       // After successful signup, create a default "Hotel Room" bedroom
       try {
         const token = getToken(); // Get the token that was just stored from signup
@@ -131,8 +131,13 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
         // Don't fail the entire signup if bedroom creation fails
         console.warn('Failed to create default bedroom:', bedroomError);
       }
-      
-      setUser(user);
+      // Fetch full profile after signup and set user context
+      try {
+        const profile = await getProfile();
+        setUser(profile);
+      } catch {
+        setUser(user); // fallback to signup response
+      }
       if (onSignUpSuccess) onSignUpSuccess();
     } catch (err) {
       console.error('Signup error details:', err);
@@ -276,23 +281,35 @@ function SignupForm({ onSignUpSuccess, onShowLogin }) {
       <hr className="signup-divider" />
 
       <div className="signup-form-field">
-        {/* Temperature Units */}
-        <div className="signup-checkbox-field">
-          <input
-            type="checkbox"
-            id={`useMetric-${formId}`}
-            name="useMetric"
-            className="signup-checkbox"
-            checked={formData.useMetric}
-            onChange={handleChange}
-          />
-          <label htmlFor={`useMetric-${formId}`} className="signup-checkbox-label">
-            Use Celsius (°C)
-            <span className="signup-checkbox-explainer">
-              Temperature displayed in Celsius instead of Fahrenheit
-            </span>
-          </label>
+        {/* Temperature Units Toggle */}
+        <div className="signup-toggle-field d-flex align-items-center mb-2">
+          <label className="form-label signup-label mb-0 me-2">Temperature Units</label>
+          <div className="form-switch d-flex align-items-center">
+            <input
+              type="checkbox"
+              id={`useMetric-${formId}`}
+              name="useMetric"
+              className="signup-toggle form-check-input"
+              checked={formData.useMetric}
+              onChange={handleChange}
+              style={{ width: '2.5em', height: '1.5em' }}
+            />
+            <label htmlFor={`useMetric-${formId}`} className="form-check-label ms-2 mb-0">
+              <span style={{fontWeight: formData.useMetric ? 'normal' : 'bold'}}>F</span>
+              <span className="mx-1">/</span>
+              <span style={{fontWeight: formData.useMetric ? 'bold' : 'normal'}}>C</span>
+            </label>
+          </div>
         </div>
+        {formData.useMetric ? (
+          <div className="signup-checkbox-explainer text-muted small ms-1">
+            Temperature displayed in Celsius (°C)
+          </div>
+        ) : (
+          <div className="signup-checkbox-explainer text-muted small ms-1">
+            Temperature displayed in Fahrenheit (°F)
+          </div>
+        )}
       </div>
 
       <div className="signup-field mb-2">

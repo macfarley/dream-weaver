@@ -68,6 +68,8 @@ function ThemeProvider({ children }) {
    */
   useEffect(() => {
     document.body.setAttribute('data-theme', theme);
+    // Only log theme changes for debugging if needed
+    // console.info(`[ThemeContext] Theme set to: ${theme}`);
   }, [theme]);
 
   // Provide the theme and functions to children

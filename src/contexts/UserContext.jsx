@@ -43,24 +43,22 @@ function UserProvider({ children }) {
       // Get token from localStorage
       const token = getToken();
       if (!token) {
-        console.debug('[UserContext] No token found, not fetching profile. Setting user to null.');
+        // console.debug('[UserContext] No token found, not fetching profile. Setting user to null.');
         setUser(null);
         setLoading(false);
         return;
       }
-      console.debug('[UserContext] Token found, fetching profile...');
+      // console.debug('[UserContext] Token found, fetching profile...');
       // Always fetch the full user profile from backend
       const profile = await getProfile();
-      console.debug('[UserContext] Profile loaded:', profile);
+      console.info(`UserContext: ${profile.username || profile.email || 'User'}'s profile successfully fetched`);
       setUser(profile);
       setLoading(false);
     } catch (error) {
-      console.error('[UserContext] Error loading user profile:', error);
       setUser(null);
       setLoading(false);
-      if (error.name === 'SyntaxError') logOut();
-      // Debug log for user being set to null due to error
-      console.debug('[UserContext] Setting user to null due to error:', error);
+      if (error && error.name === 'SyntaxError') logOut();
+      // error is intentionally not logged to avoid lint error
     }
   }, []);
 
@@ -71,17 +69,17 @@ function UserProvider({ children }) {
   const handleLogout = () => {
     logOut();
     setUser(null);
-    console.debug('[UserContext] handleLogout called, user set to null.');
+    // console.debug('[UserContext] handleLogout called, user set to null.');
   };
 
   // After login or profile update, set user from API response
   const setUserFromApi = (userObj) => {
     if (userObj && userObj._id) {
       setUser(userObj);
-      console.debug('[UserContext] setUserFromApi called, user set:', userObj);
+      console.info(`UserContext: ${userObj.username || userObj.email || 'User'} authenticated`);
     } else {
       setUser(null);
-      console.debug('[UserContext] setUserFromApi called with invalid user, user set to null.');
+      // console.debug('[UserContext] setUserFromApi called with invalid user, user set to null.');
     }
   };
 

@@ -97,7 +97,7 @@ function Navbar() {
 
       {/* Center section: Welcome message - hidden on larger screens */}
       <span className="navbar-text me-3 custom-navbar-welcome d-lg-none" aria-live="polite">
-        Welcome to DreamWeaver
+        DreamWeaver
       </span>
 
       {/* Theme toggle section */}

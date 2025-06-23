@@ -136,11 +136,11 @@ function Dashboard() {
     const hasActiveSleep = latestSleepData && (!latestSleepData.wakeUps || latestSleepData.wakeUps.length === 0);
     const handleDreamCloudClick = () => {
       if (latestSleepData && latestSleepData._id) {
-        navigate(`/users/dashboard/sleepdata/${latestSleepData._id}`, {
+        navigate(`/sleep/${latestSleepData._id}`, {
           state: { sessionData: latestSleepData }
         });
       } else {
-        navigate('/users/dashboard/dreams');
+        navigate('/dreams');
       }
     };
     if (hasActiveSleep) {
@@ -310,7 +310,7 @@ function Dashboard() {
                 if (latestSleepData && latestSleepData.wakeUps?.length > 0 && !latestDreamLog) return "View Dreams";
                 return "View Dreams";
               })(), 
-              onClick: () => navigate('/journal'),
+              onClick: () => navigate('/dreams'),
               title: 'See your dream journal'
             }]}
           />

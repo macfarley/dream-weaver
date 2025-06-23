@@ -1,8 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import { updateProfile } from '../../services/userService';
-import { getUserById, updateUserProfile, deleteUser } from '../../services/adminService';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Loading from '../ui/Loading';
 import { User, Mail, Clock, Thermometer, Calendar, Bell, Palette } from 'lucide-react';
@@ -11,39 +10,22 @@ import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../ui/ThemeToggle';
 
 /**
- * UserProfile component allows users to view and update their profile information.
- * It can work in two modes:
- * 1. Regular user mode: Edit their own profile (no userId param)
- * 2. Admin mode: View/edit another user's profile (userId param present)
- * 
- * Admin features:
- * - Can edit usernames (regular users cannot)
- * - Can delete users (with password confirmation)
- * - Cannot edit other admins (view only)
- * - Cannot edit the MongoDB _id field
+ * UserProfile component allows users to view and update their own profile information.
+ * This component is for regular users only. Admins do not use this component to manage other users.
  */
 function UserProfile() {
   // Access user and refreshUserProfile from context
   const { user, refreshUserProfile, setUser } = useContext(UserContext);
   const { setThemeFromPreferences, theme, updateTheme } = useTheme();
   const navigate = useNavigate();
-  const { userId } = useParams(); // Get userId from URL params for admin mode
 
-  // Determine if this is admin mode (editing another user) or self mode
-  const isAdminMode = userId && userId !== user?._id;
-  
   // State for the profile being viewed/edited
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
-  
-  // State for delete confirmation
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
 
   // Local state for form data
   const [formData, setFormData] = useState({
-    // username removed from formData
     firstName: '',
     lastName: '',
     email: '',
@@ -56,17 +38,10 @@ function UserProfile() {
     dateOfBirth: '',
   });
 
-  // State for tracking related data counts for deletion warning
-  const [relatedDataCounts, setRelatedDataCounts] = useState({
-    bedrooms: 0,
-    sleepSessions: 0
-  });
-
   // Debug: Log profileUser before rendering
   useEffect(() => {
     if (profileUser) {
-      // Only log to console, do not render debug UI
-      console.log('UserProfile: profileUser state:', profileUser);
+      // console.log('UserProfile: profileUser state:', profileUser);
     }
   }, [profileUser]);
 
@@ -93,31 +68,20 @@ function UserProfile() {
   // Loading state
   useEffect(() => {
     setLoading(true);
-    if (isAdminMode) {
-      // Admin mode: fetch the target user's data
-      getUserById(userId)
-        .then((userData) => {
-          setProfileUser(normalizeUser(userData));
-        })
-        .catch(() => {
-          toast.error('Failed to load user profile');
-          navigate('/admin/dashboard');
-        })
-        .finally(() => setLoading(false));
-    } else if (user) {
+    if (user) {
       setProfileUser(normalizeUser(user));
       setLoading(false);
     } else {
       setLoading(false);
     }
-  }, [user, userId, isAdminMode, navigate]);
+  }, [user]);
 
-  // Sync theme with user preferences when profileUser changes (self mode only)
+  // Sync theme with user preferences when profileUser changes
   useEffect(() => {
-    if (profileUser && !isAdminMode && profileUser.theme) {
+    if (profileUser && profileUser.theme) {
       setThemeFromPreferences(profileUser.theme);
     }
-  }, [profileUser, isAdminMode, setThemeFromPreferences]);
+  }, [profileUser, setThemeFromPreferences]);
 
   // Handler to update theme both in context and user profile
   const handleThemeToggle = async () => {
@@ -125,17 +89,14 @@ function UserProfile() {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     updateTheme(newTheme);
     setThemeFromPreferences(newTheme);
-    // If not admin mode, persist to user profile
-    if (!isAdminMode) {
-      try {
-        await updateProfile({ userPreferences: { theme: newTheme } });
-        setProfileUser(prev => ({ ...prev, theme: newTheme }));
-        setUser(prev => ({ ...prev, theme: newTheme }));
-        await refreshUserProfile();
-        toast.success(`Theme updated to ${newTheme}`);
-      } catch {
-        toast.error('Failed to update theme preference.');
-      }
+    try {
+      await updateProfile({ userPreferences: { theme: newTheme } });
+      setProfileUser(prev => ({ ...prev, theme: newTheme }));
+      setUser(prev => ({ ...prev, theme: newTheme }));
+      await refreshUserProfile();
+      toast.success(`Theme updated to ${newTheme}`);
+    } catch {
+      toast.error('Failed to update theme preference.');
     }
   };
 
@@ -153,9 +114,8 @@ function UserProfile() {
     );
   }
 
-  // Restore canEdit, canDelete, and handleChange definitions (needed for UI logic and form handling)
-  const canEdit = !isAdminMode || (user?.role === 'admin' && profileUser?.role !== 'admin');
-  const canDelete = user?.role === 'admin' && isAdminMode && profileUser?.role !== 'admin';
+  // Restore canEdit and handleChange definitions (needed for UI logic and form handling)
+  const canEdit = true;
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -185,7 +145,6 @@ function UserProfile() {
     e.preventDefault();
     setLoading(true);
     try {
-      let updatedUser;
       // Build update payload with nested userPreferences
       const userEditableData = {
         firstName: formData.firstName.trim(),
@@ -213,37 +172,30 @@ function UserProfile() {
           delete userEditableData.userPreferences[key];
         }
       });
-      if (isAdminMode) {
-        updatedUser = await updateUserProfile(userId, userEditableData);
-        setProfileUser(normalizeUser(updatedUser));
-        toast.success(`Profile updated for ${updatedUser.username}`);
-        setShowEditForm(false);
-      } else {
-        const response = await updateProfile(userEditableData);
-        if (response && response.token) {
-          clearAllAuthTokens();
-          localStorage.setItem('token', response.token);
-          if (response.user) {
-            setProfileUser(normalizeUser(response.user));
-            setUser(normalizeUser(response.user));
-            // Sync theme immediately after update
-            setThemeFromPreferences(response.user.userPreferences?.theme || response.user.theme);
-          } else {
-            setProfileUser(prev => ({ ...prev, ...userEditableData }));
-            setUser(prev => ({ ...prev, ...userEditableData }));
-            setThemeFromPreferences(userEditableData.userPreferences?.theme || userEditableData.theme);
-          }
-          await refreshUserProfile();
-          toast.success('Profile updated!');
+      const response = await updateProfile(userEditableData);
+      if (response && response.token) {
+        clearAllAuthTokens();
+        localStorage.setItem('token', response.token);
+        if (response.user) {
+          setProfileUser(normalizeUser(response.user));
+          setUser(normalizeUser(response.user));
+          // Sync theme immediately after update
+          setThemeFromPreferences(response.user.userPreferences?.theme || response.user.theme);
         } else {
-          await refreshUserProfile();
           setProfileUser(prev => ({ ...prev, ...userEditableData }));
           setUser(prev => ({ ...prev, ...userEditableData }));
           setThemeFromPreferences(userEditableData.userPreferences?.theme || userEditableData.theme);
-          toast.success('Profile updated!');
         }
-        setShowEditForm(false);
+        await refreshUserProfile();
+        toast.success('Profile updated!');
+      } else {
+        await refreshUserProfile();
+        setProfileUser(prev => ({ ...prev, ...userEditableData }));
+        setUser(prev => ({ ...prev, ...userEditableData }));
+        setThemeFromPreferences(userEditableData.userPreferences?.theme || userEditableData.theme);
+        toast.success('Profile updated!');
       }
+      setShowEditForm(false);
     } catch (err) {
       console.error('Profile update error:', err);
       toast.error('Failed to update profile. Please try again.');
@@ -257,7 +209,6 @@ function UserProfile() {
    */
   const handleEditClick = () => {
     const newFormData = {
-      // username removed from formData
       firstName: profileUser.firstName || '',
       lastName: profileUser.lastName || '',
       email: profileUser.email || '',
@@ -269,12 +220,6 @@ function UserProfile() {
       sleepReminderHours: profileUser.sleepReminderHours || 12,
       dateOfBirth: profileUser.dateOfBirth || '',
     };
-    
-    console.log('Setting form data from profile user:', {
-      profileUser: profileUser,
-      formData: newFormData
-    });
-    
     setFormData(newFormData);
     setShowEditForm(true);
   };
@@ -299,76 +244,14 @@ function UserProfile() {
     return 'U';
   };
 
-  /**
-   * Loads related data counts for the user about to be deleted
-   */
-  const loadRelatedDataCounts = async () => {
-    if (!isAdminMode || !userId) return;
-    
-    try {
-      // Note: These would need to be implemented as admin endpoints
-      // For now, we'll show a placeholder message
-      // In a real implementation, you'd call something like:
-      // const bedroomCount = await getBedroomCountByUserId(userId);
-      // const sleepSessionCount = await getSleepSessionCountByUserId(userId);
-      
-      setRelatedDataCounts({
-        bedrooms: '?', // Placeholder - would be actual count
-        sleepSessions: '?' // Placeholder - would be actual count
-      });
-    } catch (err) {
-      console.error('Failed to load related data counts:', err);
-      // Set to unknown if we can't get the counts
-      setRelatedDataCounts({
-        bedrooms: '?',
-        sleepSessions: '?'
-      });
-    }
-  };
-
-  /**
-   * Shows the delete confirmation modal and loads related data counts
-   */
-  const showDeleteConfirmation = () => {
-    setShowDeleteConfirm(true);
-    loadRelatedDataCounts();
-  };
-
-  /**
-   * Handles user deletion (admin only)
-   */
-  const handleDelete = async () => {
-    if (!deletePassword.trim()) {
-      toast.error('Please enter your admin password');
-      return;
-    }
-    
-    try {
-      await deleteUser(userId, deletePassword);
-      toast.success(`User ${profileUser.username} has been deleted`);
-      navigate('/admin/dashboard');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to delete user. Check your password.');
-    }
-  };
-
   // Render the profile view
   return (
-    <div className={`user-profile ${isAdminMode ? 'admin-mode' : ''}`}>
+    <div className="user-profile">
       <div className="container my-4">
         <div className="row">
           <div className="col-lg-8 mx-auto">
             {/* Profile View */}
             <div className="profile-view">
-              
-              {/* Admin Warning */}
-              {isAdminMode && (
-                <div className="admin-warning">
-                  <span className="warning-icon">⚠️</span>
-                  You are viewing/editing another user's profile as an administrator.
-                </div>
-              )}
 
               {/* Profile Header */}
               <div className="profile-header">
@@ -382,9 +265,6 @@ function UserProfile() {
                   }
                 </div>
                 <div className="profile-username">@{profileUser.username}</div>
-                <div className={`profile-role-badge ${profileUser.role}`}>
-                  {profileUser.role === 'admin' ? '👑 Administrator' : '👤 User'}
-                </div>
               </div>
 
               {/* Profile Details */}
@@ -446,10 +326,8 @@ function UserProfile() {
                       <div className="detail-label">Theme</div>
                       <div className="detail-value d-flex align-items-center gap-2">
                         {profileUser.theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
-                        {/* Theme toggle button, only for self mode */}
-                        {!isAdminMode && (
-                          <ThemeToggle onToggle={handleThemeToggle} />
-                        )}
+                        {/* Theme toggle button */}
+                        <ThemeToggle onToggle={handleThemeToggle} />
                       </div>
                     </div>
                     <div className="detail-item">
@@ -507,24 +385,13 @@ function UserProfile() {
                     Edit Profile
                   </button>
                 )}
-                
                 <button 
                   type="button" 
                   className="btn btn-secondary"
-                  onClick={() => navigate(isAdminMode ? '/admin/dashboard' : '/dashboard')}
+                  onClick={() => navigate('/dashboard')}
                 >
-                  {isAdminMode ? 'Back to Admin Dashboard' : 'Back to Dashboard'}
+                  Back to Dashboard
                 </button>
-                
-                {canDelete && (
-                  <button 
-                    type="button" 
-                    className="btn btn-danger"
-                    onClick={showDeleteConfirmation}
-                  >
-                    Delete User
-                  </button>
-                )}
               </div>
             </div>
 
@@ -710,75 +577,6 @@ function UserProfile() {
                 </div>
               </div>
             )}
-
-          {/* Delete Confirmation Modal */}
-          {showDeleteConfirm && (
-            <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
-              <div className="modal-dialog">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Confirm User Deletion</h5>
-                    <button 
-                      type="button" 
-                      className="btn-close"
-                      onClick={() => setShowDeleteConfirm(false)}
-                    ></button>
-                  </div>
-                  <div className="modal-body">
-                    <div className="alert alert-danger">
-                      <strong>⚠️ Warning:</strong> This action cannot be undone!
-                    </div>
-                    <p>
-                      You are about to permanently delete user: <strong>{profileUser.username}</strong>
-                    </p>
-                    
-                    <div className="alert alert-warning">
-                      <strong>🗑️ Data that will be deleted:</strong>
-                      <ul className="mb-0 mt-2">
-                        <li>User account and profile information</li>
-                        <li>Bedrooms: <strong>{relatedDataCounts.bedrooms}</strong> bedroom(s)</li>
-                        <li>Sleep data: <strong>{relatedDataCounts.sleepSessions}</strong> sleep session(s)</li>
-                        <li>Dreams and journal entries</li>
-                        <li>All user preferences and settings</li>
-                      </ul>
-                      <p className="mb-0 mt-2 small">
-                        <em>This includes ALL data associated with this user account.</em>
-                      </p>
-                    </div>
-                    
-                    <div className="mb-3">
-                      <label className="form-label fw-bold">
-                        Enter your admin password to confirm deletion:
-                      </label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        placeholder="Your admin password"
-                        value={deletePassword}
-                        onChange={(e) => setDeletePassword(e.target.value)}
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-                  <div className="modal-footer">
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary"
-                      onClick={() => setShowDeleteConfirm(false)}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="button" 
-                      className="btn btn-danger"
-                      onClick={handleDelete}
-                    >
-                      Delete User
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>            )}
           </div>
         </div>
       </div>

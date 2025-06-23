@@ -1,7 +1,8 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../contexts/UserContext";
 import { signIn } from "../../services/authService";
+import { getProfile } from "../../services/userService";
 
 /**
  * LoginForm component handles user login.
@@ -85,9 +86,16 @@ function LoginForm({ onShowSignup, onLoginSuccess }) {
         try {
             // Attempt to sign in with form data
             const user = await signIn(formData);
-            setUser(user); // Update user context on success
+            // Fetch full profile after login and set user context
+            let profile = null;
+            try {
+                profile = await getProfile();
+                setUser(profile);
+            } catch {
+                setUser(user); // fallback to login response
+            }
             if (onLoginSuccess) {
-                onLoginSuccess(user);
+                onLoginSuccess(profile || user);
             } else {
                 navigate("/users/dashboard");
             }

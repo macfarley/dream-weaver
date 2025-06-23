@@ -57,9 +57,7 @@ function JoinUs() {
    * The UserContext will update, and navigation is handled by the forms themselves.
    */
   const handleSignUpSuccess = () => {
-    // Note: Navigation after signup is handled by the SignupForm component
-    // The UserContext will be updated automatically through the signup process
-    console.info('User signup completed successfully');
+    navigate('/dashboard');
   };
 
   /**

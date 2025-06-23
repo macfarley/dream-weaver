@@ -169,12 +169,12 @@ const DashboardProvider = ({ children }) => {
         const realUser = user?.data || user;
         // console.log('DashboardContext useEffect:', { user: realUser, userLoading });
         // console.log('DashboardContext: user object', realUser);
+        // console.log('DashboardContext: Loading dashboard for user', realUser.username || realUser.email || userId);
+        // console.log('DashboardContext: No user, clearing dashboard data');
         const userId = realUser?._id || realUser?.id;
         if (!userLoading && realUser && userId) {
-            // console.log('DashboardContext: Loading dashboard for user', realUser.username || realUser.email || userId);
             refreshDashboard(realUser);
         } else if (!userLoading && !realUser) {
-            // console.log('DashboardContext: No user, clearing dashboard data');
             setDashboardData({
                 profile: null,
                 bedrooms: [],
