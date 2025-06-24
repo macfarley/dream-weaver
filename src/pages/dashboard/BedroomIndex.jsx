@@ -5,10 +5,20 @@ import { getToken } from '../../services/authService';
 import { Link } from 'react-router-dom';
 import BedroomForm from '../../components/sleep/BedroomForm';
 
+/**
+ * BedroomIndex page lists all bedrooms for the user.
+ * - Uses BedroomForm for creating new bedrooms (passes userId and submitLabel).
+ * - After creation, refreshes the list and auto-hides the form.
+ * - If no bedrooms, prompts user to create their first room.
+ * - Each bedroom can be viewed/edited via a link.
+ */
 const BedroomIndex = () => {
   const { dashboardData, loading, error, refreshDashboard } = useContext(DashboardContext);
   const [bedrooms, setBedrooms] = useState([]);
   const [showBedroomForm, setShowBedroomForm] = useState(false);
+
+  // Get userId from dashboardData.profile if available
+  const userId = dashboardData?.profile?._id;
 
   // Handle successful bedroom creation
   const handleBedroomAdd = (newBedroom) => {
@@ -58,6 +68,8 @@ const BedroomIndex = () => {
         
         {showBedroomForm ? (
           <BedroomForm
+            userId={userId}
+            submitLabel="Add Bedroom"
             onSuccess={handleBedroomAdd}
             onCancel={() => setShowBedroomForm(false)}
           />
@@ -84,6 +96,8 @@ const BedroomIndex = () => {
       {showBedroomForm && (
         <div className="mb-4">
           <BedroomForm
+            userId={userId}
+            submitLabel="Add Bedroom"
             onSuccess={handleBedroomAdd}
             onCancel={() => setShowBedroomForm(false)}
           />

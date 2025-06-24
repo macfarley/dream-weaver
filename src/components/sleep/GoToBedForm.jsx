@@ -9,7 +9,11 @@ import { useNavigate } from 'react-router-dom';
 
 /**
  * GoToBed component allows a user to start a new sleep session.
- * User selects a bedroom, optionally adds a new one, chooses a cuddle buddy, and enters sleepy thoughts.
+ * - User selects a bedroom from a dropdown (populated from backend).
+ * - User can add a new bedroom on the fly using the BedroomForm (with userId and submitLabel passed).
+ * - After adding, the new bedroom is loaded and auto-selected for immediate use.
+ * - User chooses a cuddle buddy and enters sleepy thoughts.
+ * - Submits to start a new sleep session.
  */
 function GoToBed() {
     // Get user info from context
@@ -95,13 +99,17 @@ function GoToBed() {
         }
     };
 
+    // Get userId for BedroomForm
+    const userId = user?._id;
+
     /**
      * Handler for when a new bedroom is added.
      * Refreshes the list and auto-selects the new bedroom.
      */
-    const handleBedroomAdd = (newBedroom) => {
+    const handleBedroomAdd = async (newBedroom) => {
         setShowBedroomForm(false); // Hide the form
-        loadBedrooms(); // Refresh the list
+        // Always reload bedrooms to ensure the new one is present
+        await loadBedrooms(); // Refresh the list
         setSelectedBedroomId(newBedroom._id); // Select the new bedroom
     };
 
@@ -184,6 +192,8 @@ function GoToBed() {
                 {/* Embedded Bedroom Form (shown when toggled) */}
                 {showBedroomForm && (
                     <BedroomForm
+                        userId={userId}
+                        submitLabel="Add Bedroom"
                         onSuccess={handleBedroomAdd}
                         onCancel={() => setShowBedroomForm(false)}
                     />
