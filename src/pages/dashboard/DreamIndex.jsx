@@ -90,7 +90,7 @@ function DreamIndex() {
           <div className="mt-3">
             <button
               className="btn btn-primary btn-sm"
-              onClick={() => navigate(`/users/dashboard/sleepdata/${entry._id}`, {
+              onClick={() => navigate(`/sleep/${entry._id}`, {
                 state: { sessionData: entry }
               })}
             >

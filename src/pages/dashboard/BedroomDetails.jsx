@@ -4,6 +4,7 @@ import { DashboardContext } from '../../contexts/DashboardContext';
 import * as bedroomService from '../../services/bedroomService';
 import * as sleepDataService from '../../services/sleepDataService';
 import { parseISO, format as formatDate } from 'date-fns';
+import BedroomForm from '../../components/sleep/BedroomForm';
 
 
 // Local temperature formatting utility
@@ -36,10 +37,9 @@ function BedroomDetails() {
     // Get dashboard data and refresh function from context
     const { dashboardData, refreshDashboard } = useContext(DashboardContext);
 
-    // Local state for bedroom details, edit mode, form data, delete password, usage dates, loading, and error
+    // Local state for bedroom details, edit mode, delete password, usage dates, loading, and error
     const [bedroom, setBedroom] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({});
     const [deletePassword, setDeletePassword] = useState('');
     const [usageDates, setUsageDates] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -76,7 +76,6 @@ function BedroomDetails() {
                 }
 
                 setBedroom(room);
-                setFormData(room);
 
                 // Load all sleep sessions (prefer context, fallback to API)
                 let allSleepData = dashboardData?.allSleepSessions;
@@ -109,26 +108,6 @@ function BedroomDetails() {
 
         loadData();
     }, [bedroomid, dashboardData]);
-
-    // Handle form input changes
-    const handleChange = e => {
-        setFormData(prev => ({
-            ...prev,
-            [e.target.name]: e.target.value
-        }));
-    };
-
-    // Handle form submission for editing bedroom
-    const handleSubmit = async e => {
-        e.preventDefault();
-        try {
-            await bedroomService.updateBedroom(bedroom._id, formData);
-            setIsEditing(false);
-            refreshDashboard?.();
-        } catch (err) {
-            console.error('Error updating bedroom:', err);
-        }
-    };
 
     // Handle bedroom deletion
     const handleDelete = async () => {
@@ -183,11 +162,15 @@ function BedroomDetails() {
                             dateFormat={dateFormat}
                         />
                     ) : (
-                        <BedroomEditForm
-                            formData={formData}
-                            handleChange={handleChange}
-                            handleSubmit={handleSubmit}
+                        <BedroomForm
+                            initialData={bedroom}
+                            onSubmit={async (data) => {
+                                await bedroomService.updateBedroom(bedroom._id, data);
+                                setIsEditing(false);
+                                refreshDashboard?.();
+                            }}
                             onCancel={() => setIsEditing(false)}
+                            submitLabel="Save Changes"
                         />
                     )}
                 </div>
@@ -231,100 +214,6 @@ function BedroomInfo({ bedroom, onEdit, prefersImperial, dateFormat }) {
                 Edit
             </button>
         </div>
-    );
-}
-
-// Subcomponent: Edit form for bedroom
-function BedroomEditForm({ formData, handleChange, handleSubmit, onCancel }) {
-    return (
-        <form onSubmit={handleSubmit}>
-            <input
-                name="bedroomName"
-                value={formData.bedroomName}
-                onChange={handleChange}
-                className="form-control mb-2"
-            />
-            <select
-                name="bedType"
-                value={formData.bedType}
-                onChange={handleChange}
-                className="form-select mb-2"
-            >
-                <option value="bed">Bed</option>
-                <option value="futon">Futon</option>
-                <option value="couch">Couch</option>
-                <option value="chair">Chair</option>
-                <option value="bean bag">Bean Bag</option>
-                <option value="sleeping bag">Sleeping Bag</option>
-            </select>
-            {formData.bedType === 'bed' && (
-                <>
-                    <select
-                        name="mattressType"
-                        value={formData.mattressType}
-                        onChange={handleChange}
-                        className="form-select mb-2"
-                    >
-                        <option value="memory foam">Memory Foam</option>
-                        <option value="spring">Spring</option>
-                        <option value="latex">Latex</option>
-                        <option value="hybrid">Hybrid</option>
-                        <option value="air">Air</option>
-                        <option value="water">Water</option>
-                    </select>
-                    <select
-                        name="bedSize"
-                        value={formData.bedSize}
-                        onChange={handleChange}
-                        className="form-select mb-2"
-                    >
-                        <option value="twin">Twin</option>
-                        <option value="full">Full</option>
-                        <option value="queen">Queen</option>
-                        <option value="king">King</option>
-                        <option value="california king">California King</option>
-                    </select>
-                </>
-            )}
-            <input
-                name="temperature"
-                type="number"
-                min={50}
-                max={100}
-                value={formData.temperature}
-                onChange={handleChange}
-                className="form-control mb-2"
-            />
-            <select
-                name="lightLevel"
-                value={formData.lightLevel}
-                onChange={handleChange}
-                className="form-select mb-2"
-            >
-                {['pitch black', 'very dim', 'dim', 'normal', 'bright', 'daylight'].map(l => (
-                    <option key={l} value={l}>{l}</option>
-                ))}
-            </select>
-            <select
-                name="noiseLevel"
-                value={formData.noiseLevel}
-                onChange={handleChange}
-                className="form-select mb-2"
-            >
-                {['silent', 'very quiet', 'quiet', 'moderate', 'loud', 'very loud'].map(n => (
-                    <option key={n} value={n}>{n}</option>
-                ))}
-            </select>
-            <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                className="form-control mb-2"
-                rows={3}
-            />
-            <button className="btn btn-success me-2" type="submit">Save</button>
-            <button className="btn btn-secondary" type="button" onClick={onCancel}>Cancel</button>
-        </form>
     );
 }
 

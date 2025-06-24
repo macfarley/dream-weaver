@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import * as bedroomService from '../../services/bedroomService';
+import TemperatureSlider from '../ui/TemperatureSlider';
 
 /**
  * BedroomForm component allows users to add a new bedroom with various attributes.
@@ -32,8 +33,12 @@ function BedroomForm({ userId, onSuccess, onCancel }) {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: name === 'temperature' ? Number(value) : value,
         }));
+    };
+
+    const handleTempChange = (value) => {
+        setFormData((prev) => ({ ...prev, temperature: value }));
     };
 
     /**
@@ -126,17 +131,12 @@ function BedroomForm({ userId, onSuccess, onCancel }) {
                 </>
             )}
 
-            {/* Temperature Input */}
+            {/* Temperature Slider */}
             <div className="mb-2">
                 <label className="form-label">Temperature (°F)</label>
-                <input
-                    name="temperature"
-                    type="number"
-                    className="form-control"
-                    min="50"
-                    max="100"
+                <TemperatureSlider
                     value={formData.temperature}
-                    onChange={handleChange}
+                    onChange={handleTempChange}
                 />
             </div>
 

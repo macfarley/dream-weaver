@@ -17,7 +17,7 @@ therealmccoyster@gmail.com
 - Integrated modern dev tools: ESLint, Prettier, GitHub Copilot, and CI/CD workflows.
 - Prioritized inclusivity, privacy, and ethical use in all design and documentation.
 
-### DreamWeaver Backend (Personal/Portfolio Project, 2024-2025)
+### DreamWeaver Backend (Portfolio Project, 2024-2025)
 **Backend Developer** | Node.js, Express, MongoDB, JWT, REST API
 - Engineered a secure, production-grade RESTful API for DreamWeaver, supporting user authentication, sleep tracking, bedroom management, and dream journaling.
 - Implemented robust JWT authentication, role-based access control, and admin/user separation.
@@ -56,23 +56,23 @@ Vice President, Ohio University Wargamers
 Secretary, Psychology Society
 
 **Celina High School, Celina, OH** — Honors Diploma (Aug 2005 - May 2009)  
-Captain, Scholastic Team
+Captain, Scholastic Decathalon Team
+Captain, Mock Trial & Debate Association
 
 ---
 
 ## TECHNICAL & PROFESSIONAL SKILLS
 
 - JavaScript (ES6+), React, Vite, Node.js, Express, MongoDB, REST APIs, Bootstrap, Sass, HTML5, CSS3
-- Git & GitHub, CI/CD, JWT Auth, Accessibility, Testing (Jest), Agile, Figma, Draw.io, VS Code, Linux, Cloud Deployment (Vercel/Netlify)
-- Conflict resolution & verbal judo
-- Policy compliance & operational schedules
-- Public relations & communication
-- Customer service & grievance mitigation
-- Leadership & team supervision
-- Creative problem solving
-- Report writing & documentation
-- Collaborative leadership (D&D Dungeon Master)
-- Python (learning)
+- Git & GitHub, CI/CD, JWT Auth, Accessibility, Testing (Jest), Agile, Figma, Draw.io, VS Code, Linux, Cloud Deployment (Vercel/Heroku)
+- Conflict resolution & Creative Problem Solving
+- Policy Compliance & Operational Schedules
+- Public Relations & Expectation Management
+- Customer Service & Grievance Mitigation
+- Leadership & Work Team Supervisor
+- Report Writing & Documentation
+- Collaborative Leadership (D&D Dungeon Master, Charity Event Organization)
+- Python, Django up-skill in progress
 
 ---
 

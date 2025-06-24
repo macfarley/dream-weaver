@@ -260,6 +260,32 @@ src/
 
 ---
 
+## 🗺️ Planning & Design Docs
+
+- **Entity Relationship Diagram (ERD):** ![DreamWeaver ERD](./src/assets/dreamWeaver-ERD.png)
+- **Landing Page Wireframe:** ![Landing Page Wireframe](./src/assets/dreamWeaver-landingpage-wireframe.drawio.svg)
+- **Additional Wireframes:**
+  - ![Wireframe 1](./src/assets/wireframe1.jpg)
+  - ![Wireframe 2](./src/assets/wireframe23.jpg)
+  - ![Wireframe 3](./src/assets/wireframe45.jpg)
+  - ![Wireframe 4](./src/assets/wireframe67.jpg)
+  - ![Wireframe 5](./src/assets/wireframe89.jpg)
+
+---
+
+## 🚧 Next Steps (Planned Enhancements)
+
+Once DreamWeaver has a robust user base and real-world data, the next phase will focus on advanced analytics and personalized sleep insights:
+
+- **Sleep Pattern Analysis:** Develop models to analyze user sleep data and surface actionable insights (e.g., "You tended to sleep longer and be more rested in this setting").
+- **Personalized Suggestions:** Recommend optimal sleep environments and routines based on historical patterns.
+- **Smart Reminders:** Adaptive reminders based on user behavior and sleep goals.
+- **Data Visualization:** Enhanced charts and visualizations for trends and correlations.
+- **Integrations:** Explore integrations with wearable devices and health APIs.
+- **Community/Privacy:** Continue to prioritize privacy and user control as features expand.
+
+---
+
 ## 🌐 Deployment Notes
 
 To deploy the frontend (e.g., Netlify, Vercel):

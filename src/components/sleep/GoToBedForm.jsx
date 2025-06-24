@@ -133,7 +133,7 @@ function GoToBed() {
             refreshDashboard?.();
 
             // Navigate back to dashboard
-            navigate('/users/dashboard');
+            navigate('/dashboard');
         } catch (err) {
             // Log and show error
             console.error('Error starting sleep session:', err);

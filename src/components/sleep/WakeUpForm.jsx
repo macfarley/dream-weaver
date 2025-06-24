@@ -79,7 +79,7 @@ function WakeUpForm() {
             setError(''); // Clear any errors
             
             // Navigate to dashboard with success state
-            navigate('/users/dashboard', { 
+            navigate('/dashboard', { 
                 state: { 
                     message: 'Good morning! Sleep session completed successfully! 🌅',
                     type: 'success'
@@ -116,7 +116,7 @@ function WakeUpForm() {
             if (refreshDashboard) refreshDashboard();
 
             // Navigate back to dashboard
-            navigate('/users/dashboard');
+            navigate('/dashboard');
         } catch (err) {
             console.error('Failed to record back to bed:', err);
             setError(err.message || 'Something went wrong while recording your wake event.');
