@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://dream-weaver-backend-8bb0ae2b1a97.herokuapp.com/api/$1"
+    }
+  ]
+}

@@ -125,39 +125,47 @@ function Navbar() {
         role="menu"
       >
         <ul className="navbar-nav ms-auto custom-navbar-nav" role="menubar">
-          {/* Always show all navigation links, relying on route protection for auth */}
+          {/* Always show About and Home */}
           <li className="nav-item custom-nav-item">
             <Link className="nav-link" to="/about" onClick={closeMobileMenu} role="menuitem" title="About DreamWeaver">About</Link>
           </li>
           <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/join" onClick={closeMobileMenu} role="menuitem" title="Join DreamWeaver">Join Us</Link>
-          </li>
-          <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/dashboard" onClick={closeMobileMenu} role="menuitem" title="Your Dashboard">Dashboard</Link>
-          </li>
-          <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/dreams" onClick={closeMobileMenu} role="menuitem" title="Dream Journal">Dream Journal</Link>
-          </li>
-          <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/sleep" onClick={closeMobileMenu} role="menuitem" title="Sleep History">Sleep History</Link>
-          </li>
-          <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/bedrooms" onClick={closeMobileMenu} role="menuitem" title="Your Bedrooms">Bedrooms</Link>
-          </li>
-          <li className="nav-item custom-nav-item">
-            <Link className="nav-link" to="/profile" onClick={closeMobileMenu} role="menuitem" title="Your Profile">Profile</Link>
-          </li>
-          <li className="nav-item custom-nav-item">
-            <Link className="nav-link text-warning" to="/admin/dashboard" onClick={closeMobileMenu} role="menuitem" title="Admin Dashboard">Admin Dashboard</Link>
-          </li>
-          <li className="nav-item custom-nav-item">
             <Link className="nav-link" to="/" onClick={closeMobileMenu} role="menuitem" title="Home">Home</Link>
           </li>
-          {/* Show logout if logged in */}
-          {user && (
+          {/* Show Join Us if not logged in */}
+          {!user && (
             <li className="nav-item custom-nav-item">
-              <button className="nav-link btn btn-link text-danger" onClick={logOut} role="menuitem" title="Log out">Logout</button>
+              <Link className="nav-link" to="/join" onClick={closeMobileMenu} role="menuitem" title="Join DreamWeaver">Join Us</Link>
             </li>
+          )}
+          {/* Show user links if logged in */}
+          {user && (
+            <>
+              <li className="nav-item custom-nav-item">
+                <Link className="nav-link" to="/dashboard" onClick={closeMobileMenu} role="menuitem" title="Your Dashboard">Dashboard</Link>
+              </li>
+              <li className="nav-item custom-nav-item">
+                <Link className="nav-link" to="/dreams" onClick={closeMobileMenu} role="menuitem" title="Dream Journal">Dream Journal</Link>
+              </li>
+              <li className="nav-item custom-nav-item">
+                <Link className="nav-link" to="/sleep" onClick={closeMobileMenu} role="menuitem" title="Sleep History">Sleep History</Link>
+              </li>
+              <li className="nav-item custom-nav-item">
+                <Link className="nav-link" to="/bedrooms" onClick={closeMobileMenu} role="menuitem" title="Your Bedrooms">Bedrooms</Link>
+              </li>
+              <li className="nav-item custom-nav-item">
+                <Link className="nav-link" to="/profile" onClick={closeMobileMenu} role="menuitem" title="Your Profile">Profile</Link>
+              </li>
+              {/* Show Admin Dashboard only for admin users */}
+              {user.role === 'admin' && (
+                <li className="nav-item custom-nav-item">
+                  <Link className="nav-link text-warning" to="/admin/dashboard" onClick={closeMobileMenu} role="menuitem" title="Admin Dashboard">Admin Dashboard</Link>
+                </li>
+              )}
+              <li className="nav-item custom-nav-item">
+                <button className="nav-link btn btn-link text-danger" onClick={logOut} role="menuitem" title="Log out">Logout</button>
+              </li>
+            </>
           )}
         </ul>
       </div>
