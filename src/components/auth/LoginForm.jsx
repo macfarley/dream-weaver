@@ -28,6 +28,9 @@ function LoginForm({ onShowSignup, onLoginSuccess }) {
     // State for submit error (e.g., wrong credentials)
     const [submitError, setSubmitError] = useState("");
 
+    // State for loading during form submission
+    const [isLoading, setIsLoading] = useState(false);
+
     /**
      * Validate a single field by name and value.
      * @param {string} name - Field name
@@ -82,26 +85,37 @@ function LoginForm({ onShowSignup, onLoginSuccess }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitError(""); // Clear previous submit errors
+        setIsLoading(true); // Show loading state
 
         try {
             // Attempt to sign in with form data
+            console.log("Attempting login with username:", formData.username);
             const user = await signIn(formData);
+            console.log("Login successful:", user);
+            
             // Fetch full profile after login and set user context
             let profile = null;
             try {
                 profile = await getProfile();
                 setUser(profile);
-            } catch {
+                console.log("Profile fetched successfully:", profile);
+            } catch (profileError) {
+                console.warn("Could not fetch profile, using login response:", profileError);
                 setUser(user); // fallback to login response
             }
+            
             if (onLoginSuccess) {
                 onLoginSuccess(profile || user);
             } else {
-                navigate("/users/dashboard");
+                navigate("/dashboard");
             }
         } catch (err) {
+            console.error("Login failed:", err);
             // Show error message if sign in fails
-            setSubmitError(err.message || "Login failed. Please check your credentials.");
+            const errorMessage = err.message || "Login failed. Please check your credentials and try again.";
+            setSubmitError(errorMessage);
+        } finally {
+            setIsLoading(false); // Hide loading state
         }
     };
 
@@ -143,8 +157,8 @@ function LoginForm({ onShowSignup, onLoginSuccess }) {
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className="login-submit w-100" disabled={!isValid}>
-                Log In
+            <button type="submit" className="login-submit w-100" disabled={!isValid || isLoading}>
+                {isLoading ? "Signing In..." : "Log In"}
             </button>
 
             {/* Link to show signup form */}

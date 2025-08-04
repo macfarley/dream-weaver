@@ -35,7 +35,7 @@
   }
 
   // =============================
-  // PRIMARY BUTTON
+  // PRIMARY BUTTON AND SIGNUP SECTION
   // =============================
   .btn-primary {
     font-size: 1.25rem;
@@ -48,6 +48,30 @@
     &:hover,
     &:focus {
       filter: brightness(1.1);
+    }
+  }
+
+  .signup-section {
+    margin-bottom: 3rem;
+    
+    .signup-form-container,
+    .login-form-container {
+      background-color: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+      animation: slideDown 0.3s ease-out;
+      margin-bottom: 1rem;
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 

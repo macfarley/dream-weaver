@@ -84,24 +84,41 @@ function LandingPage() {
       <h1 className="display-4 fw-bold mb-2">Welcome to dreamWeaver</h1>
       <p className="lead mb-4">Track your sleep. Record your dreams. Design your nights.</p>
 
-      {/* Primary call-to-action - BigActionButton for logged-in users, regular button for guests */}
+      {/* Primary call-to-action - BigActionButton for logged-in users, signup form or button for guests */}
       {user ? (
         <div className="mb-5">
           <BigActionButton size="large" />
         </div>
       ) : (
-        <button
-          className="btn btn-primary btn-lg mb-3"
-          onClick={handleStartClick}
-          type="button"
-          aria-label="Sign up to start tracking"
-        >
-          Start Tracking Your Sleep
-        </button>
+        <div className="signup-section mb-4">
+          {showSignup ? (
+            <div className="signup-form-container p-4 rounded shadow-sm mx-auto" style={{maxWidth: '400px'}}>
+              <SignupForm
+                onSignUpSuccess={handleSignUpSuccess}
+                onShowLogin={openLogin}
+              />
+            </div>
+          ) : (
+            <button
+              className="btn btn-primary btn-lg mb-3"
+              onClick={handleStartClick}
+              type="button"
+              aria-label="Sign up to start tracking"
+            >
+              Start Tracking Your Sleep
+            </button>
+          )}
+          
+          {showLogin && (
+            <div className="login-form-container p-4 rounded shadow-sm mx-auto" style={{maxWidth: '400px'}}>
+              <LoginForm onShowSignup={openSignup} />
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Main content area with feature cards and authentication forms */}
-      <div className="content-wrapper d-flex w-100 justify-content-center align-items-start gap-4">
+      {/* Main content area with feature cards */}
+      <div className="content-wrapper d-flex w-100 justify-content-center align-items-start">
         {/* Feature overview cards */}
         <div className="cards-container row w-100 justify-content-center g-4 px-3">
           {/* Sleep Environment Feature */}
@@ -131,37 +148,6 @@ function LandingPage() {
             </div>
           </div>
         </div>
-
-        {/* Desktop authentication forms (shown to the right of cards on larger screens) */}
-        {showSignup && (
-          <div className="signup-panel p-4 rounded shadow-sm">
-            <SignupForm
-              onSignUpSuccess={handleSignUpSuccess}
-              onShowLogin={openLogin}
-            />
-          </div>
-        )}
-
-        {showLogin && (
-          <div className="login-panel p-4 rounded shadow-sm">
-            <LoginForm onShowSignup={openSignup} />
-          </div>
-        )}
-      </div>
-
-      {/* Mobile authentication forms (shown below cards on smaller screens) */}
-      <div className="signup-mobile mt-4 w-100 px-3 d-md-none">
-        {showSignup && (
-          <div className="mobile-signup-login p-3 rounded shadow-sm">
-            <SignupForm onShowLogin={openLogin} onSignUpSuccess={handleSignUpSuccess} />
-          </div>
-        )}
-
-        {showLogin && (
-          <div className="mobile-signup-login p-3 rounded shadow-sm">
-            <LoginForm onShowSignup={openSignup} />
-          </div>
-        )}
       </div>
     </div>
   );
